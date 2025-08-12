@@ -6,3 +6,99 @@ project is imagined as a shared endeavour undertaken among the
 denizens of the [[https://www.twitch.tv/systemcrafters][#systemcrafters community]] on twitch and the libera
 chat IRC network.
 
+* Feature Breakdown for Internet Radio Service
+A breakdown of must-have and optional features for a Common Lisp-based streaming platform.
+
+** Core Music & Content Management
+- Playlist CRUD, Track Library Management
+- Auto-DJ mode with randomization and repeat avoidance
+- Metadata broadcasting
+- Cue points & crossfades
+
+** Live DJ Integration
+- Live DJ handoff with authentication
+- Mic & voice-over support
+- Remote cueing, hot swap
+- Jingles & soundboard
+
+** Scheduling & Automation
+- Show scheduling
+- Pre-recorded shows
+- Event triggers
+- Failover streams
+
+** Listener Features
+- Web player with live metadata
+- Song requests
+- Dedications & shoutouts
+- Live chat
+- Track voting
+
+** DJ & Admin Dashboard
+- User roles & permissions
+- Track queue control
+- Upload system
+- Analytics
+- Audit logs
+
+** Streaming Infrastructure
+- Multiple bitrate streams
+- Podcast export
+- Replay system
+- Recording
+
+** Cool Extras
+- Social push for 'now playing'
+- Visualizer output
+- Listener polls
+- API for automation
+
+* System Architecture Overview
+Architecture layers and data flow from DJs to listeners, with Common Lisp core handling business logic and integration with streaming backend (Liquidsoap + Icecast).
+
+** Components
+- Ingest & Switchboard
+- Transcoder/Packager
+- Delivery layer
+- Web Player
+- Common Lisp Core
+- Database/Storage
+- Analytics/Observability
+
+* MVP Definition
+
+In this context, MVP (Minimum Viable Product) means the smallest set of features that allows the station to operate live to listeners, reliably, with essential functionality.
+
+MVP for this project includes:
+- Auto-DJ playback
+- Scheduled playlists
+- Icecast streaming
+- Live DJ handoff
+- Basic admin dashboard
+- Postgres-backed library
+- Now-playing metadata
+- Basic web player
+
+* MVP vs Later Feature Checklist
+This checklist helps ensure Phase 2 features do not slip into the MVP development window.
+
+** MVP Features (Weeks 1–7)
+| Feature | Description |
+|---------|-------------|
+| Project bootstrap | Lisp API skeleton, DB schema v0, Icecast + Liquidsoap dev stack |
+| Library ingest | Metadata extraction |
+| Auto-DJ in Liquidsoap | Crossfade, loudness norm, now-playing metadata |
+| Scheduler engine | Recurring shows/playlists |
+| Live DJ handoff | Auth & smooth transitions |
+| Listener requests | Endpoint, queue control, audit log |
+| Show recording | Archive (local/7 days?) |
+
+** Later / Phase 2 Features (Weeks 8–10)
+| Feature | Description |
+|---------|-------------|
+| Roles & permissions | Admin/DJ/Curator, login/password reset |
+| Nightly backups | - |
+| Analytics dashboard | Listener count, time-on-station |
+| Prometheus/Grafana | Metrics, incident alerts |
+| QA | Runbook, load testing, public landing page skin |
+| Stability test | 48h uninterrupted operation |
