@@ -6,7 +6,7 @@
   :author "Brian O'Reilly <fade@deepsky.com>"
   :license "GNU AFFERO GENERAL PUBLIC LICENSE V.3"
   :serial t
-  :depends-on (:HUNCHENTOOT
+  :depends-on (:RADIANCE
                :SPINNERET
                :CL-JSON
                )

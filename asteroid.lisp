@@ -1,6 +1,6 @@
 ;; -*-lisp-*-
 (defpackage :asteroid
-            (:use :cl)
+            (:use :cl :radiance)
             (:use :asteroid.app-utils)
             (:export :-main
                      :start-server
@@ -9,19 +9,21 @@
 
 (in-package :asteroid)
 
+;; Define as RADIANCE module
+(define-module asteroid
+  (:use #:cl #:radiance)
+  (:domain "asteroid"))
+
 ;; Configuration
 (defparameter *server-port* 8080)
-(defparameter *server-host* "localhost")
-(defparameter *acceptor* nil)
 
-;; HTML generation helpers
-(defun generate-page-html (title &rest body-content)
-  "Generate a complete HTML page with consistent styling"
+;; RADIANCE route handlers
+(define-page index #@"/" ()
   (spinneret:with-html-string
     (:doctype)
     (:html
      (:head
-      (:title title)
+      (:title "🎵 ASTEROID RADIO 🎵")
       (:meta :charset "utf-8")
       (:meta :name "viewport" :content "width=device-width, initial-scale=1")
       (:style "
@@ -32,64 +34,35 @@
         .status { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
         .panel { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
         .nav { margin: 20px 0; }
-        .nav a { color: #00ff00; text-decoration: none; margin-right: 20px; padding: 10px; border: 1px solid #333; }
+        .nav a { color: #00ff00; text-decoration: none; margin: 0 15px; padding: 10px 20px; border: 1px solid #333; background: #1a1a1a; display: inline-block; }
         .nav a:hover { background: #333; }
-        .back { color: #00ff00; text-decoration: none; }
-        button { background: #333; color: #00ff00; border: 1px solid #555; padding: 10px 20px; margin: 5px; cursor: pointer; }
-        button:hover { background: #555; }
-        .player { background: #1a1a1a; padding: 40px; border: 1px solid #333; margin: 40px auto; max-width: 600px; text-align: center; }
-        .now-playing { font-size: 1.5em; margin: 20px 0; color: #ff6600; }
-        .controls button { padding: 15px 30px; margin: 10px; font-size: 1.2em; }
-      "))
-     (:body
-      (:div.container
-       (mapcar (lambda (element) element) body-content))))))
-
-;; Route handlers
-(defun handle-index ()
-  "Main page handler"
-  (spinneret:with-html-string
-    (:doctype)
-    (:html
-     (:head
-      (:title "Asteroid Radio - Music for Hackers")
-      (:meta :charset "utf-8")
-      (:meta :name "viewport" :content "width=device-width, initial-scale=1")
-      (:style "
-        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #00ff00; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #ff6600; text-align: center; font-size: 2.5em; margin-bottom: 30px; }
-        h2 { color: #ff6600; }
-        .status { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
-        .nav { margin: 20px 0; }
-        .nav a { color: #00ff00; text-decoration: none; margin-right: 20px; padding: 10px; border: 1px solid #333; }
-        .nav a:hover { background: #333; }
+        .controls { margin: 20px 0; }
+        .controls button { background: #1a1a1a; color: #00ff00; border: 1px solid #333; padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .controls button:hover { background: #333; }
+        .now-playing { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
+        .back { color: #00ff00; text-decoration: none; margin-bottom: 20px; display: inline-block; }
+        .back:hover { text-decoration: underline; }
       "))
      (:body
       (:div.container
        (:h1 "🎵 ASTEROID RADIO 🎵")
        (:div.status
         (:h2 "Station Status")
-        (:p "Status: " (:strong "Running"))
-        (:p "Now Playing: " (:em "Silence (for now)"))
-        (:p "Listeners: 0"))
+        (:p "🟢 LIVE - Broadcasting asteroid music for hackers")
+        (:p "Current listeners: 0")
+        (:p "Stream quality: 128kbps MP3"))
        (:div.nav
         (:a :href "/admin" "Admin Dashboard")
         (:a :href "/player" "Web Player")
         (:a :href "/api/status" "API Status"))
        (:div
-        (:h2 "Welcome to Asteroid Radio")
-        (:p "A streaming radio station for hackers, built with Common Lisp.")
-        (:p "Features coming soon:")
-        (:ul
-         (:li "Auto-DJ with crossfading")
-         (:li "Live DJ handoff")
-         (:li "Song requests")
-         (:li "Admin dashboard")
-         (:li "Music library management"))))))))
+        (:h2 "Now Playing")
+        (:p "Artist: The Void")
+        (:p "Track: Silence")
+        (:p "Album: Startup Sounds")
+        (:p "Duration: ∞")))))))
 
-(defun handle-admin ()
-  "Admin dashboard handler"
+(define-page admin #@"/admin" ()
   (spinneret:with-html-string
     (:doctype)
     (:html
@@ -132,8 +105,7 @@
         (:p "Liquidsoap: Not Running")
         (:p "Icecast: Not Running")))))))
 
-(defun handle-player ()
-  "Web player handler"
+(define-page player #@"/player" ()
   (spinneret:with-html-string
     (:doctype)
     (:html
@@ -164,9 +136,8 @@
         (:p "Bitrate: 128kbps MP3")
         (:p "Status: Offline")))))))
 
-(defun handle-api-status ()
-  "API status endpoint handler"
-  (setf (hunchentoot:content-type*) "application/json")
+(define-page api/status #@"/api/status" ()
+  (setf (radiance:header "Content-Type") "application/json")
   (cl-json:encode-json-to-string
    `(("status" . "running")
      ("server" . "asteroid-radio")
@@ -178,48 +149,22 @@
      ("listeners" . 0)
      ("stream-url" . "http://localhost:8000/asteroid"))))
 
-;; Route setup
-(defun setup-routes ()
-  "Set up all HTTP routes"
-  (hunchentoot:define-easy-handler (index :uri "/") ()
-    (handle-index))
-  
-  (hunchentoot:define-easy-handler (admin :uri "/admin") ()
-    (handle-admin))
-  
-  (hunchentoot:define-easy-handler (player :uri "/player") ()
-    (handle-player))
-  
-  (hunchentoot:define-easy-handler (api-status :uri "/api/status") ()
-    (handle-api-status)))
-
-;; Server management functions
-(defun start-server (&key (port *server-port*) (host *server-host*))
-  "Start the Asteroid Radio web server"
-  (when *acceptor*
-    (hunchentoot:stop *acceptor*))
-  
-  (format t "Setting up routes...~%")
-  (setup-routes)
-  
-  (format t "Starting Asteroid Radio server on ~a:~a~%" host port)
-  (setf *acceptor* (make-instance 'hunchentoot:easy-acceptor
-                                  :port port
-                                  :address host))
-  (hunchentoot:start *acceptor*)
-  (format t "Server started! Visit http://~a:~a~%" host port))
+;; RADIANCE server management functions
+(defun start-server (&key (port *server-port*))
+  "Start the Asteroid Radio RADIANCE server"
+  (format t "Starting Asteroid Radio RADIANCE server on port ~a~%"  port)
+  (radiance:startup)
+  (format t "Server started! Visit http://localhost:~a/asteroid/~%" port))
 
 (defun stop-server ()
-  "Stop the Asteroid Radio web server"
-  (when *acceptor*
-    (format t "Stopping Asteroid Radio server...~%")
-    (hunchentoot:stop *acceptor*)
-    (setf *acceptor* nil)
-    (format t "Server stopped.~%")))
+  "Stop the Asteroid Radio RADIANCE server"
+  (format t "Stopping Asteroid Radio server...~%")
+  (radiance:shutdown)
+  (format t "Server stopped.~%"))
 
-(defun run-server (&key (port *server-port*) (host *server-host*))
+(defun run-server (&key (port *server-port*))
   "Start the server and keep it running (blocking)"
-  (start-server :port port :host host)
+  (start-server :port port)
   (format t "Server running. Press Ctrl+C to stop.~%")
   ;; Keep the server running
   (handler-case
@@ -231,6 +176,6 @@
 (defun -main (&optional args)
   (declare (ignore args))
   (format t "~%🎵 ASTEROID RADIO - Music for Hackers 🎵~%")
-  (format t "Starting web server...~%")
+  (format t "Starting RADIANCE web server...~%")
   (run-server))
 

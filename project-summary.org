@@ -32,39 +32,42 @@ This document summarizes the implementation of a basic web server for the Astero
 ** Removed Dependencies
 | Dependency | Reason for Removal |
 |------------|-------------------|
-| :RADIANCE | Not available in Quicklisp distribution |
-| :MITO | Not available in Quicklisp, not needed for basic web server |
-| :MITO-AUTH | Not available in Quicklisp, authentication not needed for MVP |
+| :RADIANCE | Requires separate Shirakumo dist installation, switched to simpler Hunchentoot for MVP |
+| :MITO | Not available in default Quicklisp, not needed for basic web server |
+| :MITO-AUTH | Not available in default Quicklisp, authentication not needed for MVP |
 | :STR | Not used in current implementation |
 | :PZMQ | Not needed for basic web server functionality |
 
 ** Final Dependencies
 | Dependency | Purpose | Justification |
 |------------|---------|---------------|
-| :HUNCHENTOOT | Web server framework | Widely available, stable, well-documented Common Lisp web server |
+| :RADIANCE | Web framework | Modular web framework with subdomain routing and integrated module system |
 | :SPINNERET | HTML generation | Clean DSL for generating HTML, integrates well with Common Lisp |
 | :CL-JSON | JSON encoding/decoding | Standard library for API endpoints |
 
-** Why Hunchentoot Over RADIANCE
-- **Availability**: RADIANCE not found in Quicklisp distribution
-- **Stability**: Hunchentoot is mature, battle-tested web server
-- **Documentation**: Extensive documentation and community support
-- **Simplicity**: Easier to set up for basic web server needs
+** Migration from Hunchentoot to RADIANCE
+- **Initial Choice**: Started with Hunchentoot for simpler MVP setup
+- **Discovery**: RADIANCE available via Shirakumo dist: `(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")`
+- **Migration Completed**: Successfully migrated to RADIANCE framework
+- **Benefits**: RADIANCE provides modular architecture, subdomain routing, and integrated module system
+- **Result**: More scalable foundation for future radio station features
 
 * Implementation Details
 
 ** Web Server Architecture
-- Port: 8080 (configurable via =*server-port*=)
-- Host: localhost (configurable via =*server-host*=)
-- Server management: =*acceptor*= global variable tracks server instance
+- Framework: RADIANCE modular web framework
+- Port: 8080 (default RADIANCE configuration)
+- Module: asteroid (domain: "asteroid")
+- Subdomain routing: asteroid.localhost:8080
+- Server management: =radiance:startup= / =radiance:shutdown=
 
-** Route Structure
-| Route | Handler | Purpose |
-|-------|---------|---------|
-| / | =handle-index= | Main page with station status |
-| /admin | =handle-admin= | Admin dashboard with controls |
-| /player | =handle-player= | Web player interface |
-| /api/status | =handle-api-status= | JSON API endpoint |
+** Route Structure (RADIANCE)
+| Route | Handler | Purpose | URL |
+|-------|---------|---------|-----|
+| / | =index= | Main page with station status | http://asteroid.localhost:8080/ |
+| /admin | =admin= | Admin dashboard with controls | http://asteroid.localhost:8080/admin |
+| /player | =player= | Web player interface | http://asteroid.localhost:8080/player |
+| /api/status | =api/status= | JSON API endpoint | http://asteroid.localhost:8080/api/status |
 
 ** HTML Generation Strategy
 - Direct use of =spinneret:with-html-string= in each handler
@@ -88,14 +91,19 @@ Removed unused dependencies from =asteroid.asd=:
 - Removed :MITO, :MITO-AUTH, :STR, :PZMQ
 - Kept only essential dependencies: :HUNCHENTOOT, :SPINNERET, :CL-JSON
 
-** Error 2: RADIANCE Framework Unavailable
+** Error 2: RADIANCE Framework Migration
 *** Problem
-Original design assumed RADIANCE web framework, but not available in Quicklisp.
+Initially avoided RADIANCE due to perceived unavailability, implemented with Hunchentoot instead.
+
+*** Root Cause
+RADIANCE available via Shirakumo dist: `(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")` but required additional setup step.
 
 *** Solution
-- Replaced RADIANCE with Hunchentoot
-- Rewrote web server initialization and route handling
-- Used =hunchentoot:define-easy-handler= for route definitions
+- Successfully migrated from Hunchentoot to RADIANCE
+- Installed Shirakumo distribution for RADIANCE access
+- Rewrote route handlers using =define-page= syntax
+- Added =define-module= declaration for proper RADIANCE integration
+- Updated server management to use =radiance:startup= / =radiance:shutdown=
 
 ** Error 3: HTML Generation Function Signature Mismatch
 *** Problem
@@ -109,21 +117,23 @@ Initial =generate-page-html= helper function designed for single body argument, 
 *** Solution
 Attempted fix with =&rest= parameter, but Spinneret macro expansion issues persisted.
 
-** Error 4: Spinneret Macro Expansion Issues
+** Error 4: RADIANCE Route Syntax Issues
 *** Problem
 #+BEGIN_EXAMPLE
-[ERROR] The function :H1 is undefined.
-Internal Server Error in browser
+Module #<PACKAGE "ASTEROID"> requested but while the package exists, it is not a module.
+The value #@"asteroid/api/status" is not of type LIST
 #+END_EXAMPLE
 
 *** Root Cause
-Complex helper function approach interfered with Spinneret's macro expansion system.
+- Missing =define-module= declaration for RADIANCE integration
+- Incorrect route path syntax using =asteroid/= prefix instead of module-relative paths
+- Wrong API endpoint definition syntax
 
 *** Solution
-- Abandoned helper function approach
-- Rewrote each handler to use =spinneret:with-html-string= directly
-- Embedded CSS styling directly in each page
-- Simplified HTML generation to work within Spinneret's macro system
+- Added =define-module= declaration with proper domain specification
+- Fixed route paths: =#@"asteroid/"= → =#@"/"=, =#@"asteroid/admin"= → =#@"/admin"=
+- Updated API endpoint to use =define-page= instead of =define-api=
+- Fixed parentheses syntax errors in HTML generation
 
 ** Error 5: Shell History Expansion Issues
 *** Problem
@@ -160,30 +170,42 @@ Used single quotes instead of double quotes for SBCL command-line arguments to p
 
 ** 🚀 Running the Server
 
+*** RADIANCE Setup (One-time)
+#+BEGIN_EXAMPLE
+sbcl --eval '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")'
+#+END_EXAMPLE
+
 *** Command Line (One-shot execution)
 #+BEGIN_EXAMPLE
-sbcl --eval '(ql:quickload (quote (:hunchentoot :spinneret :cl-json)))' \
+sbcl --eval '(ql:quickload (quote (:radiance :spinneret :cl-json)))' \
      --eval '(load "asteroid.asd")' \
      --eval '(asdf:load-system :asteroid)' \
      --eval '(asteroid:start-server)' \
-     --eval '(format t "Server running at http://localhost:8080 - Press Ctrl+C to stop")'
+     --eval '(format t "Server running at http://asteroid.localhost:8080/ - Press Ctrl+C to stop")'
 #+END_EXAMPLE
 
 *** Interactive REPL
 #+BEGIN_EXAMPLE
 sbcl
-(ql:quickload '(:hunchentoot :spinneret :cl-json))
+(ql:quickload '(:radiance :spinneret :cl-json))
 (load "asteroid.asd")
 (asdf:load-system :asteroid)
 (asteroid:start-server)
-;; Server now running at http://localhost:8080
+;; Server now running at http://asteroid.localhost:8080/
 ;; To stop: (asteroid:stop-server)
 #+END_EXAMPLE
 
 *** Available Functions
-- =(asteroid:start-server)= - Start web server (non-blocking)
-- =(asteroid:stop-server)= - Stop web server cleanly
+- =(asteroid:start-server)= - Start RADIANCE server (non-blocking)
+- =(asteroid:stop-server)= - Stop RADIANCE server cleanly
 - =(asteroid:run-server)= - Start server and keep running (blocking, with Ctrl+C handler)
+
+*** Access URLs
+- **Main page**: http://asteroid.localhost:8080/
+- **Admin dashboard**: http://asteroid.localhost:8080/admin
+- **Web player**: http://asteroid.localhost:8080/player
+- **API endpoint**: http://asteroid.localhost:8080/api/status
+- **RADIANCE welcome**: http://localhost:8080/
 
 ** 📋 Next Steps (Not Implemented)
 - Database integration (when MITO alternative chosen)
@@ -193,6 +215,7 @@ sbcl
 - Authentication system
 - Real-time now-playing updates
 - WebSocket integration for live updates
+- **Completed**: ✅ Successfully migrated to RADIANCE framework
 
 * Technical Lessons Learned
 
@@ -202,9 +225,11 @@ sbcl
 - Keep dependency list minimal for initial implementation
 
 ** Common Lisp Web Development
-- Hunchentoot provides robust foundation for web applications
+- RADIANCE provides modular architecture with subdomain routing
 - Spinneret works best with direct macro usage, not through helper functions
 - HTML generation should be kept simple and direct
+- RADIANCE modules require proper =define-module= declarations
+- Route paths in RADIANCE are module-relative (use =#@"/"= not =#@"asteroid/"=)
 
 ** Error Handling Strategy
 - Compilation warnings often indicate runtime issues
@@ -233,6 +258,12 @@ asteroid/
 
 * Conclusion
 
-Successfully implemented a functional web server foundation for the Asteroid Radio project. The server provides a complete web interface with admin controls, player interface, and API endpoints. Key success factors included pragmatic dependency choices, incremental development approach, and thorough error resolution.
+Successfully implemented and migrated a functional web server foundation for the Asteroid Radio project using RADIANCE framework. The server provides a complete web interface with admin controls, player interface, and API endpoints accessible via subdomain routing at asteroid.localhost:8080.
 
-The implementation is ready for the next development phase: integrating audio streaming components and database functionality.
+Key achievements:
+- **Framework Migration**: Successfully migrated from Hunchentoot to RADIANCE
+- **Modular Architecture**: Implemented proper RADIANCE module with subdomain routing
+- **Complete Web Interface**: Main page, admin dashboard, web player, and JSON API
+- **Scalable Foundation**: RADIANCE provides better architecture for future radio features
+
+The implementation demonstrates the value of exploring framework alternatives and provides a robust, modular foundation ready for the next development phase: integrating audio streaming components (Liquidsoap/Icecast) and database functionality.
