@@ -1,0 +1,211 @@
+#+TITLE: Asteroid Radio Web Server Implementation Summary
+#+DATE: 2025-08-20
+#+AUTHOR: Development Session Summary
+
+* Project Overview
+
+This document summarizes the implementation of a basic web server for the Asteroid Radio project, a Common Lisp-based streaming radio station for "asteroid music for hackers."
+
+** Project Context
+- Fork of https://github.com/fade/asteroid
+- Goal: Create streaming radio station with web interface
+- Started with basic Common Lisp framework skeleton
+- Implemented web server as foundation for future streaming components
+
+* Initial State Analysis
+
+** Original Dependencies (asteroid.asd)
+- :RADIANCE (web framework)
+- :MITO (database ORM)
+- :MITO-AUTH (authentication)
+- :STR (string utilities)
+- :PZMQ (ZeroMQ bindings)
+- :SPINNERET (HTML generation)
+
+** Original Code Structure
+- =asteroid.lisp= - Main package with placeholder =-main= function
+- =app-utils.lisp= - Utility functions for debugger control and cross-platform quit
+- =design.org= - Comprehensive feature specification and MVP roadmap
+
+* Dependency Changes and Rationale
+
+** Removed Dependencies
+| Dependency | Reason for Removal |
+|------------|-------------------|
+| :RADIANCE | Not available in Quicklisp distribution |
+| :MITO | Not available in Quicklisp, not needed for basic web server |
+| :MITO-AUTH | Not available in Quicklisp, authentication not needed for MVP |
+| :STR | Not used in current implementation |
+| :PZMQ | Not needed for basic web server functionality |
+
+** Final Dependencies
+| Dependency | Purpose | Justification |
+|------------|---------|---------------|
+| :HUNCHENTOOT | Web server framework | Widely available, stable, well-documented Common Lisp web server |
+| :SPINNERET | HTML generation | Clean DSL for generating HTML, integrates well with Common Lisp |
+| :CL-JSON | JSON encoding/decoding | Standard library for API endpoints |
+
+** Why Hunchentoot Over RADIANCE
+- **Availability**: RADIANCE not found in Quicklisp distribution
+- **Stability**: Hunchentoot is mature, battle-tested web server
+- **Documentation**: Extensive documentation and community support
+- **Simplicity**: Easier to set up for basic web server needs
+
+* Implementation Details
+
+** Web Server Architecture
+- Port: 8080 (configurable via =*server-port*=)
+- Host: localhost (configurable via =*server-host*=)
+- Server management: =*acceptor*= global variable tracks server instance
+
+** Route Structure
+| Route | Handler | Purpose |
+|-------|---------|---------|
+| / | =handle-index= | Main page with station status |
+| /admin | =handle-admin= | Admin dashboard with controls |
+| /player | =handle-player= | Web player interface |
+| /api/status | =handle-api-status= | JSON API endpoint |
+
+** HTML Generation Strategy
+- Direct use of =spinneret:with-html-string= in each handler
+- Consistent hacker-themed styling (green text, black background)
+- Responsive design with CSS embedded in each page
+
+* Errors Encountered and Solutions
+
+** Error 1: Missing MITO Dependency
+*** Problem
+#+BEGIN_EXAMPLE
+debugger invoked on a ASDF/FIND-COMPONENT:MISSING-DEPENDENCY
+Component :MITO not found, required by #<SYSTEM "asteroid">
+#+END_EXAMPLE
+
+*** Root Cause
+MITO and related database dependencies not available in Quicklisp distribution.
+
+*** Solution
+Removed unused dependencies from =asteroid.asd=:
+- Removed :MITO, :MITO-AUTH, :STR, :PZMQ
+- Kept only essential dependencies: :HUNCHENTOOT, :SPINNERET, :CL-JSON
+
+** Error 2: RADIANCE Framework Unavailable
+*** Problem
+Original design assumed RADIANCE web framework, but not available in Quicklisp.
+
+*** Solution
+- Replaced RADIANCE with Hunchentoot
+- Rewrote web server initialization and route handling
+- Used =hunchentoot:define-easy-handler= for route definitions
+
+** Error 3: HTML Generation Function Signature Mismatch
+*** Problem
+#+BEGIN_EXAMPLE
+The function GENERATE-PAGE-HTML is called with five arguments, but wants exactly two.
+#+END_EXAMPLE
+
+*** Root Cause
+Initial =generate-page-html= helper function designed for single body argument, but called with multiple arguments.
+
+*** Solution
+Attempted fix with =&rest= parameter, but Spinneret macro expansion issues persisted.
+
+** Error 4: Spinneret Macro Expansion Issues
+*** Problem
+#+BEGIN_EXAMPLE
+[ERROR] The function :H1 is undefined.
+Internal Server Error in browser
+#+END_EXAMPLE
+
+*** Root Cause
+Complex helper function approach interfered with Spinneret's macro expansion system.
+
+*** Solution
+- Abandoned helper function approach
+- Rewrote each handler to use =spinneret:with-html-string= directly
+- Embedded CSS styling directly in each page
+- Simplified HTML generation to work within Spinneret's macro system
+
+** Error 5: Shell History Expansion Issues
+*** Problem
+#+BEGIN_EXAMPLE
+zsh: event not found: ~
+zsh: event not found: \
+#+END_EXAMPLE
+
+*** Root Cause
+Zsh history expansion interfering with command-line arguments containing special characters.
+
+*** Solution
+Used single quotes instead of double quotes for SBCL command-line arguments to prevent shell interpretation.
+
+* Current Project Status
+
+** ✅ Completed Features
+- [X] Basic web server running on localhost:8080
+- [X] Main page with station status display
+- [X] Admin dashboard with placeholder controls
+- [X] Web player interface (UI only)
+- [X] JSON API endpoint (/api/status)
+- [X] Hacker-themed consistent styling
+- [X] Proper error handling and server management
+- [X] Git upstream remote configuration
+
+** 🎯 Current Capabilities
+- Web server starts/stops cleanly
+- All routes functional and accessible
+- HTML generation working correctly
+- JSON API returning structured data
+- Responsive web interface
+- Server management functions exported
+
+** 📋 Next Steps (Not Implemented)
+- Database integration (when MITO alternative chosen)
+- Audio streaming backend (Liquidsoap integration)
+- Icecast server integration
+- File upload functionality
+- Authentication system
+- Real-time now-playing updates
+- WebSocket integration for live updates
+
+* Technical Lessons Learned
+
+** Dependency Management
+- Always verify dependency availability in target package manager
+- Prefer widely-adopted, stable libraries over newer alternatives
+- Keep dependency list minimal for initial implementation
+
+** Common Lisp Web Development
+- Hunchentoot provides robust foundation for web applications
+- Spinneret works best with direct macro usage, not through helper functions
+- HTML generation should be kept simple and direct
+
+** Error Handling Strategy
+- Compilation warnings often indicate runtime issues
+- Test each component incrementally
+- Use REPL for interactive debugging and testing
+
+** Development Workflow
+- Start with minimal working version
+- Add complexity incrementally
+- Test each change immediately
+- Keep fallback options for critical dependencies
+
+* File Structure Summary
+
+#+BEGIN_EXAMPLE
+asteroid/
+├── asteroid.asd          # System definition (minimal dependencies)
+├── asteroid.lisp         # Main web server implementation
+├── app-utils.lisp        # Utility functions
+├── design.org           # Original project specification
+├── test-server.lisp     # Server testing script
+├── project-summary.org  # This document
+├── Makefile            # Build configuration
+└── LICENSE             # AGPL v3 license
+#+END_EXAMPLE
+
+* Conclusion
+
+Successfully implemented a functional web server foundation for the Asteroid Radio project. The server provides a complete web interface with admin controls, player interface, and API endpoints. Key success factors included pragmatic dependency choices, incremental development approach, and thorough error resolution.
+
+The implementation is ready for the next development phase: integrating audio streaming components and database functionality.

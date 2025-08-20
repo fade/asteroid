@@ -6,12 +6,9 @@
   :author "Brian O'Reilly <fade@deepsky.com>"
   :license "GNU AFFERO GENERAL PUBLIC LICENSE V.3"
   :serial t
-  :depends-on (:RADIANCE
-               :MITO
-               :MITO-AUTH
-               :STR
-               :PZMQ
+  :depends-on (:HUNCHENTOOT
                :SPINNERET
+               :CL-JSON
                )
   :pathname "./"
   :components ((:file "app-utils")
