@@ -158,6 +158,33 @@ Used single quotes instead of double quotes for SBCL command-line arguments to p
 - Responsive web interface
 - Server management functions exported
 
+** 🚀 Running the Server
+
+*** Command Line (One-shot execution)
+#+BEGIN_EXAMPLE
+sbcl --eval '(ql:quickload (quote (:hunchentoot :spinneret :cl-json)))' \
+     --eval '(load "asteroid.asd")' \
+     --eval '(asdf:load-system :asteroid)' \
+     --eval '(asteroid:start-server)' \
+     --eval '(format t "Server running at http://localhost:8080 - Press Ctrl+C to stop")'
+#+END_EXAMPLE
+
+*** Interactive REPL
+#+BEGIN_EXAMPLE
+sbcl
+(ql:quickload '(:hunchentoot :spinneret :cl-json))
+(load "asteroid.asd")
+(asdf:load-system :asteroid)
+(asteroid:start-server)
+;; Server now running at http://localhost:8080
+;; To stop: (asteroid:stop-server)
+#+END_EXAMPLE
+
+*** Available Functions
+- =(asteroid:start-server)= - Start web server (non-blocking)
+- =(asteroid:stop-server)= - Stop web server cleanly
+- =(asteroid:run-server)= - Start server and keep running (blocking, with Ctrl+C handler)
+
 ** 📋 Next Steps (Not Implemented)
 - Database integration (when MITO alternative chosen)
 - Audio streaming backend (Liquidsoap integration)
