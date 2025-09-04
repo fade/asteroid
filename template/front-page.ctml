@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang=en>
+ <head>
+  <title>🎵 ASTEROID RADIO 🎵</title>
+  <meta charset=utf-8>
+  <meta name=viewport
+        content=\"width=device-width, initial-scale=1\">
+ </head>
+ <body>
+  <div class=container>
+   <h1>🎵 ASTEROID RADIO 🎵</h1>
+   <div class=status>
+    <h2>Station Status</h2>
+    <p>🟢 LIVE - Broadcasting asteroid music for hackers
+    <p>Current listeners: 0
+    <p>Stream quality: 128kbps MP3
+   </div>
+   <div class=nav>
+    <a href=\"/admin\">Admin Dashboard</a><a href=\"/player\">Web Player</a><a
+    href=\"/api/status\">API Status</a>
+   </div>
+   <div>
+    <h2>Now Playing</h2>
+    <p>Artist: The Void
+    <p>Track: Silence
+    <p>Album: Startup Sounds
+    <p>Duration: ∞
+   </div>
+  </div>
+ </body>
+</html>
