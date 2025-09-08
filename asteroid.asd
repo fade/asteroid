@@ -13,7 +13,6 @@
                :r-clip
                :spinneret
                :cl-json
-               ;; :com.inuoe.jzon
                :dexador
                :lass)
   :pathname "./"
