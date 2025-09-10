@@ -18,7 +18,7 @@
     <div class="nav">
       <a href="/admin">Admin Dashboard</a>
       <a href="/player">Web Player</a>
-      <a href="/api/status">API Status</a>
+      <a href="/status">API Status</a>
     </div>
     <div>
       <h2>Now Playing</h2>

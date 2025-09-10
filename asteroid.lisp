@@ -84,7 +84,7 @@
      :now-playing-album "Startup Sounds"
      :player-status "Stopped")))
 
-(define-page status-api #@"/api/status" ()
+(define-page status-api #@"/status" ()
   (setf (radiance:header "Content-Type") "application/json")
   (cl-json:encode-json-to-string
    `(("status" . "running")
