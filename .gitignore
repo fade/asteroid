@@ -21,3 +21,4 @@ buildapp
 quicklisp-manifest.txt
 notes/
 run-asteroid.sh
+build-sbcl.sh
