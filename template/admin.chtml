@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title data-text="title">Asteroid Radio - Admin Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/static/asteroid.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎛️ ADMIN DASHBOARD</h1>
+    <div class="nav">
+      <a href="/">← Back to Main</a>
+      <a href="/player">Web Player</a>
+    </div>
+    <div class="admin-grid">
+      <div class="status-card">
+        <h3>Server Status</h3>
+        <p class="status-good" data-text="server-status">🟢 Running</p>
+      </div>
+      <div class="status-card">
+        <h3>Database Status</h3>
+        <p class="status-warning" data-text="database-status">🟡 Not Connected</p>
+      </div>
+      <div class="status-card">
+        <h3>Liquidsoap Status</h3>
+        <p class="status-error" data-text="liquidsoap-status">🔴 Not Running</p>
+      </div>
+      <div class="status-card">
+        <h3>Icecast Status</h3>
+        <p class="status-error" data-text="icecast-status">🔴 Not Running</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

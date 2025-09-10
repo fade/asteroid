@@ -1,48 +1,32 @@
 <!DOCTYPE html>
-<html lang=en>
- <head>
-  <title>🎵 ASTEROID RADIO 🎵</title>
-  <meta charset=utf-8>
-  <meta name=viewport
-        content=\"width=device-width, initial-scale=1\">
-  <style>
-        body { font-family: &#39;Courier New&#39;, monospace; background: #0a0a0a; color: #00ff00; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #ff6600; text-align: center; font-size: 2.5em; margin-bottom: 30px; }
-        h2 { color: #ff6600; }
-        .status { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
-        .panel { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
-        .nav { margin: 20px 0; }
-        .nav a { color: #00ff00; text-decoration: none; margin: 0 15px; padding: 10px 20px; border: 1px solid #333; background: #1a1a1a; display: inline-block; }
-        .nav a:hover { background: #333; }
-        .controls { margin: 20px 0; }
-        .controls button { background: #1a1a1a; color: #00ff00; border: 1px solid #333; padding: 10px 20px; margin: 5px; cursor: pointer; }
-        .controls button:hover { background: #333; }
-        .now-playing { background: #1a1a1a; padding: 20px; border: 1px solid #333; margin: 20px 0; }
-        .back { color: #00ff00; text-decoration: none; margin-bottom: 20px; display: inline-block; }
-        .back:hover { text-decoration: underline; }
-      </style>
- </head>
- <body>
-  <div class=container>
-   <h1>🎵 ASTEROID RADIO 🎵</h1>
-   <div class=status>
-    <h2>Station Status</h2>
-    <p>🟢 LIVE - Broadcasting asteroid music for hackers
-    <p>Current listeners: 0
-    <p>Stream quality: 128kbps MP3
-   </div>
-   <div class=nav>
-    <a href=\"/admin\">Admin Dashboard</a><a href=\"/player\">Web Player</a><a
-    href=\"/api/status\">API Status</a>
-   </div>
-   <div>
-    <h2>Now Playing</h2>
-    <p>Artist: The Void
-    <p>Track: Silence
-    <p>Album: Startup Sounds
-    <p>Duration: ∞
-   </div>
+<html lang="en">
+<head>
+  <title data-text="title">🎵 ASTEROID RADIO 🎵</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/static/asteroid.css">
+</head>
+<body>
+  <div class="container">
+    <h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
+    <div class="status">
+      <h2>Station Status</h2>
+      <p data-text="status-message">🟢 LIVE - Broadcasting asteroid music for hackers</p>
+      <p>Current listeners: <span data-text="listeners">0</span></p>
+      <p>Stream quality: <span data-text="stream-quality">128kbps MP3</span></p>
+    </div>
+    <div class="nav">
+      <a href="/admin">Admin Dashboard</a>
+      <a href="/player">Web Player</a>
+      <a href="/api/status">API Status</a>
+    </div>
+    <div>
+      <h2>Now Playing</h2>
+      <p>Artist: <span data-text="now-playing-artist">The Void</span></p>
+      <p>Track: <span data-text="now-playing-track">Silence</span></p>
+      <p>Album: <span data-text="now-playing-album">Startup Sounds</span></p>
+      <p>Duration: <span data-text="now-playing-duration">∞</span></p>
+    </div>
   </div>
- </body>
+</body>
 </html>

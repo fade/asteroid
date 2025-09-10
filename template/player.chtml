@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title data-text="title">Asteroid Radio - Web Player</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/static/asteroid.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎵 WEB PLAYER</h1>
+    <div class="nav">
+      <a href="/">← Back to Main</a>
+      <a href="/admin">Admin Dashboard</a>
+    </div>
+    <div class="player">
+      <div class="now-playing">
+        <h3>Now Playing</h3>
+        <p>Artist: <span data-text="now-playing-artist">The Void</span></p>
+        <p>Track: <span data-text="now-playing-track">Silence</span></p>
+        <p>Album: <span data-text="now-playing-album">Startup Sounds</span></p>
+      </div>
+      <div class="player-controls">
+        <button class="play-btn">▶️ Play</button>
+        <button class="stop-btn">⏹️ Stop</button>
+        <p>Stream: <span data-text="stream-url">http://localhost:8000/asteroid</span></p>
+        <p>Quality: <span data-text="bitrate">128kbps MP3</span></p>
+        <p>Status: <span data-text="player-status">Stopped</span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

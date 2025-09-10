@@ -9,19 +9,25 @@
 
 ;; Define as RADIANCE module
 (define-module asteroid
-  (:use #:cl #:radiance #:lass)
+  (:use #:cl #:radiance #:lass #:r-clip)
   (:domain "asteroid"))
 
 ;; Configuration
 (defparameter *server-port* 8080)
 
-;; Read and compile LASS from file
+;; Define CLIP attribute processor for data-text
+(clip:define-attribute-processor data-text (node value)
+  (plump:clear node)
+  (plump:make-text-node node (clip:clipboard value)))
+
+;; LASS CSS generation
 (defun generate-css ()
-  "Generate CSS by reading LASS from static/asteroid.lass file"
-  (let ((lass-file (merge-pathnames "static/asteroid.lass")))
-    (lass:compile-and-write
-     (with-open-file (in lass-file)
-       (read in)))))
+  "Generate CSS from LASS file"
+  (lass:compile-and-write 
+   (read-from-string 
+    (alexandria:read-file-into-string 
+     (merge-pathnames "static/asteroid.lass" 
+                      (asdf:system-source-directory :asteroid))))))
 
 ;; Generate CSS file using LASS
 (defun compile-styles ()
@@ -40,93 +46,45 @@
 
 ;; RADIANCE route handlers
 (define-page index #@"/" ()
-  (spinneret:with-html-string
-    (:doctype)
-    (:html
-     (:head
-      (:title "🎵 ASTEROID RADIO 🎵")
-      (:meta :charset "utf-8")
-      (:meta :name "viewport" :content "width=device-width, initial-scale=1")
-      (:link :rel "stylesheet" :type "text/css" :href "/static/asteroid.css"))
-     (:body
-      (:div.container
-       (:h1 "🎵 ASTEROID RADIO 🎵")
-       (:div.status
-        (:h2 "Station Status")
-        (:p "🟢 LIVE - Broadcasting asteroid music for hackers")
-        (:p "Current listeners: 0")
-        (:p "Stream quality: 128kbps MP3"))
-       (:div.nav
-        (:a :href "/admin" "Admin Dashboard")
-        (:a :href "/player" "Web Player")
-        (:a :href "/api/status" "API Status"))
-       (:div
-        (:h2 "Now Playing")
-        (:p "Artist: The Void")
-        (:p "Track: Silence")
-        (:p "Album: Startup Sounds")
-        (:p "Duration: ∞")))))))
+  (let ((template-path (merge-pathnames "template/front-page.chtml" 
+                                       (asdf:system-source-directory :asteroid))))
+    (clip:process-to-string 
+     (plump:parse (alexandria:read-file-into-string template-path))
+     :title "🎵 ASTEROID RADIO 🎵"
+     :station-name "🎵 ASTEROID RADIO 🎵"
+     :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
+     :listeners "0"
+     :stream-quality "128kbps MP3"
+     :now-playing-artist "The Void"
+     :now-playing-track "Silence"
+     :now-playing-album "Startup Sounds"
+     :now-playing-duration "∞")))
 
 (define-page admin #@"/admin" ()
-  (spinneret:with-html-string
-    (:doctype)
-    (:html
-     (:head
-      (:title "Asteroid Radio - Admin Dashboard")
-      (:meta :charset "utf-8")
-      (:link :rel "stylesheet" :type "text/css" :href "/static/asteroid.css"))
-     (:body
-      (:div.container
-       (:a.back :href "/" "← Back to Main")
-       (:h1 "Admin Dashboard")
-       (:div.panel
-        (:h2 "Playback Control")
-        (:button "Play")
-        (:button "Pause")
-        (:button "Skip")
-        (:button "Stop"))
-       (:div.panel
-        (:h2 "Library Management")
-        (:button "Upload Music")
-        (:button "Manage Playlists")
-        (:button "Scan Library"))
-       (:div.panel
-        (:h2 "Live DJ")
-        (:button "Go Live")
-        (:button "End Session")
-        (:button "Mic Check"))
-       (:div.panel
-        (:h2 "System Status")
-        (:p "Server: Running")
-        (:p "Database: Not Connected")
-        (:p "Liquidsoap: Not Running")
-        (:p "Icecast: Not Running")))))))
+  (let ((template-path (merge-pathnames "template/admin.chtml" 
+                                       (asdf:system-source-directory :asteroid))))
+    (clip:process-to-string 
+     (plump:parse (alexandria:read-file-into-string template-path))
+     :title "Asteroid Radio - Admin Dashboard"
+     :server-status "🟢 Running"
+     :database-status "🟡 Not Connected"
+     :liquidsoap-status "🔴 Not Running"
+     :icecast-status "🔴 Not Running")))
 
 (define-page player #@"/player" ()
-  (spinneret:with-html-string
-    (:doctype)
-    (:html
-     (:head
-      (:title "Asteroid Radio - Web Player")
-      (:meta :charset "utf-8")
-      (:link :rel "stylesheet" :type "text/css" :href "/static/asteroid.css"))
-     (:body
-      (:a.back :href "/" "← Back to Main")
-      (:div.player
-       (:h1 "🎵 ASTEROID RADIO PLAYER 🎵")
-       (:div.now-playing
-        (:div "Now Playing:")
-        (:div "Silence - The Sound of Startup"))
-       (:div.controls
-        (:button "▶ Play Stream")
-        (:button "⏸ Pause")
-        (:button "🔊 Volume"))
-       (:div
-        (:p "Stream URL: http://localhost:8000/asteroid")
-        (:p "Bitrate: 128kbps MP3")
-        (:p "Status: Offline")))))))
+  (let ((template-path (merge-pathnames "template/player.chtml" 
+                                       (asdf:system-source-directory :asteroid))))
+    (clip:process-to-string 
+     (plump:parse (alexandria:read-file-into-string template-path))
+     :title "Asteroid Radio - Web Player"
+     :stream-url "http://localhost:8000/asteroid"
+     :bitrate "128kbps MP3"
+     :now-playing-artist "The Void"
+     :now-playing-track "Silence"
+     :now-playing-album "Startup Sounds"
+     :player-status "Stopped")))
 
-(define-page api/status #@"/api/status" ()
+(define-page status-api #@"/api/status" ()
   (setf (radiance:header "Content-Type") "application/json")
   (cl-json:encode-json-to-string
    `(("status" . "running")

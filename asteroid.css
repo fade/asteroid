@@ -1,0 +1,125 @@
+body{
+    font-family: Courier New, monospace;
+    background: #0a0a0a;
+    color: #00ff00;
+    margin: 0;
+    padding: 20px;
+}
+
+body .container{
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+body h1{
+    color: #ff6600;
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+}
+
+body h2{
+    color: #ff6600;
+}
+
+body .status{
+    background: #1a1a1a;
+    padding: 20px;
+    border: 1px solid #333;
+    margin: 20px 0;
+}
+
+body .panel{
+    background: #1a1a1a;
+    padding: 20px;
+    border: 1px solid #333;
+    margin: 20px 0;
+}
+
+body .nav{
+    margin: 20px 0;
+}
+
+body .nav a{
+    color: #00ff00;
+    text-decoration: none;
+    margin: 0 15px;
+    padding: 10px 20px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    display: inline-block;
+}
+
+body .nav a :hover{
+    background: #333;
+}
+
+body .controls{
+    margin: 20px 0;
+}
+
+body .controls button{
+    background: #1a1a1a;
+    color: #00ff00;
+    border: 1px solid #333;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+body .controls button :hover{
+    background: #333;
+}
+
+body button{
+    background: #333;
+    color: #00ff00;
+    border: 1px solid #555;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+body button :hover{
+    background: #555;
+}
+
+body .now-playing{
+    background: #1a1a1a;
+    padding: 20px;
+    border: 1px solid #333;
+    margin: 20px 0;
+    font-size: 1.5em;
+    color: #ff6600;
+}
+
+body .back{
+    color: #00ff00;
+    text-decoration: none;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+body .back :hover{
+    text-decoration: underline;
+}
+
+body .player{
+    background: #1a1a1a;
+    padding: 40px;
+    border: 1px solid #333;
+    margin: 40px auto;
+    max-width: 600px;
+}
+
+
+
+body .player .controls button{
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 1.2em;
+}
+
+body body.player-page{
+    text-align: center;
+}
