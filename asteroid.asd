@@ -29,4 +29,5 @@
                (:file "module")
                (:file "database")
                (:file "stream-media")
+               (:file "users")
                (:file "asteroid")))
