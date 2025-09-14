@@ -23,3 +23,4 @@
                              (track-ids :text))))
   
   (format t "Database collections initialized~%"))
+
