@@ -9,7 +9,9 @@
   :version "0.0.0"
   :defsystem-depends-on (:radiance)
   :class "radiance:virtual-module"
-  :depends-on (:radiance
+  :depends-on (:slynk
+               :radiance
+               :i-log4cl
                :r-clip
                :cl-json
                :dexador
@@ -17,7 +19,11 @@
                :r-data-model
                :cl-fad
                :local-time
-               :taglib)
+               :taglib
+               (:interface :database)
+               :r-data-model
+               (:interface :user))
+
   :pathname "./"
   :components ((:file "app-utils")
                (:file "module")

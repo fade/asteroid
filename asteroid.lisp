@@ -310,9 +310,12 @@
       (format t "~%Received interrupt, stopping server...~%")
       (stop-server))))
 
-(defun -main (&optional args)
+(defun -main (&optional args (debug t))
   (declare (ignorable args))
+  (format t "~&args of asteroid: ~A~%" args)
   (format t "~%🎵 ASTEROID RADIO - Music for Hackers 🎵~%")
   (format t "Starting RADIANCE web server...~%")
+  (when debug
+    (slynk:create-server :port 4009 :dont-close t))
   (run-server))
 
