@@ -47,9 +47,9 @@
         <div class="upload-info">
           <p><strong>To add your own MP3 files:</strong></p>
           <ol>
-            <li>Copy your MP3/FLAC/OGG/WAV files to: <code>/home/glenn/Projects/Code/asteroid/music/incoming/</code></li>
-            <li>Click "Copy Files to Library" below</li>
-            <li>Files will be moved to the library and added to the database</li>
+              <li>Copy your MP3/FLAC/OGG/WAV files to: <code>/home/glenn/Projects/Code/asteroid/music/incoming/</code></li>
+              <li>Click "Copy Files to Library" below</li>
+              <li>Files will be moved to the library and added to the database</li>
           </ol>
           <p><em>Supported formats: MP3, FLAC, OGG, WAV</em></p>
         </div>

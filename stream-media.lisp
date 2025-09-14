@@ -12,6 +12,11 @@
     (remove-if-not #'supported-audio-file-p
                    (cl-fad:list-directory directory :follow-symlinks nil))))
 
+(defun scan-directory-for-music-recursively (path)
+  (loop for directory in (uiop:subdirectories path)
+        with music = (scan-directory-for-music path)
+        appending (scan-directory-for-music directory)))
+
 (defun extract-metadata-with-taglib (file-path)
   "Extract metadata using taglib library"
   (handler-case
@@ -68,7 +73,7 @@
 (defun scan-music-library (&optional (directory *music-library-path*))
   "Scan music library directory and add tracks to database"
   (format t "Scanning music library: ~a~%" directory)
-  (let ((audio-files (scan-directory-for-music directory))
+  (let ((audio-files (scan-directory-for-music-recursively directory))
         (added-count 0))
     (dolist (file audio-files)
       (let ((metadata (extract-metadata-with-taglib file)))
