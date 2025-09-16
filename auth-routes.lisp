@@ -7,7 +7,9 @@
 (define-page login #@"/login" ()
   "User login page"
   (let ((username (radiance:post-var "username"))
-        (password (radiance:post-var "password")))
+        (password (radiance:post-var "password"))
+        (template-path (merge-pathnames "template/login.chtml" 
+                                       (asdf:system-source-directory :asteroid))))
     (if (and username password)
         ;; Handle login form submission
         (let ((user (authenticate-user username password)))
@@ -25,78 +27,17 @@
                     (format t "Session error: ~a~%" e)
                     "Login successful but session error occurred")))
               ;; Login failed - show form with error
-"<!DOCTYPE html>
-<html>
-<head>
-    <title>Asteroid Radio - Login</title>
-    <link rel='stylesheet' href='/static/asteroid.css'>
-</head>
-<body>
-    <div class='container'>
-        <h1>🎵 ASTEROID RADIO - LOGIN</h1>
-        <div class='auth-container'>
-            <div class='auth-form'>
-                <h2>System Access</h2>
-                <div class='message error'>Invalid username or password</div>
-                <form method='post' action='/asteroid/login'>
-                    <div class='form-group'>
-                        <label>Username:</label>
-                        <input type='text' name='username' required>
-                    </div>
-                    <div class='form-group'>
-                        <label>Password:</label>
-                        <input type='password' name='password' required>
-                    </div>
-                    <div class='form-actions'>
-                        <button type='submit' class='btn btn-primary' style='width: 100%;'>LOGIN</button>
-                    </div>
-                </form>
-                <div class='panel' style='margin-top: 20px; text-align: center;'>
-                    <strong style='color: #ff6600;'>Default Admin Credentials:</strong><br>
-                    Username: <code style='color: #00ff00;'>admin</code><br>
-                    Password: <code style='color: #00ff00;'>asteroid123</code>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>"))
+              (clip:process-to-string 
+               (plump:parse (alexandria:read-file-into-string template-path))
+               :title "Asteroid Radio - Login"
+               :error-message "Invalid username or password"
+               :display-error "display: block;")))
         ;; Show login form (no POST data)
-"<!DOCTYPE html>
-<html>
-<head>
-    <title>Asteroid Radio - Login</title>
-    <link rel='stylesheet' href='/static/asteroid.css'>
-</head>
-<body>
-    <div class='container'>
-        <h1>🎵 ASTEROID RADIO - LOGIN</h1>
-        <div class='auth-container'>
-            <div class='auth-form'>
-                <h2>System Access</h2>
-                <form method='post' action='/asteroid/login'>
-                    <div class='form-group'>
-                        <label>Username:</label>
-                        <input type='text' name='username' required>
-                    </div>
-                    <div class='form-group'>
-                        <label>Password:</label>
-                        <input type='password' name='password' required>
-                    </div>
-                    <div class='form-actions'>
-                        <button type='submit' class='btn btn-primary' style='width: 100%;'>LOGIN</button>
-                    </div>
-                </form>
-                <div class='panel' style='margin-top: 20px; text-align: center;'>
-                    <strong style='color: #ff6600;'>Default Admin Credentials:</strong><br>
-                    Username: <code style='color: #00ff00;'>admin</code><br>
-                    Password: <code style='color: #00ff00;'>asteroid123</code>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>")))
+        (clip:process-to-string 
+         (plump:parse (alexandria:read-file-into-string template-path))
+         :title "Asteroid Radio - Login"
+         :error-message ""
+         :display-error "display: none;"))))
 
 ;; Simple logout handler
 (define-page logout #@"/logout" ()
@@ -114,13 +55,15 @@
         (cl-json:encode-json-to-string
          `(("status" . "success")
            ("users" . ,(mapcar (lambda (user)
-                                 `(("id" . ,(gethash "_id" user))
-                                   ("username" . ,(gethash "username" user))
-                                   ("email" . ,(gethash "email" user))
-                                   ("role" . ,(gethash "role" user))
-                                   ("active" . ,(gethash "active" user))
-                                   ("created-date" . ,(gethash "created-date" user))
-                                   ("last-login" . ,(gethash "last-login" user))))
+                                 `(("id" . ,(if (listp (gethash "_id" user)) 
+                                               (first (gethash "_id" user)) 
+                                               (gethash "_id" user)))
+                                   ("username" . ,(first (gethash "username" user)))
+                                   ("email" . ,(first (gethash "email" user)))
+                                   ("role" . ,(first (gethash "role" user)))
+                                   ("active" . ,(= (first (gethash "active" user)) 1))
+                                   ("created-date" . ,(first (gethash "created-date" user)))
+                                   ("last-login" . ,(first (gethash "last-login" user)))))
                                users)))))
     (error (e)
       (cl-json:encode-json-to-string

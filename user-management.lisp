@@ -51,8 +51,17 @@
 
 (defun find-user-by-id (user-id)
   "Find a user by ID"
-  (let ((users (db:select "USERS" (db:query (:= "_id" user-id)))))
-    (when users (first users))))
+  (format t "Looking for user with ID: ~a (type: ~a)~%" user-id (type-of user-id))
+  ;; Handle both integer and BIT types by iterating through all users
+  (let ((all-users (db:select "USERS" (db:query :all)))
+        (target-id (if (numberp user-id) user-id (parse-integer (format nil "~a" user-id)))))
+    (format t "Searching through ~a users for ID ~a~%" (length all-users) target-id)
+    (dolist (user all-users)
+      (let ((db-id (gethash "_id" user)))
+        (format t "Checking user with _id: ~a (type: ~a)~%" db-id (type-of db-id))
+        (when (equal db-id target-id)
+          (format t "Found matching user!~%")
+          (return user))))))
 
 (defun authenticate-user (username password)
   "Authenticate a user with username and password"
@@ -88,9 +97,12 @@
   (string= (hash-password password) hash))
 
 (defun user-has-role-p (user role)
-  "Check if user has a specific role"
+  "Check if user has the specified role"
   (when user
-    (let ((user-role (intern (string-upcase (gethash "role" user)) :keyword)))
+    (let* ((role-field (gethash "role" user))
+           (role-string (if (listp role-field) (first role-field) role-field))
+           (user-role (intern (string-upcase role-string) :keyword)))
+      (format t "User role: ~a, checking against: ~a~%" user-role role)
       (or (eq user-role role)
           (and (eq role :listener) (member user-role '(:dj :admin)))
           (and (eq role :dj) (eq user-role :admin))))))
@@ -99,8 +111,11 @@
   "Get the currently authenticated user from session"
   (handler-case
       (let ((user-id (session:field "user-id")))
+        (format t "Session user-id: ~a~%" user-id)
         (when user-id
-          (find-user-by-id user-id)))
+          (let ((user (find-user-by-id user-id)))
+            (format t "Found user: ~a~%" (if user "YES" "NO"))
+            user)))
     (error (e)
       (format t "Error getting current user: ~a~%" e)
       nil)))
@@ -118,7 +133,11 @@
   "Require user to have a specific role"
   (handler-case
       (let ((current-user (get-current-user)))
+        (format t "Current user for role check: ~a~%" (if current-user "FOUND" "NOT FOUND"))
+        (when current-user
+          (format t "User has role ~a: ~a~%" role (user-has-role-p current-user role)))
         (unless (and current-user (user-has-role-p current-user role))
+          (format t "Role check failed - redirecting to login~%")
           (radiance:redirect "/asteroid/login")))
     (error (e)
       (format t "Role check error: ~a~%" e)
@@ -166,11 +185,12 @@
 (defun get-all-users ()
   "Get all users from database"
   (format t "Getting all users from database...~%")
-  (let ((all-users (db:select "USERS" (db:query :all))))
-    (format t "Total users in database: ~a~%" (length all-users))
-    (dolist (user all-users)
-      (format t "User: ~a~%" user))
-    all-users))
+  (let ((users (db:select "USERS" (db:query :all))))
+    (format t "Total users in database: ~a~%" (length users))
+    (dolist (user users)
+      (format t "User: ~a~%" user)
+      (format t "User _id field: ~a (type: ~a)~%" (gethash "_id" user) (type-of (gethash "_id" user))))
+    users))
 
 (defun get-user-stats ()
   "Get user statistics"
