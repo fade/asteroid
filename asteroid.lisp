@@ -21,9 +21,30 @@
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 
 
+;; Authentication functions
+(defun require-authentication ()
+  "Require user to be authenticated"
+  (handler-case
+      (unless (session:field "user-id")
+        (radiance:redirect "/asteroid/login"))
+    (error (e)
+      (format t "Authentication error: ~a~%" e)
+      (radiance:redirect "/asteroid/login"))))
+
+(defun require-role (role)
+  "Require user to have a specific role"
+  (handler-case
+      (let ((current-user (get-current-user)))
+        (unless (and current-user (user-has-role-p current-user role))
+          (radiance:redirect "/asteroid/login")))
+    (error (e)
+      (format t "Role check error: ~a~%" e)
+      (radiance:redirect "/asteroid/login"))))
+
 ;; API Routes
 (define-page admin-scan-library #@"/admin/scan-library" ()
   "API endpoint to scan music library"
+  (require-role :admin)
   (handler-case
       (let ((tracks-added (scan-music-library)))
         (setf (radiance:header "Content-Type") "application/json")
@@ -39,6 +60,7 @@
 
 (define-page admin-tracks #@"/admin/tracks" ()
   "API endpoint to view all tracks in database"
+  (require-authentication)
   (handler-case
       (let ((tracks (db:select "tracks" (db:query :all))))
         (setf (radiance:header "Content-Type") "application/json")
@@ -46,15 +68,13 @@
          `(("status" . "success")
            ("tracks" . ,(mapcar (lambda (track)
                                   `(("id" . ,(gethash "_id" track))
-                                    ("title" . ,(gethash "title" track))
-                                    ("artist" . ,(gethash "artist" track))
-                                    ("album" . ,(gethash "album" track))
-                                    ("duration" . ,(gethash "duration" track))
-                                    ("file-path" . ,(gethash "file-path" track))
-                                    ("format" . ,(gethash "format" track))
-                                    ("bitrate" . ,(gethash "bitrate" track))
-                                    ("added-date" . ,(gethash "added-date" track))
-                                    ("play-count" . ,(gethash "play-count" track))))
+                                    ("title" . ,(first (gethash "title" track)))
+                                    ("artist" . ,(first (gethash "artist" track)))
+                                    ("album" . ,(first (gethash "album" track)))
+                                    ("duration" . ,(first (gethash "duration" track)))
+                                    ("format" . ,(first (gethash "format" track)))
+                                    ("bitrate" . ,(first (gethash "bitrate" track)))
+                                    ("play-count" . ,(first (gethash "play-count" track)))))
                                 tracks)))))
     (error (e)
       (setf (radiance:header "Content-Type") "application/json")
@@ -220,13 +240,9 @@
    `(("status" . "success")
      ("player" . ,(get-player-status)))))
 
-;; Configure static file serving for other files
-(define-page static #@"/static/(.*)" (:uri-groups (path))
-  (serve-file (merge-pathnames (concatenate 'string "static/" path) 
-                               (asdf:system-source-directory :asteroid))))
-
-;; RADIANCE route handlers
-(define-page index #@"/" ()
+;; Front page
+(define-page front-page #@"/" ()
+  "Main front page"
   (let ((template-path (merge-pathnames "template/front-page.chtml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
@@ -241,7 +257,15 @@
      :now-playing-album "Startup Sounds"
      :now-playing-duration "∞")))
 
+;; Configure static file serving for other files
+(define-page static #@"/static/(.*)" (:uri-groups (path))
+  (serve-file (merge-pathnames (concatenate 'string "static/" path) 
+                               (asdf:system-source-directory :asteroid))))
+
+;; Admin page (requires authentication)
 (define-page admin #@"/admin" ()
+  "Admin dashboard"
+  (require-authentication)
   (let ((template-path (merge-pathnames "template/admin.chtml" 
                                        (asdf:system-source-directory :asteroid)))
         (track-count (handler-case 
@@ -249,7 +273,7 @@
                        (error () 0))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
-     :title "Asteroid Radio - Admin Dashboard"
+     :title "🎵 ASTEROID RADIO - Admin Dashboard"
      :server-status "🟢 Running"
      :database-status (handler-case 
                         (if (db:connected-p) "🟢 Connected" "🔴 Disconnected")
@@ -292,6 +316,11 @@
   "Start the Asteroid Radio RADIANCE server"
   (format t "Starting Asteroid Radio RADIANCE server on port ~a~%"  port)
   (compile-styles)  ; Generate CSS file using LASS
+  
+  ;; Ensure RADIANCE environment is properly set before startup
+  (unless (radiance:environment)
+    (setf (radiance:environment) "default"))
+  
   (radiance:startup)
   (format t "Server started! Visit http://localhost:~a/asteroid/~%" port))
 
@@ -312,6 +341,17 @@
       (format t "~%Received interrupt, stopping server...~%")
       (stop-server))))
 
+(defun ensure-radiance-environment ()
+  "Ensure RADIANCE environment is properly configured for persistence"
+  (unless (radiance:environment)
+    (setf (radiance:environment) "default"))
+  
+  ;; Ensure the database directory exists
+  (let ((db-dir (merge-pathnames ".config/radiance/default/i-lambdalite/radiance.db/"
+                                 (user-homedir-pathname))))
+    (ensure-directories-exist db-dir)
+    (format t "Database directory: ~a~%" db-dir)))
+
 (defun -main (&optional args (debug t))
   (declare (ignorable args))
   (format t "~&args of asteroid: ~A~%" args)
@@ -319,5 +359,12 @@
   (format t "Starting RADIANCE web server...~%")
   (when debug
     (slynk:create-server :port 4009 :dont-close t))
+  
+  ;; Ensure proper environment setup before starting
+  (ensure-radiance-environment)
+  
+  ;; Initialize user management before server starts
+  (initialize-user-system)
+  
   (run-server))
 

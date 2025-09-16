@@ -91,17 +91,44 @@
     <!-- Player Control -->
     <div class="admin-section">
       <h2>Player Control</h2>
-      <div class="player-controls">
-        <button id="player-play" class="btn btn-success">▶️ Play</button>
-        <button id="player-pause" class="btn btn-warning">⏸️ Pause</button>
-        <button id="player-stop" class="btn btn-danger">⏹️ Stop</button>
-        <button id="player-resume" class="btn btn-info">▶️ Resume</button>
+      <div class="card">
+        <h3>🎵 Player Control</h3>
+        <div class="player-controls">
+          <button class="btn btn-primary" onclick="playTrack()">▶️ Play</button>
+          <button class="btn btn-secondary" onclick="pausePlayer()">⏸️ Pause</button>
+          <button class="btn btn-secondary" onclick="stopPlayer()">⏹️ Stop</button>
+          <button class="btn btn-secondary" onclick="resumePlayer()">▶️ Resume</button>
+        </div>
+        <div id="player-status" class="status-info">
+          Status: <span id="status-text">Unknown</span><br>
+          Current Track: <span id="current-track">None</span>
+        </div>
       </div>
-      
-      <div class="player-status">
-        <p>Status: <span id="player-state">Stopped</span></p>
-        <p>Current Track: <span id="current-track">None</span></p>
-        <p>Position: <span id="current-position">0</span>s</p>
+
+      <div class="card">
+        <h3>👥 User Management</h3>
+        <div class="user-stats" id="user-stats">
+          <div class="stat-card">
+            <span class="stat-number" id="total-users">0</span>
+            <span class="stat-label">Total Users</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="active-users">0</span>
+            <span class="stat-label">Active Users</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="admin-users">0</span>
+            <span class="stat-label">Admins</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="dj-users">0</span>
+            <span class="stat-label">DJs</span>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="loadUsers()">👥 Manage Users</button>
+          <button class="btn btn-secondary" onclick="showCreateUser()">➕ Create User</button>
+        </div>
       </div>
     </div>
   </div>
@@ -325,8 +352,152 @@
       alert('Copy your MP3 files to: /home/glenn/Projects/Code/asteroid/music/incoming/\n\nThen click "Copy Files to Library" to add them to your music collection.');
     }
 
+    // User Management Functions
+    async function loadUserStats() {
+      try {
+        const response = await fetch('/asteroid/api/users/stats');
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          const stats = result.stats;
+          document.getElementById('total-users').textContent = stats.total;
+          document.getElementById('active-users').textContent = stats.active;
+          document.getElementById('admin-users').textContent = stats.admins;
+          document.getElementById('dj-users').textContent = stats.djs;
+        }
+      } catch (error) {
+        console.error('Error loading user stats:', error);
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        const response = await fetch('/asteroid/api/users');
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          showUsersTable(result.users);
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+        alert('Error loading users. Please try again.');
+      }
+    }
+
+    function showUsersTable(users) {
+      const container = document.createElement('div');
+      container.className = 'user-management';
+      container.innerHTML = `
+        <h3>User Management</h3>
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Last Login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map(user => `
+              <tr>
+                <td>${user.username}</td>
+                <td>${user.email}</td>
+                <td>
+                  <select onchange="updateUserRole('${user.id}', this.value)">
+                    <option value="listener" ${user.role === 'listener' ? 'selected' : ''}>Listener</option>
+                    <option value="dj" ${user.role === 'dj' ? 'selected' : ''}>DJ</option>
+                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                  </select>
+                </td>
+                <td>${user.active ? '✅ Active' : '❌ Inactive'}</td>
+                <td>${user['last-login'] ? new Date(user['last-login'] * 1000).toLocaleString() : 'Never'}</td>
+                <td class="user-actions">
+                  ${user.active ? 
+                    `<button class="btn btn-danger" onclick="deactivateUser('${user.id}')">Deactivate</button>` :
+                    `<button class="btn btn-success" onclick="activateUser('${user.id}')">Activate</button>`
+                  }
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <button class="btn btn-secondary" onclick="hideUsersTable()">Close</button>
+      `;
+      
+      document.body.appendChild(container);
+    }
+
+    function hideUsersTable() {
+      const userManagement = document.querySelector('.user-management');
+      if (userManagement) {
+        userManagement.remove();
+      }
+    }
+
+    async function updateUserRole(userId, newRole) {
+      try {
+        const formData = new FormData();
+        formData.append('role', newRole);
+        
+        const response = await fetch(`/asteroid/api/users/${userId}/role`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          loadUserStats();
+          alert('User role updated successfully');
+        } else {
+          alert('Error updating user role: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        alert('Error updating user role. Please try again.');
+      }
+    }
+
+    async function deactivateUser(userId) {
+      if (!confirm('Are you sure you want to deactivate this user?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/asteroid/api/users/${userId}/deactivate`, {
+          method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          loadUsers();
+          loadUserStats();
+          alert('User deactivated successfully');
+        } else {
+          alert('Error deactivating user: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error deactivating user:', error);
+        alert('Error deactivating user. Please try again.');
+      }
+    }
+
+    function showCreateUser() {
+      window.location.href = '/asteroid/register';
+    }
+
+    // Load user stats on page load
+    loadUserStats();
+
     // Update player status every 5 seconds
     setInterval(updatePlayerStatus, 5000);
+    
+    // Update user stats every 30 seconds
+    setInterval(loadUserStats, 30000);
   </script>
 </body>
 </html>

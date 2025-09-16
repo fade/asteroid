@@ -384,6 +384,218 @@
   :border-radius "3px"
   :font-family "Courier New, monospace")
 
+ (.upload-interface
+   :margin-top 2rem
+   :padding 1.5rem
+   :background-color "#1a1a1a"
+   :border-radius 8px
+   :border "1px solid #333"
+   
+   (h3 :color "#00ff00"
+       :margin-bottom 1rem)
+   
+   (.upload-area
+    :border "2px dashed #333"
+    :border-radius 8px
+    :padding 2rem
+    :text-align center
+    :background-color "#0f0f0f"
+    :transition "border-color 0.3s ease"
+    
+    ("&:hover" :border-color "#00ff00")
+    
+    (.upload-icon :font-size 3rem
+                  :color "#666"
+                  :margin-bottom 1rem)
+    
+    (p :color "#999"
+       :margin-bottom 1rem)
+    
+    (.btn :margin-top 1rem)))
+
+  ;; Authentication Styles
+  (.auth-container
+   :display flex
+   :justify-content center
+   :align-items center
+   :min-height "60vh"
+   :padding 2rem)
+
+  (.auth-form
+   :background-color "#1a1a1a"
+   :border "1px solid #333"
+   :border-radius 8px
+   :padding 2rem
+   :width "100%"
+   :max-width 400px
+   :box-shadow "0 4px 6px rgba(0, 0, 0, 0.3)"
+   
+   (h2 :color "#00ff00"
+       :text-align center
+       :margin-bottom 1.5rem
+       :font-size 1.5rem)
+   
+   (h3 :color "#00ff00"
+       :margin-bottom 1rem
+       :font-size 1.2rem))
+
+  (.form-group
+   :margin-bottom 1rem
+   
+   (label :display block
+          :color "#ccc"
+          :margin-bottom 0.5rem
+          :font-weight bold)
+   
+   (input :width "100%"
+          :padding 0.75rem
+          :background-color "#0f0f0f"
+          :border "1px solid #333"
+          :border-radius 4px
+          :color "#fff"
+          :font-size 1rem
+          :box-sizing border-box
+          
+          ("&:focus" :border-color "#00ff00"
+                     :outline none
+                     :box-shadow "0 0 0 2px rgba(0, 255, 0, 0.2)")))
+
+  (.form-actions
+   :display flex
+   :gap 1rem
+   :margin-top 1.5rem)
+
+  (.message
+   :padding 0.75rem
+   :border-radius 4px
+   :margin-top 1rem
+   :text-align center
+   :font-weight bold
+   
+   ("&.success" :background-color "rgba(0, 255, 0, 0.1)"
+                :border "1px solid #00ff00"
+                :color "#00ff00")
+   
+   ("&.error" :background-color "rgba(255, 0, 0, 0.1)"
+              :border "1px solid #ff0000"
+              :color "#ff0000"))
+
+  (.auth-link
+   :text-align center
+   :margin-top 1.5rem
+   :color "#999"
+   
+   (a :color "#00ff00"
+      :text-decoration none
+      
+      ("&:hover" :text-decoration underline)))
+
+  ;; Profile Styles
+  (.profile-container
+   :max-width 600px
+   :margin "2rem auto"
+   :padding 0 1rem)
+
+  (.profile-card
+   :background-color "#1a1a1a"
+   :border "1px solid #333"
+   :border-radius 8px
+   :padding 2rem
+   :margin-bottom 2rem
+   
+   (h2 :color "#00ff00"
+       :margin-bottom 1.5rem
+       :text-align center))
+
+  (.profile-info
+   :margin-bottom 2rem)
+
+  (.info-group
+   :display flex
+   :justify-content space-between
+   :align-items center
+   :padding 0.75rem 0
+   :border-bottom "1px solid #333"
+   
+   ("&:last-child" :border-bottom none)
+   
+   (label :color "#ccc"
+          :font-weight bold)
+   
+   (span :color "#fff"))
+
+  (.role-badge
+   :background-color "#00ff00"
+   :color "#000"
+   :padding "0.25rem 0.5rem"
+   :border-radius 4px
+   :font-size 0.875rem
+   :font-weight bold)
+
+  (.profile-actions
+   :display flex
+   :gap 1rem
+   :justify-content center)
+
+  ;; User Management Styles
+  (.user-management
+   :margin-top 2rem)
+
+  (.users-table
+   :width "100%"
+   :border-collapse collapse
+   :background-color "#1a1a1a"
+   :border "1px solid #333"
+   :border-radius 8px
+   :overflow hidden
+   
+   (thead
+    :background-color "#0f0f0f"
+    
+    (th :padding 1rem
+        :text-align left
+        :color "#00ff00"
+        :font-weight bold
+        :border-bottom "1px solid #333"))
+   
+   (tbody
+    (tr :border-bottom "1px solid #333"
+        
+        ("&:hover" :background-color "#222")
+        
+        (td :padding 1rem
+            :color "#fff"
+            :vertical-align middle))
+    
+    (.user-actions
+     :display flex
+     :gap 0.5rem
+     
+     (.btn :padding "0.25rem 0.5rem"
+           :font-size 0.875rem))))
+
+  (.user-stats
+   :display grid
+   :grid-template-columns "repeat(auto-fit, minmax(150px, 1fr))"
+   :gap 1rem
+   :margin-bottom 2rem)
+
+  (.stat-card
+   :background-color "#1a1a1a"
+   :border "1px solid #333"
+   :border-radius 8px
+   :padding 1rem
+   :text-align center
+   
+   (.stat-number :font-size 2rem
+                 :font-weight bold
+                 :color "#00ff00"
+                 :display block)
+   
+   (.stat-label :color "#ccc"
+                :font-size 0.875rem
+                :margin-top 0.5rem)))
+
  ;; Center alignment for player page
  (body.player-page
   :text-align center))

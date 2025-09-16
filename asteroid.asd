@@ -13,21 +13,22 @@
                :radiance
                :i-log4cl
                :r-clip
-               :cl-json
-               :dexador
                :lass
-               :r-data-model
-               :cl-fad
+               :cl-json
+               :alexandria
                :local-time
                :taglib
-               (:interface :database)
                :r-data-model
+               :ironclad
+               :babel
+               :cl-fad
+               (:interface :database)
                (:interface :user))
-
   :pathname "./"
   :components ((:file "app-utils")
                (:file "module")
                (:file "database")
                (:file "stream-media")
-               (:file "users")
+               (:file "user-management")
+               (:file "auth-routes")
                (:file "asteroid")))

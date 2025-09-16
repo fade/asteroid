@@ -4,41 +4,49 @@
   <title data-text="title">🎵 ASTEROID RADIO 🎵</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="/static/asteroid.css">
+  <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
 </head>
 <body>
   <div class="container">
-    <h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
-    <div class="status">
-      <h2>Station Status</h2>
-      <p data-text="status-message">🟢 LIVE - Broadcasting asteroid music for hackers</p>
-      <p>Current listeners: <span data-text="listeners">0</span></p>
-      <p>Stream quality: <span data-text="stream-quality">128kbps MP3</span></p>
-    </div>
-    <div class="nav">
-      <a href="/admin">Admin Dashboard</a>
-      <a href="/player/">Web Player</a>
-      <a href="http://localhost:8000/asteroid.mp3" target="_blank">🎵 Live Stream</a>
-      <a href="/status">API Status</a>
-    </div>
-    
-    <div class="live-stream">
-      <h2>🔴 LIVE STREAM</h2>
-      <p><strong>Stream URL:</strong> <code>http://localhost:8000/asteroid.mp3</code></p>
-      <p><strong>Format:</strong> MP3 128kbps Stereo</p>
-      <p><strong>Status:</strong> <span style="color: #00ff00;">● BROADCASTING</span></p>
-      <audio controls style="width: 100%; margin: 10px 0;">
-        <source src="http://localhost:8000/asteroid.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
-    </div>
-    <div>
-      <h2>Now Playing</h2>
-      <p>Artist: <span data-text="now-playing-artist">The Void</span></p>
-      <p>Track: <span data-text="now-playing-track">Silence</span></p>
-      <p>Album: <span data-text="now-playing-album">Startup Sounds</span></p>
-      <p>Duration: <span data-text="now-playing-duration">∞</span></p>
-    </div>
+    <header>
+      <h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
+      <nav>
+        <a href="/asteroid/">Home</a>
+        <a href="/asteroid/player">Player</a>
+        <a href="/asteroid/admin">Admin</a>
+        <a href="/asteroid/status">Status</a>
+        <a href="/asteroid/login">Login</a>
+        <a href="/asteroid/register">Register</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="status">
+        <h2>Station Status</h2>
+        <p data-text="status-message">🟢 LIVE - Broadcasting asteroid music for hackers</p>
+        <p>Current listeners: <span data-text="listeners">0</span></p>
+        <p>Stream quality: <span data-text="stream-quality">128kbps MP3</span></p>
+      </div>
+      
+      <div class="live-stream">
+        <h2>🔴 LIVE STREAM</h2>
+        <p><strong>Stream URL:</strong> <code>http://localhost:8000/asteroid.mp3</code></p>
+        <p><strong>Format:</strong> MP3 128kbps Stereo</p>
+        <p><strong>Status:</strong> <span style="color: #00ff00;">● BROADCASTING</span></p>
+        <audio controls style="width: 100%; margin: 10px 0;">
+          <source src="http://localhost:8000/asteroid.mp3" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+      
+      <div class="now-playing">
+        <h2>Now Playing</h2>
+        <p>Artist: <span data-text="now-playing-artist">The Void</span></p>
+        <p>Track: <span data-text="now-playing-track">Silence</span></p>
+        <p>Album: <span data-text="now-playing-album">Startup Sounds</span></p>
+        <p>Duration: <span data-text="now-playing-duration">∞</span></p>
+      </div>
+    </main>
   </div>
 </body>
 </html>

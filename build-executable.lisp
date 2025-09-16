@@ -9,6 +9,10 @@
 ;; Load RADIANCE first, then handle environment
 (ql:quickload :radiance)
 
+;; Ensure RADIANCE environment is set before loading
+(unless (radiance:environment)
+  (setf (radiance:environment) "default"))
+
 ;; Load the system with RADIANCE environment handling
 (handler-bind ((radiance-core:environment-not-set 
                 (lambda (c)
