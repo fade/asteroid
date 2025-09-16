@@ -22,6 +22,7 @@
                :ironclad
                :babel
                :cl-fad
+               :bordeaux-threads
                (:interface :database)
                (:interface :user))
   :pathname "./"
