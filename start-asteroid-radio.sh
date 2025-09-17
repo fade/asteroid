@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -x
+
 # Asteroid Radio - Start Script
 # Launches all services needed for internet radio streaming
 
-ASTEROID_DIR="/home/glenn/Projects/Code/asteroid"
-ICECAST_CONFIG="/etc/icecast2/icecast.xml"
+ASTEROID_DIR="$HOME/SourceCode/lisp/asteroid/"
+ICECAST_CONFIG="/etc/icecast.xml"
 LIQUIDSOAP_SCRIPT="$ASTEROID_DIR/asteroid-radio.liq"
 
 echo "🎵 Starting Asteroid Radio Station..."
@@ -29,10 +31,10 @@ check_service() {
 }
 
 # Start Icecast2 if not running
-if ! check_service "Icecast2" "icecast2"; then
-    sudo systemctl start icecast2
+if ! check_service "Icecast2" "icecast"; then
+    sudo systemctl start icecast
     sleep 2
-    if pgrep -f "icecast2" > /dev/null; then
+    if pgrep -f "icecast" > /dev/null; then
         echo "✅ Icecast2 started successfully"
     else
         echo "❌ Failed to start Icecast2"

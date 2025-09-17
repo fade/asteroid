@@ -22,7 +22,8 @@
                :taglib
                (:interface :database)
                :r-data-model
-               (:interface :user))
+               (:interface :user)
+               (:interface :auth))
 
   :pathname "./"
   :components ((:file "app-utils")

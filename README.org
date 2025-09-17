@@ -108,6 +108,7 @@ sudo systemctl start icecast2
 - *Admin interface*: =http://[IP]:8000/admin/=
 - *Statistics*: =http://[IP]:8000/status.xsl=
 
+
 * Liquidsoap Integration
 
 ** Configuration File: =asteroid-radio.liq=
