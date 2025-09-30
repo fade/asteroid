@@ -22,3 +22,37 @@ quicklisp-manifest.txt
 notes/
 run-asteroid.sh
 build-sbcl.sh
+
+# Music files - don't commit audio files to repository
+*.mp3
+*.flac
+*.ogg
+*.wav
+*.m4a
+*.aac
+*.wma
+
+# Docker music directory
+docker/music/
+
+# Docker build artifacts
+docker/.env
+docker/.dockerignore
+
+# Credentials files (security)
+.smbcredentials
+*.credentials
+
+# Backup files
+*.backup.*
+docker-compose.yml.backup.*
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db

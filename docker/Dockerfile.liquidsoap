@@ -1,0 +1,28 @@
+# Use official Liquidsoap Docker image from Savonet team
+FROM savonet/liquidsoap:v2.2.5
+
+# Switch to root for setup
+USER root
+
+# Create app directory and set permissions
+RUN mkdir -p /app/music /app/config && \
+    chown -R liquidsoap:liquidsoap /app
+
+# Copy Liquidsoap script
+COPY asteroid-radio-docker.liq /app/asteroid-radio.liq
+
+# Make script executable and set ownership
+RUN chmod +x /app/asteroid-radio.liq && \
+    chown liquidsoap:liquidsoap /app/asteroid-radio.liq
+
+# Switch to liquidsoap user for security
+USER liquidsoap
+
+# Set working directory
+WORKDIR /app
+
+# Expose port for potential HTTP interface
+EXPOSE 8001
+
+# Run Liquidsoap
+CMD ["liquidsoap", "/app/asteroid-radio.liq"]

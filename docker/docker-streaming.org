@@ -1,0 +1,171 @@
+#+TITLE: Asteroid Radio - Docker Streaming Setup
+#+AUTHOR: Asteroid Radio Team
+#+DATE: 2025-09-30
+
+This setup provides a complete streaming solution using Docker with Liquidsoap and Icecast2.
+
+* Quick Start
+
+1. *Ensure you have music files in the =./music/= directory*
+2. *Start the streaming services:*
+   #+BEGIN_SRC bash
+   ./start-streaming.sh
+   #+END_SRC
+
+* What's Included
+
+- *Icecast2*: Streaming server (port 8000)
+- *Liquidsoap*: Audio processing and streaming client
+- *Automatic playlist*: Randomized playback from =./music/= directory
+- *Multiple stream qualities*: 128kbps and 64kbps MP3 streams
+- *Audio processing*: Normalization, crossfading, metadata handling
+
+* Stream URLs
+
+- *High Quality (128kbps)*: http://localhost:8000/asteroid.mp3
+- *Low Quality (64kbps)*: http://localhost:8000/asteroid-low.mp3
+
+* Admin Interfaces
+
+- *Icecast Admin*: http://localhost:8000/admin/
+  - Username: =admin=
+  - Password: =asteroid_admin_2024=
+
+- *Asteroid Web Interface*: http://localhost:8080/asteroid/
+  - Username: =admin=
+  - Password: =asteroid123=
+
+* Manual Commands
+
+** Start Services
+#+BEGIN_SRC bash
+docker compose up -d
+#+END_SRC
+
+** Stop Services
+#+BEGIN_SRC bash
+docker compose down
+#+END_SRC
+
+** View Logs
+#+BEGIN_SRC bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f liquidsoap
+docker compose logs -f icecast
+#+END_SRC
+
+** Restart Services
+#+BEGIN_SRC bash
+docker compose restart
+#+END_SRC
+
+** Control Liquidsoap via Telnet
+#+BEGIN_SRC bash
+telnet localhost 1234
+#+END_SRC
+
+Common telnet commands:
+- =help= - Show available commands
+- =request.queue= - Show current queue
+- =request.push /path/to/file.mp3= - Add specific file to queue
+- =var.get volume= - Get current volume
+- =var.set volume 0.8= - Set volume (0.0 to 1.0)
+
+* File Structure
+
+#+BEGIN_EXAMPLE
+asteroid/docker/
+├── docker-compose.yml          # Docker orchestration
+├── Dockerfile.liquidsoap       # Simple Dockerfile using official image
+├── icecast.xml                # Icecast2 configuration
+├── asteroid-radio-docker.liq   # Liquidsoap script for Docker
+├── start.sh                   # Simple start script
+├── stop.sh                    # Simple stop script
+├── docker-streaming.org        # This documentation
+└── setup-complete.org         # Setup summary
+#+END_EXAMPLE
+
+* Configuration
+
+** Adding Music
+1. Place music files (MP3, FLAC, OGG, WAV) in your music directory
+2. Update =docker-compose.yml= to mount your music directory
+3. Liquidsoap will automatically detect and play them
+4. Playlist reloads every hour or when files change
+
+** Customizing Streams
+Edit =asteroid-radio-docker.liq= to:
+- Change bitrates
+- Add more stream outputs
+- Modify audio processing
+- Adjust crossfade settings
+
+** Icecast Configuration
+Edit =icecast.xml= to:
+- Change passwords
+- Modify listener limits
+- Add more mount points
+- Configure logging
+
+** Docker Image
+Uses official =savonet/liquidsoap:latest= image:
+- Pre-built with all audio codecs (MP3, FLAC, OGG, WAV, etc.)
+- System agnostic - works on any Docker-capable system
+- Maintained by the Liquidsoap team
+- Fast builds - no compilation required
+
+* Troubleshooting
+
+** Services won't start
+#+BEGIN_SRC bash
+# Check Docker status
+docker info
+
+# Check service logs
+docker compose logs
+#+END_SRC
+
+** No audio in stream
+1. Verify music files exist in =./music/=
+2. Check Liquidsoap logs: =docker compose logs liquidsoap=
+3. Ensure file formats are supported (MP3, FLAC, OGG, WAV)
+
+** Can't connect to stream
+1. Check if Icecast is running: =docker compose ps=
+2. Verify port 8000 is not blocked by firewall
+3. Check Icecast logs: =docker compose logs icecast=
+
+** Permission issues
+#+BEGIN_SRC bash
+# Fix file permissions
+chmod +x start-streaming.sh
+chmod 644 icecast.xml asteroid-radio-docker.liq
+#+END_SRC
+
+* Integration with Asteroid Web Interface
+
+The Asteroid web application can be updated to show the correct streaming status by checking if the Docker services are running. The admin dashboard will show:
+
+- *Liquidsoap Status*: 🟢 Running (when Docker container is up)
+- *Icecast Status*: 🟢 Running (when Docker container is up)
+
+* Windows/WSL Notes
+
+This setup works in WSL (Windows Subsystem for Linux) with Docker Desktop:
+
+1. Ensure Docker Desktop is running
+2. Use WSL2 backend for better performance
+3. Access streams via =localhost= from Windows browsers
+4. File paths should use Linux format in WSL
+
+* Production Deployment
+
+For production use:
+1. Change all default passwords in =icecast.xml=
+2. Use environment variables for sensitive configuration
+3. Set up proper SSL/TLS certificates
+4. Configure firewall rules appropriately
+5. Consider using Docker secrets for password management
