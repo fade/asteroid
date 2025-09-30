@@ -12,7 +12,7 @@
       <h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
       <nav>
         <a href="/asteroid/">Home</a>
-        <a href="/asteroid/player">Player</a>
+        <a href="/asteroid/player/">Player</a>
         <a href="/asteroid/admin">Admin</a>
         <a href="/asteroid/status">Status</a>
         <a href="/asteroid/login">Login</a>

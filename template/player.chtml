@@ -4,14 +4,14 @@
   <title data-text="title">Asteroid Radio - Web Player</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="/static/asteroid.css">
+  <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
 </head>
 <body>
   <div class="container">
     <h1>🎵 WEB PLAYER</h1>
     <div class="nav">
-      <a href="/">← Back to Main</a>
-      <a href="/admin">Admin Dashboard</a>
+      <a href="/asteroid/">← Back to Main</a>
+      <a href="/asteroid/admin">Admin Dashboard</a>
     </div>
     
     <!-- Track Browser -->
