@@ -32,8 +32,14 @@ build-sbcl.sh
 *.aac
 *.wma
 
-# Docker music directory
-docker/music/
+# Docker music directory - keep folder but ignore music files
+docker/music/*.mp3
+docker/music/*.flac
+docker/music/*.ogg
+docker/music/*.wav
+docker/music/*.m4a
+docker/music/*.aac
+docker/music/*.wma
 
 # Docker build artifacts
 docker/.env

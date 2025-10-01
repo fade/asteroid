@@ -46,10 +46,47 @@
         <h2>Now Playing</h2>
         <p>Artist: <span data-text="now-playing-artist">The Void</span></p>
         <p>Track: <span data-text="now-playing-track">Silence</span></p>
-        <p>Album: <span data-text="now-playing-album">Startup Sounds</span></p>
-        <p>Duration: <span data-text="now-playing-duration">∞</span></p>
+        <p>Listeners: <span data-text="listeners">0</span></p>
       </div>
     </main>
   </div>
+
+  <script>
+    // Update now playing info from Icecast
+    function updateNowPlaying() {
+      fetch('/asteroid/api/icecast-status')
+        .then(response => response.json())
+        .then(data => {
+          if (data.icestats && data.icestats.source) {
+            // Find the high quality stream (asteroid.mp3)
+            const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+            const mainStream = sources.find(s => s.listenurl && s.listenurl.includes('asteroid.mp3'));
+            
+            if (mainStream && mainStream.title) {
+              // Parse "Artist - Track" format
+              const titleParts = mainStream.title.split(' - ');
+              const artist = titleParts.length > 1 ? titleParts[0] : 'Unknown Artist';
+              const track = titleParts.length > 1 ? titleParts.slice(1).join(' - ') : mainStream.title;
+              
+              document.querySelector('[data-text="now-playing-artist"]').textContent = artist;
+              document.querySelector('[data-text="now-playing-track"]').textContent = track;
+              document.querySelector('[data-text="listeners"]').textContent = mainStream.listeners || '0';
+              
+              // Update stream status
+              const statusElement = document.querySelector('.live-stream p:nth-child(3) span');
+              if (statusElement) {
+                statusElement.textContent = '● LIVE - ' + track;
+                statusElement.style.color = '#00ff00';
+              }
+            }
+          }
+        })
+        .catch(error => console.log('Could not fetch stream status:', error));
+    }
+
+    // Update every 10 seconds
+    updateNowPlaying();
+    setInterval(updateNowPlaying, 10000);
+  </script>
 </body>
 </html>

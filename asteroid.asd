@@ -24,6 +24,7 @@
                :cl-fad
                :bordeaux-threads
                (:interface :auth)
+               :drakma
                (:interface :database)
                (:interface :user))
   :pathname "./"

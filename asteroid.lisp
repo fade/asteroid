@@ -307,7 +307,23 @@
                        ("artist" . "The Void")
                        ("album" . "Startup Sounds")))
      ("listeners" . 0)
-     ("stream-url" . "http://localhost:8000/asteroid"))))
+     ("stream-url" . "http://localhost:8000/asteroid.mp3")
+     ("stream-status" . "live"))))
+
+;; Live stream status from Icecast
+(define-page icecast-status #@"/api/icecast-status" ()
+  "Get live status from Icecast server"
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+    (let* ((icecast-url "http://localhost:8000/status-json.xsl")
+           (response (drakma:http-request icecast-url :want-stream nil)))
+      (if response
+          (babel:octets-to-string response :encoding :utf-8)  ; Convert response to string
+          (cl-json:encode-json-to-string
+           `(("error" . "Could not connect to Icecast server")))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("error" . ,(format nil "Icecast connection failed: ~a" e)))))))
 
 
 ;; RADIANCE server management functions

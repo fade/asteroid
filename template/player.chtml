@@ -14,9 +14,23 @@
       <a href="/asteroid/admin">Admin Dashboard</a>
     </div>
     
+    <!-- Live Stream Section -->
+    <div class="player-section">
+      <h2>🔴 Live Radio Stream</h2>
+      <div class="live-player">
+        <p><strong>Now Playing:</strong> <span id="live-now-playing">Loading...</span></p>
+        <p><strong>Listeners:</strong> <span id="live-listeners">0</span></p>
+        <audio controls style="width: 100%; margin: 10px 0;">
+          <source src="http://localhost:8000/asteroid.mp3" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+        <p><em>Listen to the live Asteroid Radio stream</em></p>
+      </div>
+    </div>
+
     <!-- Track Browser -->
     <div class="player-section">
-      <h2>Track Library</h2>
+      <h2>Personal Track Library</h2>
       <div class="track-browser">
         <input type="text" id="search-tracks" placeholder="Search tracks..." class="search-input">
         <div id="track-list" class="track-list">
@@ -122,11 +136,13 @@
       document.getElementById('volume-slider').addEventListener('input', updateVolume);
       
       // Audio player events
-      audioPlayer.addEventListener('loadedmetadata', updateTimeDisplay);
-      audioPlayer.addEventListener('timeupdate', updateTimeDisplay);
-      audioPlayer.addEventListener('ended', handleTrackEnd);
-      audioPlayer.addEventListener('play', () => updatePlayButton('⏸️ Pause'));
-      audioPlayer.addEventListener('pause', () => updatePlayButton('▶️ Play'));
+      if (audioPlayer) {
+        audioPlayer.addEventListener('loadedmetadata', updateTimeDisplay);
+        audioPlayer.addEventListener('timeupdate', updateTimeDisplay);
+        audioPlayer.addEventListener('ended', handleTrackEnd);
+        audioPlayer.addEventListener('play', () => updatePlayButton('⏸️ Pause'));
+        audioPlayer.addEventListener('pause', () => updatePlayButton('▶️ Play'));
+      }
       
       // Playlist controls
       document.getElementById('create-playlist').addEventListener('click', createPlaylist);
@@ -136,7 +152,10 @@
 
     async function loadTracks() {
       try {
-        const response = await fetch('/admin/tracks');
+        const response = await fetch('/asteroid/api/tracks');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
         const data = await response.json();
         
         if (data.status === 'success') {
@@ -269,7 +288,9 @@
 
     function updateVolume() {
       const volume = document.getElementById('volume-slider').value / 100;
-      audioPlayer.volume = volume;
+      if (audioPlayer) {
+        audioPlayer.volume = volume;
+      }
     }
 
     function updateTimeDisplay() {
@@ -363,6 +384,56 @@
 
     // Initialize volume
     updateVolume();
+
+    // Live stream functionality
+    function updateLiveStream() {
+      try {
+        fetch('/asteroid/api/icecast-status')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Live stream data:', data); // Debug log
+            
+            if (data.icestats && data.icestats.source) {
+              const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+              const mainStream = sources.find(s => s.listenurl && s.listenurl.includes('asteroid.mp3'));
+              
+              if (mainStream && mainStream.title) {
+                const titleParts = mainStream.title.split(' - ');
+                const artist = titleParts.length > 1 ? titleParts[0] : 'Unknown Artist';
+                const track = titleParts.length > 1 ? titleParts.slice(1).join(' - ') : mainStream.title;
+                
+                const nowPlayingEl = document.getElementById('live-now-playing');
+                const listenersEl = document.getElementById('live-listeners');
+                
+                if (nowPlayingEl) nowPlayingEl.textContent = `${artist} - ${track}`;
+                if (listenersEl) listenersEl.textContent = mainStream.listeners || '0';
+                
+                console.log('Updated live stream info:', `${artist} - ${track}`, 'Listeners:', mainStream.listeners);
+              } else {
+                console.log('No main stream found or no title');
+              }
+            } else {
+              console.log('No icestats or source in response');
+            }
+          })
+          .catch(error => {
+            console.error('Live stream fetch error:', error);
+            const nowPlayingEl = document.getElementById('live-now-playing');
+            if (nowPlayingEl) nowPlayingEl.textContent = 'Stream unavailable';
+          });
+      } catch (error) {
+        console.error('Live stream update error:', error);
+      }
+    }
+
+    // Update live stream info every 10 seconds
+    setTimeout(updateLiveStream, 1000); // Initial update after 1 second
+    setInterval(updateLiveStream, 10000);
   </script>
 </body>
 </html>

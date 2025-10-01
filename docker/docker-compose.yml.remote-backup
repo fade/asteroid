@@ -1,0 +1,33 @@
+services:
+  icecast:
+    image: infiniteproject/icecast:latest
+    container_name: asteroid-icecast
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./icecast.xml:/etc/icecast2/icecast.xml:ro
+    environment:
+      - ICECAST_SOURCE_PASSWORD=H1tn31EhsyLrfRmo
+      - ICECAST_ADMIN_PASSWORD=asteroid_admin_2024
+      - ICECAST_RELAY_PASSWORD=asteroid_relay_2024
+    restart: unless-stopped
+    networks:
+      - asteroid-network
+
+  liquidsoap:
+    build:
+      context: .
+      dockerfile: Dockerfile.liquidsoap
+    container_name: asteroid-liquidsoap
+    depends_on:
+      - icecast
+    volumes:
+      - /mnt/remote-music/Music:/app/music:ro
+      - ./asteroid-radio-docker.liq:/app/asteroid-radio.liq:ro
+    restart: unless-stopped
+    networks:
+      - asteroid-network
+
+networks:
+  asteroid-network:
+    driver: bridge
