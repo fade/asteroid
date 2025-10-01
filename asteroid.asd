@@ -25,6 +25,7 @@
                :bordeaux-threads
                (:interface :auth)
                :drakma
+               (:interface :auth)
                (:interface :database)
                (:interface :user))
   :pathname "./"
