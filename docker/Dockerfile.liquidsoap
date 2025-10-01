@@ -1,5 +1,5 @@
 # Use official Liquidsoap Docker image from Savonet team
-FROM savonet/liquidsoap:v2.2.5
+FROM savonet/liquidsoap:792d8bf
 
 # Switch to root for setup
 USER root

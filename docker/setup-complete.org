@@ -23,28 +23,27 @@ Fade requested setting up Liquidsoap in Docker for the Asteroid Radio project, a
 - ✅ *Audio*: Currently playing "Lorde - Ribs" from the music library
 - ✅ *Streaming*: Both quality streams are active
 - ✅ *Metadata*: Track information is being broadcast
-- ✅ *Playlist*: Randomized playback from =/music/library/= directory
 
-* 🚀 Quick Start Commands
+* Quick Start Commands
 
 ** Start Streaming
 #+BEGIN_SRC bash
-./start-streaming.sh
+./start.sh
 #+END_SRC
 
-** Test Everything
+** Check Status
 #+BEGIN_SRC bash
-./test-streaming.sh
+docker-compose ps
 #+END_SRC
 
 ** View Logs
 #+BEGIN_SRC bash
-docker compose logs -f
+docker-compose logs -f
 #+END_SRC
 
 ** Stop Services
 #+BEGIN_SRC bash
-docker compose down
+./stop.sh
 #+END_SRC
 
 * 🔧 Admin Access
@@ -115,12 +114,8 @@ asteroid/docker/
 ├── docker-streaming.org           # Detailed documentation
 └── setup-complete.org             # This summary
 
-~/asteroid-scripts/
-├── start-streaming-fixed.sh       # Full startup script (works from anywhere)
-├── stop-streaming-fixed.sh        # Full stop script
-├── test-streaming.sh              # Testing and verification script
-├── setup-remote-music.sh          # Remote storage setup
-└── update-docker-remote-music.sh  # Update config for remote music
+asteroid/
+└── run-asteroid.sh                # Main Asteroid Radio application launcher
 #+END_EXAMPLE
 
 * 🎯 Mission Accomplished

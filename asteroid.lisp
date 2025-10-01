@@ -283,7 +283,7 @@
      :track-count (format nil "~d" track-count)
      :library-path "/home/glenn/Projects/Code/asteroid/music/library/")))
 
-(define-page player #@"/player/" ()
+(define-page player #@"/player" ()
   (let ((template-path (merge-pathnames "template/player.chtml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 

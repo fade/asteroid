@@ -13,13 +13,13 @@ fi
 
 # Start services
 echo "🔧 Starting services..."
-docker compose up -d
+docker-compose up -d
 
 # Wait and show status
 sleep 3
 echo ""
 echo "📊 Service Status:"
-docker compose ps
+docker-compose ps
 
 echo ""
 echo "🎵 Asteroid Radio is now streaming!"

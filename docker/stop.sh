@@ -6,7 +6,7 @@
 echo "🛑 Stopping Asteroid Radio Docker Services..."
 
 # Stop services
-docker compose down
+docker-compose down
 
 echo ""
 echo "✅ Services stopped."

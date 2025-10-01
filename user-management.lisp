@@ -42,8 +42,9 @@
         (users nil))
     (dolist (user all-users)
       (format t "Comparing ~a with ~a~%" (gethash "username" user) username)
-      (when (equal (first (gethash "username" user)) username)
-        (push user users)))
+      (let ((stored-username (gethash "username" user)))
+        (when (equal (if (listp stored-username) (first stored-username) stored-username) username)
+          (push user users))))
     (format t "Query returned ~a users~%" (length users))
     (when users 
       (format t "First user: ~a~%" (first users))
@@ -197,14 +198,22 @@
   (let ((all-users (get-all-users)))
     `(("total-users" . ,(length all-users))
       ("active-users" . ,(count-if (lambda (user) (gethash "active" user)) all-users))
-      ("listeners" . ,(count-if (lambda (user) (string= (gethash "role" user) "listener")) all-users))
-      ("djs" . ,(count-if (lambda (user) (string= (gethash "role" user) "dj")) all-users))
-      ("admins" . ,(count-if (lambda (user) (string= (gethash "role" user) "admin")) all-users)))))
+      ("listeners" . ,(count-if (lambda (user) 
+                                  (let ((role (gethash "role" user)))
+                                    (string= (if (listp role) (first role) role) "listener"))) all-users))
+      ("djs" . ,(count-if (lambda (user) 
+                            (let ((role (gethash "role" user)))
+                              (string= (if (listp role) (first role) role) "dj"))) all-users))
+      ("admins" . ,(count-if (lambda (user) 
+                               (let ((role (gethash "role" user)))
+                                 (string= (if (listp role) (first role) role) "admin"))) all-users)))))
 
 (defun create-default-admin ()
   "Create default admin user if no admin exists"
   (let ((existing-admins (remove-if-not 
-                          (lambda (user) (string= (gethash "role" user) "admin"))
+                          (lambda (user) 
+                            (let ((role (gethash "role" user)))
+                              (string= (if (listp role) (first role) role) "admin")))
                           (get-all-users))))
     (unless existing-admins
       (format t "~%Creating default admin user...~%")
