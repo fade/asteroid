@@ -3,7 +3,7 @@ body{
     font-weight: 400;
     font-style: normal;
     background: #0a0a0a;
-    color: #00ff00;
+    color: #00ffff;
     margin: 0;
     padding: 20px;
 }
@@ -14,27 +14,27 @@ body .container{
 }
 
 body h1{
-    color: #ff6600;
+    color: #4488ff;
     text-align: center;
     font-size: 2.5em;
     margin-bottom: 30px;
 }
 
 body h2{
-    color: #ff6600;
+    color: #4488ff;
 }
 
 body .status{
-    background: #1a1a1a;
+    background: #1a2332;
     padding: 20px;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     margin: 20px 0;
 }
 
 body .panel{
-    background: #1a1a1a;
+    background: #1a2332;
     padding: 20px;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     margin: 20px 0;
 }
 
@@ -43,17 +43,17 @@ body .nav{
 }
 
 body .nav a{
-    color: #00ff00;
+    color: #00ffff;
     text-decoration: none;
     margin: 0 15px;
     padding: 10px 20px;
-    border: 1px solid #333;
-    background: #1a1a1a;
+    border: 1px solid #2a3441;
+    background: #1a2332;
     display: inline-block;
 }
 
 body .nav a :hover{
-    background: #333;
+    background: #2a3441;
 }
 
 body .controls{
@@ -61,42 +61,42 @@ body .controls{
 }
 
 body .controls button{
-    background: #1a1a1a;
-    color: #00ff00;
-    border: 1px solid #333;
+    background: #1a2332;
+    color: #00ffff;
+    border: 1px solid #2a3441;
     padding: 10px 20px;
     margin: 5px;
     cursor: pointer;
 }
 
 body .controls button :hover{
-    background: #333;
+    background: #2a3441;
 }
 
 body button{
-    background: #333;
-    color: #00ff00;
-    border: 1px solid #555;
+    background: #2a3441;
+    color: #00ffff;
+    border: 1px solid #3a4551;
     padding: 10px 20px;
     margin: 5px;
     cursor: pointer;
 }
 
 body button :hover{
-    background: #555;
+    background: #3a4551;
 }
 
 body .now-playing{
-    background: #1a1a1a;
+    background: #1a2332;
     padding: 20px;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     margin: 20px 0;
     font-size: 1.5em;
-    color: #ff6600;
+    color: #4488ff;
 }
 
 body .back{
-    color: #00ff00;
+    color: #00ffff;
     text-decoration: none;
     margin-bottom: 20px;
     display: inline-block;
@@ -107,9 +107,9 @@ body .back :hover{
 }
 
 body .player{
-    background: #1a1a1a;
+    background: #1a2332;
     padding: 40px;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     margin: 40px auto;
     max-width: 600px;
 }
@@ -123,9 +123,9 @@ body .player .controls button{
 }
 
 body .player-section{
-    background: #1a1a1a;
+    background: #1a2332;
     padding: 25px;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     margin: 20px 0;
     border-radius: 5px;
 }
@@ -138,8 +138,8 @@ body .search-input{
     width: 100%;
     padding: 12px;
     background: #0a0a0a;
-    color: #00ff00;
-    border: 1px solid #333;
+    color: #00ffff;
+    border: 1px solid #2a3441;
     font-family: Courier New, monospace;
     font-size: 14px;
     margin-bottom: 15px;
@@ -148,7 +148,7 @@ body .search-input{
 body .track-list{
     max-height: 400px;
     overflow-y: auto;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     background: #0a0a0a;
 }
 
@@ -157,7 +157,7 @@ body .track-item{
     justify-content: space-between;
     align-items: center;
     padding: 12px 15px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2a3441;
     -moz-transition: background-color 0.2s;
     -o-transition: background-color 0.2s;
     -webkit-transition: background-color 0.2s;
@@ -166,7 +166,7 @@ body .track-item{
 }
 
 body .track-item :hover{
-    background: #1a1a1a;
+    background: #1a2332;
 }
 
 body .track-info{
@@ -174,7 +174,7 @@ body .track-info{
 }
 
 body .track-info .track-title{
-    color: #00ff00;
+    color: #00ffff;
     font-weight: bold;
     margin-bottom: 4px;
 }
@@ -196,20 +196,20 @@ body .audio-player{
 body .track-art{
     font-size: 3em;
     margin-right: 20px;
-    color: #ff6600;
+    color: #4488ff;
 }
 
 
 
 body .track-details .track-title{
     font-size: 1.4em;
-    color: #00ff00;
+    color: #00ffff;
     margin-bottom: 5px;
 }
 
 body .track-details .track-artist{
     font-size: 1.1em;
-    color: #ff6600;
+    color: #4488ff;
     margin-bottom: 3px;
 }
 
@@ -232,12 +232,12 @@ body .player-info{
     margin-top: 15px;
     padding: 10px;
     background: #0a0a0a;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     border-radius: 3px;
 }
 
 body .time-display{
-    color: #00ff00;
+    color: #00ffff;
     font-family: Courier New, monospace;
 }
 
@@ -248,21 +248,21 @@ body .volume-control{
 }
 
 body .volume-control label{
-    color: #ff6600;
+    color: #4488ff;
 }
 
 body .volume-slider{
     width: 100px;
     height: 5px;
-    background: #333;
+    background: #2a3441;
     outline: none;
     border-radius: 3px;
 }
 
 body .btn{
-    background: #333;
-    color: #00ff00;
-    border: 1px solid #555;
+    background: #2a3441;
+    color: #00ffff;
+    border: 1px solid #3a4551;
     padding: 8px 16px;
     margin: 3px;
     cursor: pointer;
@@ -277,106 +277,70 @@ body .btn{
 }
 
 body .btn :hover{
-    background: #555;
-    border-color: #777;
+    background: #3a4551;
+    border-color: #3a4551;
 }
 
-body .btn-primary{
+body .btn .btn-primary{
     background: #0066cc;
     border-color: #0088ff;
 }
 
-body .btn-primary :hover{
+body .btn .btn-primary :hover{
     background: #0088ff;
 }
 
-body .btn-success{
-    background: #006600;
-    border-color: #00aa00;
-}
-
-body .btn-success :hover{
-    background: #00aa00;
-}
-
-body .btn-danger{
-    background: #cc0000;
-    border-color: #ff0000;
-}
-
-body .btn-danger :hover{
-    background: #ff0000;
-}
-
-body .btn-info{
-    background: #006666;
-    border-color: #00aaaa;
-}
-
-body .btn-info :hover{
-    background: #00aaaa;
-}
-
-body .btn-warning{
-    background: #cc6600;
-    border-color: #ff8800;
-}
-
-body .btn-warning :hover{
-    background: #ff8800;
-}
-
-body .btn-secondary{
+body .btn .btn-secondary{
     background: #444;
-    border-color: #666;
+    border-color: #2a3441;
 }
 
-body .btn-secondary :hover{
+body .btn .btn-secondary :hover{
     background: #666;
 }
 
-body .btn-sm{
+body .btn .btn-sm{
     padding: 4px 8px;
     font-size: 12px;
 }
 
-body .btn.active{
-    background: #ff6600;
-    border-color: #ff8800;
+body .btn .btn.active{
+    background: #4488ff;
+    border-color: #5599ff;
     color: #000;
 }
 
-body .playlist-controls{
+body .btn .playlist-controls{
     margin-bottom: 15px;
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-body .playlist-input{
+body .btn .playlist-input{
     flex: 1;
     padding: 8px 12px;
     background: #0a0a0a;
-    color: #00ff00;
-    border: 1px solid #333;
+    color: #00ffff;
+    border: 1px solid #2a3441;
     font-family: Courier New, monospace;
 }
 
-body .playlist-list{
-    border: 1px solid #333;
+body .btn .playlist-list{
+    border: 1px solid #2a3441;
     background: #0a0a0a;
     min-height: 100px;
     padding: 10px;
 }
 
-body .queue-controls{
+body .btn .queue-controls{
     margin-bottom: 15px;
     display: flex;
     gap: 10px;
 }
 
-body .play-queue{
-    border: 1px solid #333;
+body .btn .play-queue{
+    border: 1px solid #2a3441;
     background: #0a0a0a;
     min-height: 150px;
     max-height: 300px;
@@ -384,85 +348,85 @@ body .play-queue{
     padding: 10px;
 }
 
-body .queue-item{
+body .btn .queue-item{
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 10px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2a3441;
     margin-bottom: 5px;
 }
 
-body .queue-item :last-child{
+body .btn .queue-item :last-child{
     border-bottom: none;
     margin-bottom: 0;
 }
 
-body .empty-queue{
+body .btn .empty-queue{
     text-align: center;
     color: #666;
     padding: 20px;
     font-style: italic;
 }
 
-body .no-tracks{
+body .btn .no-tracks{
     text-align: center;
     color: #666;
     padding: 20px;
     font-style: italic;
 }
 
-body .no-playlists{
+body .btn .no-playlists{
     text-align: center;
     color: #666;
     padding: 20px;
     font-style: italic;
 }
 
-body .loading{
+body .btn .loading{
     text-align: center;
-    color: #ff6600;
+    color: #4488ff;
     padding: 20px;
 }
 
-body .error{
+body .btn .error{
     text-align: center;
     color: #ff0000;
     padding: 20px;
     font-weight: bold;
 }
 
-body .upload-section{
+body .btn .upload-section{
     margin: 20px 0;
     padding: 20px;
     background: #0a0a0a;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     border-radius: 5px;
 }
 
-body .upload-controls{
+body .btn .upload-controls{
     display: flex;
     gap: 15px;
     align-items: center;
     margin-bottom: 15px;
 }
 
-body .upload-info{
+body .btn .upload-info{
     color: #888;
     font-size: 0.9em;
 }
 
-body .upload-progress{
+body .btn .upload-progress{
     margin-top: 10px;
     padding: 10px;
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: #1a2332;
+    border: 1px solid #2a3441;
     border-radius: 3px;
 }
 
-body .progress-bar{
+body .btn .progress-bar{
     height: 20px;
-    background: #ff6600;
+    background: #4488ff;
     border-radius: 3px;
     -moz-transition: width 0.3s ease;
     -o-transition: width 0.3s ease;
@@ -472,37 +436,37 @@ body .progress-bar{
     width: 0%;
 }
 
-body .progress-text{
+body .btn .progress-text{
     display: block;
     margin-top: 5px;
-    color: #00ff00;
+    color: #00ffff;
     font-size: 0.9em;
 }
 
-body input{
+body .btn input{
     padding: 8px 12px;
-    background: #1a1a1a;
-    color: #00ff00;
-    border: 1px solid #333;
+    background: #1a2332;
+    color: #00ffff;
+    border: 1px solid #2a3441;
     border-radius: 3px;
     font-family: Courier New, monospace;
 }
 
-body .upload-interface{
+body .btn .upload-interface{
     margin-top: 2rem;
     padding: 1.5rem;
-    background-color: #1a1a1a;
+    background-color: #1a2332;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
 }
 
-body .upload-interface h3{
-    color: #00ff00;
+body .btn .upload-interface h3{
+    color: #00ffff;
     margin-bottom: 1rem;
 }
 
-body .upload-interface .upload-area{
-    border: 2px dashed #333;
+body .btn .upload-interface .upload-area{
+    border: 2px dashed #2a3441;
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
@@ -514,26 +478,26 @@ body .upload-interface .upload-area{
     transition: border-color 0.3s ease;
 }
 
-body .upload-interface .upload-area &:hover{
-    border-color: #00ff00;
+body .btn .upload-interface .upload-area &:hover{
+    border-color: #00ffff;
 }
 
-body .upload-interface .upload-area .upload-icon{
+body .btn .upload-interface .upload-area .upload-icon{
     font-size: 3rem;
     color: #666;
     margin-bottom: 1rem;
 }
 
-body .upload-interface .upload-area p{
+body .btn .upload-interface .upload-area p{
     color: #999;
     margin-bottom: 1rem;
 }
 
-body .upload-interface .upload-area .btn{
+body .btn .upload-interface .upload-area .btn{
     margin-top: 1rem;
 }
 
-body .auth-container{
+body .btn .auth-container{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -541,9 +505,9 @@ body .auth-container{
     padding: 2rem;
 }
 
-body .auth-form{
-    background-color: #1a1a1a;
-    border: 1px solid #333;
+body .btn .auth-form{
+    background-color: #1a2332;
+    border: 1px solid #2a3441;
     border-radius: 8px;
     padding: 2rem;
     width: 100%;
@@ -555,43 +519,43 @@ body .auth-form{
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-body .auth-form h2{
-    color: #00ff00;
+body .btn .auth-form h2{
+    color: #00ffff;
     text-align: center;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
 }
 
-body .auth-form h3{
-    color: #00ff00;
+body .btn .auth-form h3{
+    color: #00ffff;
     margin-bottom: 1rem;
     font-size: 1.2rem;
 }
 
-body .form-group{
+body .btn .form-group{
     margin-bottom: 1rem;
 }
 
-body .form-group label{
+body .btn .form-group label{
     display: block;
     color: #ccc;
     margin-bottom: 0.5rem;
     font-weight: bold;
 }
 
-body .form-group input{
+body .btn .form-group input{
     width: 100%;
     padding: 0.75rem;
     background-color: #0f0f0f;
-    border: 1px solid #333;
+    border: 1px solid #2a3441;
     border-radius: 4px;
     color: #fff;
     font-size: 1rem;
     box-sizing: border-box;
 }
 
-body .form-group input &:focus{
-    border-color: #00ff00;
+body .btn .form-group input &:focus{
+    border-color: #00ffff;
     outline: none;
     -moz-box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
     -o-box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
@@ -600,13 +564,13 @@ body .form-group input &:focus{
     box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
 }
 
-body .form-actions{
+body .btn .form-actions{
     display: flex;
     gap: 1rem;
     margin-top: 1.5rem;
 }
 
-body .message{
+body .btn .message{
     padding: 0.75rem;
     border-radius: 4px;
     margin-top: 1rem;
@@ -614,80 +578,80 @@ body .message{
     font-weight: bold;
 }
 
-body .message &.success{
+body .btn .message &.success{
     background-color: rgba(0, 255, 0, 0.1);
-    border: 1px solid #00ff00;
-    color: #00ff00;
+    border: 1px solid #00ffff;
+    color: #00ffff;
 }
 
-body .message &.error{
+body .btn .message &.error{
     background-color: rgba(255, 0, 0, 0.1);
     border: 1px solid #ff0000;
     color: #ff0000;
 }
 
-body .auth-link{
+body .btn .auth-link{
     text-align: center;
     margin-top: 1.5rem;
     color: #999;
 }
 
-body .auth-link a{
-    color: #00ff00;
+body .btn .auth-link a{
+    color: #00ffff;
     text-decoration: none;
 }
 
-body .auth-link a &:hover{
+body .btn .auth-link a &:hover{
     text-decoration: underline;
 }
 
-body .profile-container{
+body .btn .profile-container{
     max-width: 600px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-body .profile-card{
-    background-color: #1a1a1a;
-    border: 1px solid #333;
+body .btn .profile-card{
+    background-color: #1a2332;
+    border: 1px solid #2a3441;
     border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
 }
 
-body .profile-card h2{
-    color: #00ff00;
+body .btn .profile-card h2{
+    color: #00ffff;
     margin-bottom: 1.5rem;
     text-align: center;
 }
 
-body .profile-info{
+body .btn .profile-info{
     margin-bottom: 2rem;
 }
 
-body .info-group{
+body .btn .info-group{
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2a3441;
 }
 
-body .info-group &:last-child{
+body .btn .info-group &:last-child{
     border-bottom: none;
 }
 
-body .info-group label{
+body .btn .info-group label{
     color: #ccc;
     font-weight: bold;
 }
 
-body .info-group span{
+body .btn .info-group span{
     color: #fff;
 }
 
-body .role-badge{
-    background-color: #00ff00;
+body .btn .role-badge{
+    background-color: #00ffff;
     color: #000;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
@@ -695,86 +659,86 @@ body .role-badge{
     font-weight: bold;
 }
 
-body .profile-actions{
+body .btn .profile-actions{
     display: flex;
     gap: 1rem;
     justify-content: center;
 }
 
-body .user-management{
+body .btn .user-management{
     margin-top: 2rem;
 }
 
-body .users-table{
+body .btn .users-table{
     width: 100%;
     border-collapse: collapse;
-    background-color: #1a1a1a;
-    border: 1px solid #333;
+    background-color: #1a2332;
+    border: 1px solid #2a3441;
     border-radius: 8px;
     overflow: hidden;
 }
 
-body .users-table thead{
+body .btn .users-table thead{
     background-color: #0f0f0f;
 }
 
-body .users-table thead th{
+body .btn .users-table thead th{
     padding: 1rem;
     text-align: left;
-    color: #00ff00;
+    color: #00ffff;
     font-weight: bold;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2a3441;
 }
 
 
 
-body .users-table tbody tr{
-    border-bottom: 1px solid #333;
+body .btn .users-table tbody tr{
+    border-bottom: 1px solid #2a3441;
 }
 
-body .users-table tbody tr &:hover{
+body .btn .users-table tbody tr &:hover{
     background-color: #222;
 }
 
-body .users-table tbody tr td{
+body .btn .users-table tbody tr td{
     padding: 1rem;
     color: #fff;
     vertical-align: middle;
 }
 
-body .users-table tbody .user-actions{
+body .btn .users-table tbody .user-actions{
     display: flex;
     gap: 0.5rem;
 }
 
-body .users-table tbody .user-actions .btn{
+body .btn .users-table tbody .user-actions .btn{
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
 }
 
-body .user-stats{
+body .btn .user-stats{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
     margin-bottom: 2rem;
 }
 
-body .stat-card{
-    background-color: #1a1a1a;
-    border: 1px solid #333;
+body .btn .stat-card{
+    background-color: #1a2332;
+    border: 1px solid #2a3441;
     border-radius: 8px;
     padding: 1rem;
     text-align: center;
 }
 
-body .stat-card .stat-number{
+body .btn .stat-card .stat-number{
     font-size: 2rem;
     font-weight: bold;
-    color: #00ff00;
+    color: #00ffff;
     display: block;
 }
 
-body .stat-card .stat-label{
+body .btn .stat-card .stat-label{
     color: #ccc;
     font-size: 0.875rem;
     margin-top: 0.5rem;
