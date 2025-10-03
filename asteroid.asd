@@ -13,6 +13,8 @@
                :radiance
                :i-log4cl
                :r-clip
+               :r-simple-rate
+               :r-simple-profile
                :lass
                :cl-json
                :alexandria
@@ -23,8 +25,8 @@
                :babel
                :cl-fad
                :bordeaux-threads
-               (:interface :auth)
                :drakma
+               (:interface :auth)
                (:interface :database)
                (:interface :user))
   :pathname "./"
