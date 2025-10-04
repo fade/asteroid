@@ -36,5 +36,6 @@
                (:file "template-utils")
                (:file "stream-media")
                (:file "user-management")
+               (:file "playlist-management")
                (:file "auth-routes")
                (:file "asteroid")))

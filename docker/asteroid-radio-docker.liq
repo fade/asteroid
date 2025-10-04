@@ -15,10 +15,10 @@ settings.server.telnet.port.set(1234)
 settings.server.telnet.bind_addr.set("0.0.0.0")
 
 # Create playlist source from mounted music directory
-radio = playlist(
+# Use playlist.safe which starts playing immediately without full scan
+radio = playlist.safe(
   mode="randomize", 
-  reload=3600, 
-  reload_mode="watch",
+  reload=3600,
   "/app/music/"
 )
 

@@ -1,0 +1,343 @@
+#+TITLE: PostgreSQL Setup for Asteroid Radio
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-04
+
+* Overview
+
+Complete PostgreSQL setup with Docker, persistent storage, and Radiance integration for Asteroid Radio.
+
+* What This Provides
+
+** Persistent Storage
+- All data survives container restarts
+- Database stored in Docker volume =postgres-data=
+- Automatic backups possible
+
+** Full Database Features
+- Proper UPDATE/DELETE operations
+- Transactions and ACID compliance
+- Indexes for fast queries
+- Foreign key constraints
+- Triggers for automatic timestamps
+
+** Tables Created
+- =users= - User accounts with roles
+- =tracks= - Music library metadata
+- =playlists= - User playlists
+- =playlist_tracks= - Many-to-many playlist/track relationship
+- =sessions= - Session management
+
+* Quick Start
+
+** 1. Start PostgreSQL Container
+
+#+BEGIN_SRC bash
+cd docker
+docker compose up -d postgres
+#+END_SRC
+
+Wait 10 seconds for initialization, then verify:
+
+#+BEGIN_SRC bash
+docker logs asteroid-postgres
+#+END_SRC
+
+You should see: "Asteroid Radio database initialized successfully!"
+
+** 2. Test Connection
+
+#+BEGIN_SRC bash
+docker exec -it asteroid-postgres psql -U asteroid -d asteroid
+#+END_SRC
+
+Inside psql:
+#+BEGIN_SRC sql
+\dt  -- List tables
+SELECT * FROM users;  -- View users
+\q   -- Quit
+#+END_SRC
+
+** 3. Configure Radiance (When Ready)
+
+Edit your Radiance configuration to use PostgreSQL:
+
+#+BEGIN_SRC lisp
+(load "config/radiance-postgres.lisp")
+#+END_SRC
+
+* Database Schema
+
+** Users Table
+#+BEGIN_SRC sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(50) DEFAULT 'listener',
+    active BOOLEAN DEFAULT true,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+#+END_SRC
+
+** Tracks Table
+#+BEGIN_SRC sql
+CREATE TABLE tracks (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    artist VARCHAR(500),
+    album VARCHAR(500),
+    duration INTEGER DEFAULT 0,
+    format VARCHAR(50),
+    file_path TEXT NOT NULL UNIQUE,
+    play_count INTEGER DEFAULT 0,
+    added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_played TIMESTAMP
+);
+#+END_SRC
+
+** Playlists Table
+#+BEGIN_SRC sql
+CREATE TABLE playlists (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+#+END_SRC
+
+** Playlist Tracks Junction Table
+#+BEGIN_SRC sql
+CREATE TABLE playlist_tracks (
+    id SERIAL PRIMARY KEY,
+    playlist_id INTEGER NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+    track_id INTEGER NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    position INTEGER NOT NULL,
+    added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(playlist_id, track_id, position)
+);
+#+END_SRC
+
+* Connection Details
+
+** From Host Machine
+- Host: =localhost=
+- Port: =5432=
+- Database: =asteroid=
+- Username: =asteroid=
+- Password: =asteroid_db_2025=
+
+** From Docker Containers
+- Host: =asteroid-postgres=
+- Port: =5432=
+- Database: =asteroid=
+- Username: =asteroid=
+- Password: =asteroid_db_2025=
+
+** Connection String
+#+BEGIN_SRC
+postgresql://asteroid:asteroid_db_2025@localhost:5432/asteroid
+#+END_SRC
+
+* Default Users
+
+** Admin User
+- Username: =admin=
+- Password: =admin= (⚠️ CHANGE THIS!)
+- Role: =admin=
+
+** Test Listener
+- Username: =listener=
+- Password: =admin= (⚠️ CHANGE THIS!)
+- Role: =listener=
+
+* Management Commands
+
+** Access PostgreSQL CLI
+#+BEGIN_SRC bash
+docker exec -it asteroid-postgres psql -U asteroid -d asteroid
+#+END_SRC
+
+** View All Tables
+#+BEGIN_SRC sql
+\dt
+#+END_SRC
+
+** View Table Structure
+#+BEGIN_SRC sql
+\d users
+\d tracks
+\d playlists
+\d playlist_tracks
+#+END_SRC
+
+** Count Records
+#+BEGIN_SRC sql
+SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM tracks;
+SELECT COUNT(*) FROM playlists;
+#+END_SRC
+
+** View Playlists with Track Counts
+#+BEGIN_SRC sql
+SELECT p.id, p.name, u.username, COUNT(pt.track_id) as track_count
+FROM playlists p
+JOIN users u ON p.user_id = u.id
+LEFT JOIN playlist_tracks pt ON p.id = pt.playlist_id
+GROUP BY p.id, p.name, u.username;
+#+END_SRC
+
+* Backup and Restore
+
+** Create Backup
+#+BEGIN_SRC bash
+docker exec asteroid-postgres pg_dump -U asteroid asteroid > backup.sql
+#+END_SRC
+
+** Restore from Backup
+#+BEGIN_SRC bash
+cat backup.sql | docker exec -i asteroid-postgres psql -U asteroid -d asteroid
+#+END_SRC
+
+** Backup with Docker Volume
+#+BEGIN_SRC bash
+docker run --rm \
+  -v docker_postgres-data:/data \
+  -v $(pwd):/backup \
+  alpine tar czf /backup/postgres-backup.tar.gz /data
+#+END_SRC
+
+* Migration from Radiance Default DB
+
+** Export Current Data
+
+Create a script to export from current database:
+
+#+BEGIN_SRC lisp
+(defun export-users-to-postgres ()
+  "Export users from Radiance DB to PostgreSQL"
+  (let ((users (db:select "users" (db:query :all))))
+    (loop for user in users
+          do (format t "INSERT INTO users (username, email, password_hash, role, active) VALUES (~
+                       '~a', '~a', '~a', '~a', ~a);~%"
+                     (gethash "username" user)
+                     (gethash "email" user)
+                     (gethash "password-hash" user)
+                     (gethash "role" user)
+                     (gethash "active" user)))))
+#+END_SRC
+
+** Import to PostgreSQL
+
+#+BEGIN_SRC bash
+# Run export script, save to file
+# Then import:
+cat export.sql | docker exec -i asteroid-postgres psql -U asteroid -d asteroid
+#+END_SRC
+
+* Troubleshooting
+
+** Container Won't Start
+
+Check logs:
+#+BEGIN_SRC bash
+docker logs asteroid-postgres
+#+END_SRC
+
+** Connection Refused
+
+Ensure container is running:
+#+BEGIN_SRC bash
+docker ps | grep postgres
+#+END_SRC
+
+Check health:
+#+BEGIN_SRC bash
+docker exec asteroid-postgres pg_isready -U asteroid
+#+END_SRC
+
+** Permission Denied
+
+Reset permissions:
+#+BEGIN_SRC bash
+docker exec -it asteroid-postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO asteroid;"
+#+END_SRC
+
+** Data Not Persisting
+
+Check volume:
+#+BEGIN_SRC bash
+docker volume ls | grep postgres
+docker volume inspect docker_postgres-data
+#+END_SRC
+
+* Performance Tuning
+
+** Increase Shared Buffers
+
+Edit docker-compose.yml:
+#+BEGIN_SRC yaml
+postgres:
+  command: postgres -c shared_buffers=256MB -c max_connections=100
+#+END_SRC
+
+** Enable Query Logging
+
+#+BEGIN_SRC yaml
+postgres:
+  command: postgres -c log_statement=all
+#+END_SRC
+
+* Security Recommendations
+
+** Change Default Passwords
+
+#+BEGIN_SRC sql
+ALTER USER asteroid WITH PASSWORD 'new_secure_password';
+UPDATE users SET password_hash = '$2a$12$...' WHERE username = 'admin';
+#+END_SRC
+
+** Restrict Network Access
+
+In production, don't expose port 5432 externally:
+#+BEGIN_SRC yaml
+postgres:
+  ports: []  # Remove port mapping
+#+END_SRC
+
+** Enable SSL
+
+Add to docker-compose.yml:
+#+BEGIN_SRC yaml
+postgres:
+  command: postgres -c ssl=on -c ssl_cert_file=/etc/ssl/certs/server.crt
+#+END_SRC
+
+* Next Steps
+
+1. ✅ PostgreSQL container running
+2. ⏳ Configure Radiance to use PostgreSQL
+3. ⏳ Migrate existing data
+4. ⏳ Update application code for PostgreSQL
+5. ⏳ Test playlist functionality
+6. ⏳ Deploy to production
+
+* Status: ✅ READY FOR INTEGRATION
+
+PostgreSQL is set up and ready. Next step is configuring Radiance and migrating data.
+
+** What Works Now
+- ✅ PostgreSQL container running
+- ✅ Database initialized with schema
+- ✅ Persistent storage configured
+- ✅ Default users created
+- ✅ Indexes and constraints in place
+
+** What Needs Fade
+- ⏳ Radiance PostgreSQL adapter configuration
+- ⏳ Data migration from current DB
+- ⏳ Application code updates
+- ⏳ Testing and validation

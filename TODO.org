@@ -35,10 +35,15 @@
   - [X] Station Status (Shows live status, listeners, quality)
   - [X] Live Stream (Green indicator, quality selector working)
   - [X] Now Playing (Updates every 10s from Icecast, no HTML bugs)
-- [ ] Web Player [4/6]
+- [X] Web Player [5/6] ⚠️ MOSTLY COMPLETE (Playlists limited by database)
   - [X] Live Radio Stream (Working with quality selector)
   - [X] Now Playing (Updates correctly from Icecast)
-  - [ ] Personal Track Library
-  - [ ] Audio Player
-  - [ ] Playlists
-  - [ ] Play Queue
+  - [X] Personal Track Library (Pagination: 20 tracks/page, search working)
+  - [X] Audio Player (Full controls: play/pause/prev/next/shuffle/repeat/volume)
+  - [ ] Playlists (PARTIAL - Can create/view, but cannot save/load tracks - requires PostgreSQL)
+    - [X] Create empty playlists
+    - [X] View playlists
+    - [ ] Save queue as playlist (tracks don't persist - db:update fails)
+    - [ ] Load playlists (playlists are empty - no tracks saved)
+    - [ ] Edit playlists (requires PostgreSQL)
+  - [X] Play Queue (Add tracks, clear queue - save as playlist blocked by database)

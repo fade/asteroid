@@ -43,8 +43,21 @@
       <h2>Personal Track Library</h2>
       <div class="track-browser">
         <input type="text" id="search-tracks" placeholder="Search tracks..." class="search-input">
+        <select id="library-tracks-per-page" class="sort-select" onchange="changeLibraryTracksPerPage()" style="margin-left: 10px;">
+          <option value="10">10 per page</option>
+          <option value="20" selected>20 per page</option>
+          <option value="50">50 per page</option>
+        </select>
         <div id="track-list" class="track-list">
           <div class="loading">Loading tracks...</div>
+        </div>
+        <!-- Pagination Controls -->
+        <div id="library-pagination-controls" style="display: none; margin-top: 20px; text-align: center;">
+          <button onclick="libraryGoToPage(1)" class="btn btn-secondary">« First</button>
+          <button onclick="libraryPreviousPage()" class="btn btn-secondary">‹ Prev</button>
+          <span id="library-page-info" style="margin: 0 15px; font-weight: bold;">Page 1 of 1</span>
+          <button onclick="libraryNextPage()" class="btn btn-secondary">Next ›</button>
+          <button onclick="libraryGoToLastPage()" class="btn btn-secondary">Last »</button>
         </div>
       </div>
     </div>
@@ -123,10 +136,16 @@
     let isShuffled = false;
     let isRepeating = false;
     let audioPlayer = null;
+    
+    // Pagination variables for track library
+    let libraryCurrentPage = 1;
+    let libraryTracksPerPage = 20;
+    let filteredLibraryTracks = [];
 
     document.addEventListener('DOMContentLoaded', function() {
       audioPlayer = document.getElementById('audio-player');
       loadTracks();
+      loadPlaylists();
       setupEventListeners();
       updatePlayerDisplay();
     });
@@ -179,27 +198,85 @@
     }
 
     function displayTracks(trackList) {
+      filteredLibraryTracks = trackList;
+      libraryCurrentPage = 1;
+      renderLibraryPage();
+    }
+    
+    function renderLibraryPage() {
       const container = document.getElementById('track-list');
+      const paginationControls = document.getElementById('library-pagination-controls');
       
-      if (trackList.length === 0) {
+      if (filteredLibraryTracks.length === 0) {
         container.innerHTML = '<div class="no-tracks">No tracks found</div>';
+        paginationControls.style.display = 'none';
         return;
       }
-
-      const tracksHtml = trackList.map((track, index) => `
-        <div class="track-item" data-track-id="${track.id}" data-index="${index}">
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredLibraryTracks.length / libraryTracksPerPage);
+      const startIndex = (libraryCurrentPage - 1) * libraryTracksPerPage;
+      const endIndex = startIndex + libraryTracksPerPage;
+      const tracksToShow = filteredLibraryTracks.slice(startIndex, endIndex);
+      
+      // Render tracks for current page
+      const tracksHtml = tracksToShow.map((track, pageIndex) => {
+        // Find the actual index in the full tracks array
+        const actualIndex = tracks.findIndex(t => t.id === track.id);
+        return `
+        <div class="track-item" data-track-id="${track.id}" data-index="${actualIndex}">
           <div class="track-info">
             <div class="track-title">${track.title[0] || 'Unknown Title'}</div>
             <div class="track-meta">${track.artist[0] || 'Unknown Artist'} • ${track.album[0] || 'Unknown Album'}</div>
           </div>
           <div class="track-actions">
-            <button onclick="playTrack(${index})" class="btn btn-sm btn-success">▶️</button>
-            <button onclick="addToQueue(${index})" class="btn btn-sm btn-info">➕</button>
+            <button onclick="playTrack(${actualIndex})" class="btn btn-sm btn-success">▶️</button>
+            <button onclick="addToQueue(${actualIndex})" class="btn btn-sm btn-info">➕</button>
           </div>
         </div>
-      `).join('');
+      `}).join('');
       
       container.innerHTML = tracksHtml;
+      
+      // Update pagination controls
+      document.getElementById('library-page-info').textContent = `Page ${libraryCurrentPage} of ${totalPages} (${filteredLibraryTracks.length} tracks)`;
+      paginationControls.style.display = totalPages > 1 ? 'block' : 'none';
+    }
+    
+    // Library pagination functions
+    function libraryGoToPage(page) {
+      const totalPages = Math.ceil(filteredLibraryTracks.length / libraryTracksPerPage);
+      if (page >= 1 && page <= totalPages) {
+        libraryCurrentPage = page;
+        renderLibraryPage();
+      }
+    }
+    
+    function libraryPreviousPage() {
+      if (libraryCurrentPage > 1) {
+        libraryCurrentPage--;
+        renderLibraryPage();
+      }
+    }
+    
+    function libraryNextPage() {
+      const totalPages = Math.ceil(filteredLibraryTracks.length / libraryTracksPerPage);
+      if (libraryCurrentPage < totalPages) {
+        libraryCurrentPage++;
+        renderLibraryPage();
+      }
+    }
+    
+    function libraryGoToLastPage() {
+      const totalPages = Math.ceil(filteredLibraryTracks.length / libraryTracksPerPage);
+      libraryCurrentPage = totalPages;
+      renderLibraryPage();
+    }
+    
+    function changeLibraryTracksPerPage() {
+      libraryTracksPerPage = parseInt(document.getElementById('library-tracks-per-page').value);
+      libraryCurrentPage = 1;
+      renderLibraryPage();
     }
 
     function filterTracks() {
@@ -367,28 +444,207 @@
       updateQueueDisplay();
     }
 
-    function createPlaylist() {
+    async function createPlaylist() {
       const name = document.getElementById('new-playlist-name').value.trim();
       if (!name) {
         alert('Please enter a playlist name');
         return;
       }
       
-      // TODO: Implement playlist creation API
-      alert('Playlist creation not yet implemented');
-      document.getElementById('new-playlist-name').value = '';
+      try {
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', '');
+        
+        const response = await fetch('/asteroid/api/playlists/create', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        console.log('Create playlist result:', result);
+        
+        if (result.status === 'success') {
+          alert(`Playlist "${name}" created successfully!`);
+          document.getElementById('new-playlist-name').value = '';
+          
+          // Wait a moment then reload playlists
+          await new Promise(resolve => setTimeout(resolve, 500));
+          loadPlaylists();
+        } else {
+          alert('Error creating playlist: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error creating playlist:', error);
+        alert('Error creating playlist: ' + error.message);
+      }
     }
 
-    function saveQueueAsPlaylist() {
+    async function saveQueueAsPlaylist() {
       if (playQueue.length === 0) {
         alert('Queue is empty');
         return;
       }
       
       const name = prompt('Enter playlist name:');
-      if (name) {
-        // TODO: Implement save queue as playlist
-        alert('Save queue as playlist not yet implemented');
+      if (!name) return;
+      
+      try {
+        // First create the playlist
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', `Created from queue with ${playQueue.length} tracks`);
+        
+        const createResponse = await fetch('/asteroid/api/playlists/create', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const createResult = await createResponse.json();
+        console.log('Create playlist result:', createResult);
+        
+        if (createResult.status === 'success') {
+          // Wait a moment for database to update
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Get the new playlist ID by fetching playlists
+          const playlistsResponse = await fetch('/asteroid/api/playlists');
+          const playlistsResult = await playlistsResponse.json();
+          console.log('Playlists result:', playlistsResult);
+          
+          if (playlistsResult.status === 'success' && playlistsResult.playlists.length > 0) {
+            // Find the playlist with matching name (most recent)
+            const newPlaylist = playlistsResult.playlists.find(p => p.name === name) || 
+                               playlistsResult.playlists[playlistsResult.playlists.length - 1];
+            
+            console.log('Found playlist:', newPlaylist);
+            
+            // Add all tracks from queue to playlist
+            let addedCount = 0;
+            for (const track of playQueue) {
+              const trackId = track.id || (Array.isArray(track.id) ? track.id[0] : null);
+              console.log('Adding track to playlist:', track, 'ID:', trackId);
+              
+              if (trackId) {
+                const addFormData = new FormData();
+                addFormData.append('playlist-id', newPlaylist.id);
+                addFormData.append('track-id', trackId);
+                
+                const addResponse = await fetch('/asteroid/api/playlists/add-track', {
+                  method: 'POST',
+                  body: addFormData
+                });
+                
+                const addResult = await addResponse.json();
+                console.log('Add track result:', addResult);
+                
+                if (addResult.status === 'success') {
+                  addedCount++;
+                }
+              } else {
+                console.error('Track has no valid ID:', track);
+              }
+            }
+            
+            alert(`Playlist "${name}" created with ${addedCount} tracks!`);
+            loadPlaylists();
+          } else {
+            alert('Playlist created but could not add tracks. Error: ' + (playlistsResult.message || 'Unknown'));
+          }
+        } else {
+          alert('Error creating playlist: ' + createResult.message);
+        }
+      } catch (error) {
+        console.error('Error saving queue as playlist:', error);
+        alert('Error saving queue as playlist: ' + error.message);
+      }
+    }
+    
+    async function loadPlaylists() {
+      try {
+        const response = await fetch('/asteroid/api/playlists');
+        const result = await response.json();
+        
+        console.log('Load playlists result:', result);
+        
+        if (result.status === 'success') {
+          displayPlaylists(result.playlists || []);
+        } else {
+          console.error('Error loading playlists:', result.message);
+          displayPlaylists([]);
+        }
+      } catch (error) {
+        console.error('Error loading playlists:', error);
+        displayPlaylists([]);
+      }
+    }
+    
+    function displayPlaylists(playlists) {
+      const container = document.getElementById('playlists-container');
+      
+      if (!playlists || playlists.length === 0) {
+        container.innerHTML = '<div class="no-playlists">No playlists created yet.</div>';
+        return;
+      }
+      
+      const playlistsHtml = playlists.map(playlist => `
+        <div class="playlist-item">
+          <div class="playlist-info">
+            <div class="playlist-name">${playlist.name}</div>
+            <div class="playlist-meta">${playlist['track-count']} tracks</div>
+          </div>
+          <div class="playlist-actions">
+            <button onclick="loadPlaylist(${playlist.id})" class="btn btn-sm btn-info">📂 Load</button>
+          </div>
+        </div>
+      `).join('');
+      
+      container.innerHTML = playlistsHtml;
+    }
+    
+    async function loadPlaylist(playlistId) {
+      try {
+        const response = await fetch(`/asteroid/api/playlists/${playlistId}`);
+        const result = await response.json();
+        
+        console.log('Load playlist result:', result);
+        
+        if (result.status === 'success' && result.playlist) {
+          const playlist = result.playlist;
+          
+          // Clear current queue
+          playQueue = [];
+          
+          // Add all playlist tracks to queue
+          if (playlist.tracks && playlist.tracks.length > 0) {
+            playlist.tracks.forEach(track => {
+              // Find the full track object from our tracks array
+              const fullTrack = tracks.find(t => t.id === track.id);
+              if (fullTrack) {
+                playQueue.push(fullTrack);
+              }
+            });
+            
+            updateQueueDisplay();
+            alert(`Loaded ${playQueue.length} tracks from "${playlist.name}" into queue!`);
+            
+            // Optionally start playing the first track
+            if (playQueue.length > 0) {
+              const firstTrack = playQueue.shift();
+              const trackIndex = tracks.findIndex(t => t.id === firstTrack.id);
+              if (trackIndex >= 0) {
+                playTrack(trackIndex);
+              }
+            }
+          } else {
+            alert(`Playlist "${playlist.name}" is empty`);
+          }
+        } else {
+          alert('Error loading playlist: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error loading playlist:', error);
+        alert('Error loading playlist: ' + error.message);
       }
     }
 

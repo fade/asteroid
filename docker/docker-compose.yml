@@ -30,6 +30,31 @@ services:
     networks:
       - asteroid-network
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: asteroid-postgres
+    environment:
+      POSTGRES_DB: asteroid
+      POSTGRES_USER: asteroid
+      POSTGRES_PASSWORD: asteroid_db_2025
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    restart: unless-stopped
+    networks:
+      - asteroid-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asteroid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   asteroid-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local

@@ -73,20 +73,175 @@
                                     ("album" . ,(first (gethash "album" track)))
                                     ("duration" . ,(first (gethash "duration" track)))
                                     ("format" . ,(first (gethash "format" track)))
-                                    ("bitrate" . ,(first (gethash "bitrate" track)))
-                                    ("play-count" . ,(first (gethash "play-count" track)))))
+                                    ("bitrate" . ,(first (gethash "bitrate" track)))))
                                 tracks)))))
     (error (e)
       (setf (radiance:header "Content-Type") "application/json")
       (cl-json:encode-json-to-string
        `(("status" . "error")
-         ("message" . ,(format nil "Failed to retrieve tracks: ~a" e)))))))
+         ("message" . ,(format nil "Error retrieving tracks: ~a" e)))))))
 
-(defun get-track-by-id (track-id)
+;; Playlist API endpoints
+(define-page api-playlists #@"/api/playlists" ()
+  "Get all playlists for current user"
+  (require-authentication)
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+      (let* ((user (get-current-user))
+             (user-id-raw (gethash "_id" user))
+             (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw))
+             (playlists (get-user-playlists user-id)))
+        (format t "Fetching playlists for user-id: ~a~%" user-id)
+        (format t "Found ~a playlists~%" (length playlists))
+        (cl-json:encode-json-to-string
+         `(("status" . "success")
+           ("playlists" . ,(mapcar (lambda (playlist)
+                                     (let ((name-val (gethash "name" playlist))
+                                           (desc-val (gethash "description" playlist))
+                                           (tracks-val (gethash "tracks" playlist))
+                                           (created-val (gethash "created-date" playlist))
+                                           (id-val (gethash "_id" playlist)))
+                                       (format t "Playlist ID: ~a (type: ~a)~%" id-val (type-of id-val))
+                                       `(("id" . ,(if (listp id-val) (first id-val) id-val))
+                                         ("name" . ,(if (listp name-val) (first name-val) name-val))
+                                         ("description" . ,(if (listp desc-val) (first desc-val) desc-val))
+                                         ("track-count" . ,(if tracks-val (length tracks-val) 0))
+                                         ("created-date" . ,(if (listp created-val) (first created-val) created-val)))))
+                                   playlists)))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("status" . "error")
+         ("message" . ,(format nil "Error retrieving playlists: ~a" e)))))))
+
+(define-page api-create-playlist #@"/api/playlists/create" ()
+  "Create a new playlist"
+  (require-authentication)
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+      (let* ((user (get-current-user))
+             (user-id-raw (gethash "_id" user))
+             (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw))
+             (name (radiance:post-var "name"))
+             (description (radiance:post-var "description")))
+        (format t "Creating playlist for user-id: ~a, name: ~a~%" user-id name)
+        (if name
+            (progn
+              (create-playlist user-id name description)
+              (format t "Playlist created successfully~%")
+              (cl-json:encode-json-to-string
+               `(("status" . "success")
+                 ("message" . "Playlist created successfully"))))
+            (cl-json:encode-json-to-string
+             `(("status" . "error")
+               ("message" . "Playlist name is required")))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("status" . "error")
+         ("message" . ,(format nil "Error creating playlist: ~a" e)))))))
+
+(define-page api-add-to-playlist #@"/api/playlists/add-track" ()
+  "Add a track to a playlist"
+  (require-authentication)
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+      (let ((playlist-id (parse-integer (radiance:post-var "playlist-id") :junk-allowed t))
+            (track-id (parse-integer (radiance:post-var "track-id") :junk-allowed t)))
+        (if (and playlist-id track-id)
+            (progn
+              (add-track-to-playlist playlist-id track-id)
+              (cl-json:encode-json-to-string
+               `(("status" . "success")
+                 ("message" . "Track added to playlist"))))
+            (cl-json:encode-json-to-string
+             `(("status" . "error")
+               ("message" . "Playlist ID and Track ID are required")))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("status" . "error")
+         ("message" . ,(format nil "Error adding track: ~a" e)))))))
+
+(define-page api-get-playlist #@"/api/playlists/(.*)" (:uri-groups (playlist-id))
+  "Get playlist details with tracks"
+  (require-authentication)
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+      (let* ((id (parse-integer playlist-id :junk-allowed t))
+             (playlist (get-playlist-by-id id)))
+        (format t "Looking for playlist ID: ~a~%" id)
+        (format t "Found playlist: ~a~%" (if playlist "YES" "NO"))
+        (if playlist
+            (let* ((track-ids-raw (gethash "tracks" playlist))
+                   (track-ids (if (listp track-ids-raw) track-ids-raw (list track-ids-raw)))
+                   (tracks (mapcar (lambda (track-id)
+                                     (let ((track-list (db:select "tracks" (db:query (:= "_id" track-id)))))
+                                       (when (> (length track-list) 0)
+                                         (first track-list))))
+                                   track-ids))
+                   (valid-tracks (remove nil tracks)))
+              (cl-json:encode-json-to-string
+               `(("status" . "success")
+                 ("playlist" . (("id" . ,id)
+                               ("name" . ,(let ((n (gethash "name" playlist)))
+                                           (if (listp n) (first n) n)))
+                               ("tracks" . ,(mapcar (lambda (track)
+                                                     `(("id" . ,(gethash "_id" track))
+                                                       ("title" . ,(gethash "title" track))
+                                                       ("artist" . ,(gethash "artist" track))
+                                                       ("album" . ,(gethash "album" track))))
+                                                   valid-tracks)))))))
+            (cl-json:encode-json-to-string
+             `(("status" . "error")
+               ("message" . "Playlist not found")))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("status" . "error")
+         ("message" . ,(format nil "Error retrieving playlist: ~a" e)))))))
+
+;; API endpoint to get all tracks (for web player)
+(define-page api-tracks #@"/api/tracks" ()
+  "Get all tracks for web player"
+  (require-authentication)
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+      (let ((tracks (db:select "tracks" (db:query :all))))
+        (cl-json:encode-json-to-string
+         `(("status" . "success")
+           ("tracks" . ,(mapcar (lambda (track)
+                                  `(("id" . ,(gethash "_id" track))
+                                    ("title" . ,(gethash "title" track))
+                                    ("artist" . ,(gethash "artist" track))
+                                    ("album" . ,(gethash "album" track))
+                                    ("duration" . ,(gethash "duration" track))
+                                    ("format" . ,(gethash "format" track))))
+                                tracks)))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("status" . "error")
+         ("message" . ,(format nil "Error retrieving tracks: ~a" e)))))))
+
+;; API endpoint to get track by ID (for streaming)
+(define-page api-get-track-by-id #@"/api/tracks/(.*)" (:uri-groups (track-id))
   "Retrieve track from database by ID"
   (let* ((id (if (stringp track-id) (parse-integer track-id) track-id))
          (tracks (db:select "tracks" (db:query (:= '_id id)))))
     (when tracks (first tracks))))
+(defun get-track-by-id (track-id)
+  "Get a track by its ID - handles type mismatches"
+  (format t "get-track-by-id called with: ~a (type: ~a)~%" track-id (type-of track-id))
+  ;; Try direct query first
+  (let ((tracks (db:select "tracks" (db:query (:= "_id" track-id)))))
+    (if (> (length tracks) 0)
+        (progn
+          (format t "Found via direct query~%")
+          (first tracks))
+        ;; If not found, search manually (ID might be stored as list)
+        (let ((all-tracks (db:select "tracks" (db:query :all))))
+          (format t "Searching through ~a tracks manually~%" (length all-tracks))
+          (find-if (lambda (track)
+                     (let ((stored-id (gethash "_id" track)))
+                       (or (equal stored-id track-id)
+                           (and (listp stored-id) (equal (first stored-id) track-id)))))
+                   all-tracks)))))
 
 (defun get-mime-type-for-format (format)
   "Get MIME type for audio format"
