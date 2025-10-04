@@ -262,6 +262,28 @@
   (serve-file (merge-pathnames (concatenate 'string "static/" path) 
                                (asdf:system-source-directory :asteroid))))
 
+;; Status check functions
+(defun check-icecast-status ()
+  "Check if Icecast server is running and accessible"
+  (handler-case
+      (let ((response (drakma:http-request "http://localhost:8000/status-json.xsl"
+                                          :want-stream nil
+                                          :connection-timeout 2)))
+        (if response "🟢 Running" "🔴 Not Running"))
+    (error () "🔴 Not Running")))
+
+(defun check-liquidsoap-status ()
+  "Check if Liquidsoap is running via Docker"
+  (handler-case
+      (let* ((output (with-output-to-string (stream)
+                       (uiop:run-program '("docker" "ps" "--filter" "name=liquidsoap" "--format" "{{.Status}}")
+                                        :output stream
+                                        :error-output nil
+                                        :ignore-error-status t)))
+             (running-p (search "Up" output)))
+        (if running-p "🟢 Running" "🔴 Not Running"))
+    (error () "🔴 Not Running")))
+
 ;; Admin page (requires authentication)
 (define-page admin #@"/admin" ()
   "Admin dashboard"
@@ -278,8 +300,8 @@
      :database-status (handler-case 
                         (if (db:connected-p) "🟢 Connected" "🔴 Disconnected")
                         (error () "🔴 No Database Backend"))
-     :liquidsoap-status "🔴 Not Running"
-     :icecast-status "🔴 Not Running"
+     :liquidsoap-status (check-liquidsoap-status)
+     :icecast-status (check-icecast-status)
      :track-count (format nil "~d" track-count)
      :library-path "/home/glenn/Projects/Code/asteroid/music/library/")))
 
@@ -403,6 +425,14 @@
   
   ;; Initialize user management before server starts
   (initialize-user-system)
+  
+  ;; Scan music library on startup to load existing tracks
+  (format t "Scanning music library for existing tracks...~%")
+  (handler-case
+      (let ((tracks-added (scan-music-library)))
+        (format t "✅ Loaded ~a tracks from library~%" tracks-added))
+    (error (e)
+      (format t "⚠️  Library scan failed: ~a~%" e)))
   
   (run-server))
 

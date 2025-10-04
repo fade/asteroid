@@ -33,12 +33,12 @@ Fade requested setting up Liquidsoap in Docker for the Asteroid Radio project, a
 
 ** Check Status
 #+BEGIN_SRC bash
-docker-compose ps
+docker compose ps
 #+END_SRC
 
 ** View Logs
 #+BEGIN_SRC bash
-docker-compose logs -f
+docker compose logs -f
 #+END_SRC
 
 ** Stop Services

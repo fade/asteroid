@@ -1,0 +1,614 @@
+#+TITLE: Asteroid Radio - Docker Streaming Setup
+#+AUTHOR: Docker Team
+#+DATE: 2025-10-03
+
+* Docker Streaming Overview
+
+This guide covers the complete Docker-based streaming setup for Asteroid Radio using Icecast2 and Liquidsoap containers. This approach provides a containerized, portable streaming infrastructure that's easy to deploy and maintain.
+
+* Architecture
+
+** Container Stack
+- *Icecast2 Container*: Streaming server handling client connections
+- *Liquidsoap Container*: Audio processing and stream generation
+- *Shared Volumes*: Music library and configuration sharing
+
+** Stream Formats
+- *High Quality MP3*: 128kbps MP3 stream at /asteroid.mp3
+- *High Quality AAC*: 96kbps AAC stream at /asteroid.aac (better efficiency than MP3)
+- *Low Quality MP3*: 64kbps MP3 stream at /asteroid-low.mp3 (compatibility)
+
+** Network Configuration
+- *Icecast2*: Port 8000 (streaming and admin)
+- *Liquidsoap Telnet*: Port 1234 (remote control)
+- *Internal Network*: Container-to-container communication
+
+* Quick Start
+
+** Prerequisites
+#+BEGIN_SRC bash
+# Install Docker and Docker Compose
+sudo apt update
+sudo apt install docker.io docker compose
+sudo usermod -a -G docker $USER
+# Log out and back in for group changes
+#+END_SRC
+
+** One-Command Setup
+#+BEGIN_SRC bash
+# Clone and start
+git clone <repository-url> asteroid-radio
+cd asteroid-radio/docker
+docker compose up -d
+#+END_SRC
+
+** Verify Setup
+#+BEGIN_SRC bash
+# Check container status
+docker compose ps
+
+# Test streaming (all three formats)
+curl -I http://localhost:8000/asteroid.mp3     # 128kbps MP3
+curl -I http://localhost:8000/asteroid.aac     # 96kbps AAC
+curl -I http://localhost:8000/asteroid-low.mp3 # 64kbps MP3
+#+END_SRC
+
+* Docker Compose Configuration
+
+** Complete docker-compose.yml
+#+BEGIN_SRC yaml
+version: '3.8'
+
+services:
+  icecast:
+    image: infiniteproject/icecast:latest
+    container_name: asteroid-icecast
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./icecast.xml:/etc/icecast.xml
+    environment:
+      - ICECAST_SOURCE_PASSWORD=H1tn31EhsyLrfRmo
+      - ICECAST_ADMIN_PASSWORD=asteroid_admin_2024
+      - ICECAST_RELAY_PASSWORD=asteroid_relay_2024
+    restart: unless-stopped
+    networks:
+      - asteroid-network
+
+  liquidsoap:
+    build:
+      context: .
+      dockerfile: Dockerfile.liquidsoap
+    container_name: asteroid-liquidsoap
+    ports:
+      - "1234:1234"  # Telnet control port
+    depends_on:
+      - icecast
+    volumes:
+      - ./music:/app/music:ro
+      - ./asteroid-radio-docker.liq:/app/asteroid-radio.liq:ro
+    restart: unless-stopped
+    networks:
+      - asteroid-network
+
+networks:
+  asteroid-network:
+    driver: bridge
+#+END_SRC
+
+* Container Configurations
+
+** Icecast2 Container Setup
+
+*** Custom Icecast Configuration (icecast.xml)
+#+BEGIN_SRC xml
+<icecast>
+    <location>Asteroid Radio Docker</location>
+    <admin>admin@asteroid-radio.docker</admin>
+    
+    <limits>
+        <clients>100</clients>
+        <sources>10</sources>
+        <queue-size>524288</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>15</header-timeout>
+        <source-timeout>10</source-timeout>
+        <burst-on-connect>1</burst-on-connect>
+    </limits>
+    
+    <authentication>
+        <source-password>H1tn31EhsyLrfRmo</source-password>
+        <relay-password>asteroid_relay_2024</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>asteroid_admin_2024</admin-password>
+    </authentication>
+    
+    <hostname>icecast</hostname>
+    <listen-socket>
+        <port>8000</port>
+        <bind-address>0.0.0.0</bind-address>
+    </listen-socket>
+    
+    <!-- High Quality Stream -->
+    <mount type="normal">
+        <mount-name>/asteroid.mp3</mount-name>
+        <username>source</username>
+        <password>H1tn31EhsyLrfRmo</password>
+        <max-listeners>50</max-listeners>
+        <public>1</public>
+        <stream-name>Asteroid Radio - High Quality</stream-name>
+        <stream-url>http://localhost:8080/asteroid/</stream-url>
+        <genre>Electronic/Alternative</genre>
+        <bitrate>128</bitrate>
+    </mount>
+    
+    <!-- AAC High Quality Stream -->
+    <mount type="normal">
+        <mount-name>/asteroid.aac</mount-name>
+        <username>source</username>
+        <password>H1tn31EhsyLrfRmo</password>
+        <max-listeners>50</max-listeners>
+        <public>1</public>
+        <stream-name>Asteroid Radio - AAC</stream-name>
+        <stream-description>Music for Hackers - 96kbps AAC</stream-description>
+        <stream-url>http://localhost:8080/asteroid/</stream-url>
+        <genre>Electronic/Alternative</genre>
+        <bitrate>96</bitrate>
+    </mount>
+    
+    <!-- Low Quality Stream -->
+    <mount type="normal">
+        <mount-name>/asteroid-low.mp3</mount-name>
+        <username>source</username>
+        <password>H1tn31EhsyLrfRmo</password>
+        <max-listeners>100</max-listeners>
+        <public>1</public>
+        <stream-name>Asteroid Radio - Low Quality</stream-name>
+        <stream-description>Music for Hackers - 64kbps</stream-description>
+        <stream-url>http://localhost:8080/asteroid/</stream-url>
+        <genre>Electronic/Alternative</genre>
+        <bitrate>64</bitrate>
+    </mount>
+    
+    <fileserve>1</fileserve>
+    <paths>
+        <basedir>/usr/share/icecast2</basedir>
+        <logdir>/var/log/icecast2</logdir>
+        <webroot>/usr/share/icecast2/web</webroot>
+        <adminroot>/usr/share/icecast2/admin</adminroot>
+        <alias source="/" destination="/status.xsl"/>
+    </paths>
+    
+    <logging>
+        <accesslog>access.log</accesslog>
+        <errorlog>error.log</errorlog>
+        <loglevel>3</loglevel>
+        <logsize>10000</logsize>
+    </logging>
+</icecast>
+#+END_SRC
+
+** Liquidsoap Container Setup
+
+*** Liquidsoap Configuration (asteroid-radio-docker.liq)
+#+BEGIN_SRC liquidsoap
+#!/usr/bin/liquidsoap
+
+# Asteroid Radio - Docker streaming script
+# Streams music library continuously to Icecast2 running in Docker
+
+# Allow running as root in Docker
+set("init.allow_root", true)
+
+# Set log level for debugging
+log.level.set(4)
+
+# Enable telnet server for remote control
+settings.server.telnet.set(true)
+settings.server.telnet.port.set(1234)
+settings.server.telnet.bind_addr.set("0.0.0.0")
+
+# Create playlist source from mounted music directory
+radio = playlist(
+  mode="randomize", 
+  reload=3600, 
+  reload_mode="watch",
+  "/app/music/"
+)
+
+# Add some audio processing
+radio = amplify(1.0, radio)
+radio = normalize(radio)
+
+# Add crossfade between tracks
+radio = crossfade(radio)
+
+# Create a fallback with emergency content
+emergency = sine(440.0)
+emergency = amplify(0.1, emergency)
+
+# Make source safe with fallback
+radio = fallback(track_sensitive=false, [radio, emergency])
+
+# Add metadata
+radio = map_metadata(fun(m) -> 
+  [("title", m["title"] ?? "Unknown Track"),
+   ("artist", m["artist"] ?? "Unknown Artist"),
+   ("album", m["album"] ?? "Unknown Album")], radio)
+
+# High Quality MP3 Stream (128kbps)
+output.icecast(
+  %mp3(bitrate=128),
+  host="icecast",  # Docker service name
+  port=8000,
+  password="H1tn31EhsyLrfRmo",
+  mount="asteroid.mp3",
+  name="Asteroid Radio",
+  description="Music for Hackers - Streaming from the Asteroid",
+  genre="Electronic/Alternative",
+  url="http://localhost:8080/asteroid/",
+  public=true,
+  radio
+)
+
+# AAC High Quality Stream (96kbps - better quality than 128kbps MP3)
+output.icecast(
+  %fdkaac(bitrate=96),
+  host="icecast",
+  port=8000,
+  password="H1tn31EhsyLrfRmo",
+  mount="asteroid.aac",
+  name="Asteroid Radio (AAC)",
+  description="Music for Hackers - High efficiency AAC stream",
+  genre="Electronic/Alternative",
+  url="http://localhost:8080/asteroid/",
+  public=true,
+  radio
+)
+
+# Low Quality MP3 Stream (for compatibility)
+output.icecast(
+  %mp3(bitrate=64),
+  host="icecast",
+  port=8000,
+  password="H1tn31EhsyLrfRmo",
+  mount="asteroid-low.mp3",
+  name="Asteroid Radio (Low Quality)",
+  description="Music for Hackers - Low bandwidth stream",
+  genre="Electronic/Alternative",
+  url="http://localhost:8080/asteroid/",
+  public=true,
+  radio
+)
+
+print("🎵 Asteroid Radio Docker streaming started!")
+print("High Quality MP3:  http://localhost:8000/asteroid.mp3")
+print("High Quality AAC:  http://localhost:8000/asteroid.aac")
+print("Low Quality MP3:   http://localhost:8000/asteroid-low.mp3")
+print("Icecast Admin:     http://localhost:8000/admin/")
+print("Telnet control:    telnet localhost 1234")
+#+END_SRC
+
+
+* Management Scripts
+
+** Start Script (start-streaming.sh)
+#+BEGIN_SRC bash
+#!/bin/bash
+
+# Asteroid Radio Docker Streaming Startup Script
+
+set -e
+
+echo "🚀 Starting Asteroid Radio Docker Streaming..."
+
+# Check if Docker is running
+if ! docker info > /dev/null 2>&1; then
+    echo "❌ Docker is not running. Please start Docker first."
+    exit 1
+fi
+
+# Create required directories
+mkdir -p music/incoming music/library logs
+
+# Set permissions
+chmod 755 music/incoming music/library
+chmod 777 logs
+
+# Pull latest images
+echo "📦 Pulling latest Docker images..."
+docker compose pull
+
+# Start services
+echo "🎵 Starting streaming services..."
+docker compose up -d
+
+# Wait for services to be ready
+echo "⏳ Waiting for services to start..."
+sleep 10
+
+# Check service status
+echo "📊 Checking service status..."
+docker compose ps
+
+# Test connectivity
+echo "🔍 Testing streaming connectivity..."
+if curl -s -I http://localhost:8000/asteroid.mp3 | grep -q "200 OK"; then
+    echo "✅ High quality stream is working"
+else
+    echo "⚠️  High quality stream may not be ready yet"
+fi
+
+if curl -s -I http://localhost:8000/asteroid-low.mp3 | grep -q "200 OK"; then
+    echo "✅ Low quality MP3 stream is working"
+else
+    echo "⚠️  Low quality MP3 stream may not be ready yet"
+fi
+
+if curl -s -I http://localhost:8000/asteroid.aac | grep -q "200 OK"; then
+    echo "✅ AAC stream is working"
+else
+    echo "⚠️  AAC stream may not be ready yet"
+fi
+
+echo ""
+echo "🎉 Asteroid Radio Docker setup complete!"
+echo ""
+echo "📻 Stream URLs:"
+echo "   High Quality MP3: http://localhost:8000/asteroid.mp3 (128kbps)"
+echo "   High Quality AAC: http://localhost:8000/asteroid.aac (96kbps)"
+echo "   Low Quality MP3:  http://localhost:8000/asteroid-low.mp3 (64kbps)"
+echo ""
+echo "🔧 Admin Interfaces:"
+echo "   Icecast:      http://localhost:8000/admin/ (admin/asteroid_admin_2024)"
+echo "   Telnet:       telnet localhost 1234"
+echo ""
+echo "📁 Add music files to: ./music/"
+echo "   Files are automatically detected and streamed."
+#+END_SRC
+
+** Stop Script (stop-streaming.sh)
+#+BEGIN_SRC bash
+#!/bin/bash
+
+# Asteroid Radio Docker Streaming Stop Script
+
+echo "🛑 Stopping Asteroid Radio Docker Streaming..."
+
+# Stop all services
+docker compose down
+
+# Optional: Remove volumes (uncomment to clean up completely)
+# docker compose down -v
+
+echo "✅ All services stopped."
+#+END_SRC
+
+** Test Script (test-streaming.sh)
+#+BEGIN_SRC bash
+#!/bin/bash
+
+# Asteroid Radio Docker Streaming Test Script
+
+echo "🧪 Testing Asteroid Radio Docker Setup..."
+
+# Test container status
+echo "📊 Container Status:"
+docker compose ps
+
+echo ""
+echo "🔍 Testing Connectivity:"
+
+# Test Icecast2
+if curl -s -I http://localhost:8000/ | grep -q "200 OK"; then
+    echo "✅ Icecast2 server is responding"
+else
+    echo "❌ Icecast2 server is not responding"
+fi
+
+# Test high quality stream
+if curl -s -I http://localhost:8000/asteroid.mp3 | grep -q "200 OK"; then
+    echo "✅ High quality stream is available"
+else
+    echo "❌ High quality stream is not available"
+fi
+
+# Test low quality stream
+if curl -s -I http://localhost:8000/asteroid-low.mp3 | grep -q "200 OK"; then
+    echo "✅ Low quality MP3 stream is available"
+else
+    echo "❌ Low quality MP3 stream is not available"
+fi
+
+# Test AAC stream
+if curl -s -I http://localhost:8000/asteroid.aac | grep -q "200 OK"; then
+    echo "✅ AAC stream is available"
+else
+    echo "❌ AAC stream is not available"
+fi
+
+echo ""
+echo "📋 Service Logs (last 10 lines):"
+echo "--- Icecast2 ---"
+docker compose logs --tail=10 icecast
+
+echo "--- Liquidsoap ---"
+docker compose logs --tail=10 liquidsoap
+
+#+END_SRC
+
+* Volume Management
+
+** Music Library Setup
+#+BEGIN_SRC bash
+# Music directory already exists in repository
+# Copy sample music directly to the music directory
+cp ~/path/to/music/*.mp3 docker/music/
+
+# Set permissions
+chmod 755 docker/music/
+sudo chown -R $USER:$USER docker/music/
+#+END_SRC
+
+** Persistent Data
+- *Music Library*: =./music/= - Mounted as volume
+- *Logs*: =./logs/= - Container logs and streaming logs
+- *Configuration*: =./liquidsoap/= and =./icecast.xml= - Read-only configs
+
+* Networking
+
+** Internal Container Network
+- Containers communicate via =asteroid-network= bridge
+- Liquidsoap connects to Icecast using hostname =icecast=
+- Telnet control available on port 1234 for Liquidsoap management
+
+** External Access
+- *Port 8000*: Icecast2 streaming and admin interface
+- *Port 1234*: Liquidsoap telnet control interface
+- All services bind to =0.0.0.0= for external access
+
+** WSL Compatibility
+#+BEGIN_SRC bash
+# Find WSL IP for external access
+ip addr show eth0 | grep inet
+
+# Access from Windows host
+# http://[IP-ADDRESS]:8000/asteroid.mp3     # 128kbps MP3
+# http://[IP-ADDRESS]:8000/asteroid.aac     # 96kbps AAC  
+# http://[IP-ADDRESS]:8000/asteroid-low.mp3 # 64kbps MP3
+#+END_SRC
+
+* Production Deployment
+
+** Docker Swarm Setup
+#+BEGIN_SRC yaml
+# docker compose.prod.yml
+version: '3.8'
+
+services:
+  icecast:
+    image: moul/icecast
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    # ... rest of configuration
+
+  liquidsoap:
+    image: savonet/liquidsoap:v2.2.x
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    # ... rest of configuration
+#+END_SRC
+
+** Environment Variables
+#+BEGIN_SRC bash
+# Production environment
+export ASTEROID_ENV=production
+export ASTEROID_STREAM_QUALITY=high
+export ASTEROID_MAX_LISTENERS=200
+export ICECAST_ADMIN_PASSWORD=secure_password_here
+#+END_SRC
+
+** SSL/TLS Setup
+Use reverse proxy (nginx/traefik) for HTTPS termination:
+#+BEGIN_SRC yaml
+# Add to docker-compose.yml
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl:ro
+#+END_SRC
+
+* Monitoring and Logging
+
+** Container Health Checks
+#+BEGIN_SRC bash
+# Check container health
+docker compose exec icecast curl -f http://localhost:8000/status.xsl
+docker compose exec liquidsoap ps aux | grep liquidsoap
+
+# Test telnet control interface
+echo "help" | nc localhost 1234
+#+END_SRC
+
+** Log Management
+#+BEGIN_SRC bash
+# View real-time logs
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f icecast
+docker compose logs -f liquidsoap
+
+# Log rotation setup
+docker run --log-driver=json-file --log-opt max-size=10m --log-opt max-file=3
+#+END_SRC
+
+* Troubleshooting
+
+** Common Docker Issues
+
+*** Container Won't Start
+#+BEGIN_SRC bash
+# Check container logs
+docker compose logs [service-name]
+
+# Check resource usage
+docker stats
+
+# Verify configuration files
+docker compose config
+#+END_SRC
+
+*** Streaming Issues
+#+BEGIN_SRC bash
+# Test internal connectivity
+docker compose exec liquidsoap ping icecast
+
+# Check Liquidsoap connection and logs
+docker compose logs liquidsoap
+
+# Test telnet interface
+echo "request.queue" | nc localhost 1234
+#+END_SRC
+
+*** Permission Issues
+#+BEGIN_SRC bash
+# Fix music directory permissions
+sudo chown -R $USER:$USER docker/music/
+chmod 755 docker/music/
+#+END_SRC
+
+** Performance Tuning
+
+*** Resource Limits
+#+BEGIN_SRC yaml
+# Add to services in docker-compose.yml
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+#+END_SRC
+
+*** Network Optimization
+#+BEGIN_SRC yaml
+# Optimize network settings
+networks:
+  asteroid-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
+#+END_SRC
+
+This Docker streaming setup provides a complete containerized solution for Asteroid Radio with professional streaming capabilities and easy deployment.

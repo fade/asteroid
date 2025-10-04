@@ -1,0 +1,110 @@
+#+TITLE: Asteroid Radio - Project Overview
+#+AUTHOR: Glenn Thompson & Brian O'Reilly (Fade)
+#+DATE: 2025-10-03
+
+* 🎯 Mission
+
+Asteroid Radio is a modern, web-based music streaming platform designed for hackers and music enthusiasts. Built with Common Lisp and the Radiance web framework, it combines the power of functional programming with contemporary web technologies.
+
+* 🏗️ Architecture
+
+** Core Components
+
+#+BEGIN_EXAMPLE
+┌─────────────────────────────────────────────────────────────┐
+│                    Asteroid Radio Platform                  │
+├─────────────────────────────────────────────────────────────┤
+│  Web Application Layer (Common Lisp + Radiance)            │
+│  ├── Authentication & User Management                       │
+│  ├── Music Library Management                              │
+│  ├── Web Player Interface                                  │
+│  └── API Endpoints                                         │
+├─────────────────────────────────────────────────────────────┤
+│  Streaming Infrastructure (Docker)                         │
+│  ├── Icecast2 (Streaming Server)                          │
+│  ├── Liquidsoap (Audio Processing)                        │
+│  └── Multiple Format Support (AAC, MP3)                   │
+├─────────────────────────────────────────────────────────────┤
+│  Data Layer                                                │
+│  ├── PostgreSQL Database (via Radiance)                   │
+│  ├── User Accounts & Profiles                             │
+│  └── Music Metadata                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Technology Stack
+
+**Backend:**
+- **Common Lisp** (SBCL) - Core application language
+- **Radiance Framework** - Web framework and module system
+- **LASS** - CSS preprocessing in Lisp
+- **PostgreSQL** - Database backend for user accounts and metadata
+
+**Frontend:**
+- **HTML5** with semantic templates
+- **CSS3** with dark hacker theme
+- **JavaScript** for interactive features
+- **VT323 Font** for retro terminal aesthetic
+
+**Streaming:**
+- **Docker Compose** - Container orchestration
+- **Icecast2** - HTTP streaming server
+- **Liquidsoap** - Audio processing and encoding
+- **Multiple Formats** - AAC 96kbps, MP3 128kbps/64kbps
+
+**Development & Testing:**
+- **Make** - Build system
+- **Python** - Performance analysis tools
+- **Bash** - Testing and deployment scripts
+
+## 🎨 Design Philosophy
+
+### Visual Theme
+- **Dark terminal aesthetic** - Black background with colored text
+- **Hacker-friendly** - Monospace fonts and terminal-inspired UI
+- **Color scheme** - Black → Blue-grey → Cyan → Blue progression
+- **Minimalist** - Clean, functional interface without clutter
+
+### Technical Principles
+- **Functional programming** - Leveraging Lisp's strengths
+- **Modular architecture** - Radiance's interface system
+- **Performance first** - Sub-1% CPU usage for web app
+- **Self-contained** - Minimal external dependencies
+- **Docker-ready** - Containerized streaming infrastructure
+
+## 🚀 Features
+
+### Current Features
+- ✅ **User Authentication** - Registration, login, profiles
+- ✅ **Music Streaming** - Multiple quality formats
+- ✅ **Web Player** - Browser-based music player
+- ✅ **Rate Limiting** - Anti-abuse protection
+- ✅ **Docker Integration** - Icecast2/Liquidsoap streaming
+- ✅ **Responsive Design** - Works on desktop and mobile
+
+### Planned Features
+- 🔄 **User Playlists** - Personal music collections
+- 🔄 **Social Features** - Sharing and discovery
+- 🔄 **Advanced Player** - Queue management, crossfade
+- 🔄 **Admin Interface** - System management tools
+- 🔄 **API Extensions** - Mobile app support
+
+
+## 🔮 Vision
+
+Asteroid Radio is the premier streaming platform for **Asteroid Music** - the perfect soundtrack for developers, hackers, and anyone who spends hours deep in code. Our mission is to curate and deliver music that enhances focus, creativity, and the flow state that every programmer knows.
+
+**What is Asteroid Music?**
+- **Focus-Enhancing** - Ambient, electronic, and instrumental tracks that don't distract
+- **Coding-Optimized** - Rhythms and textures that complement the mental rhythm of programming
+- **Hacker Culture** - Music that resonates with the developer mindset and aesthetic
+- **Flow State** - Carefully selected tracks that help maintain deep concentration
+
+**Platform Features:**
+- **Multi-Format Streaming** - High-quality AAC, MP3 128k, and MP3 64k streams
+- **User Community** - Accounts, playlists, and sharing among fellow developers
+- **Developer-Friendly** - Built with Common Lisp, fully hackable and extensible
+- **Professional Quality** - Crossfading, normalization, metadata, and telnet control
+- **Always-On Broadcasting** - Continuous streams perfect for long coding sessions
+
+Asteroid Radio isn't just another music platform - it's the soundtrack to the hacker lifestyle, designed by hackers for hackers who understand that the right music can make the difference between good code and great code.

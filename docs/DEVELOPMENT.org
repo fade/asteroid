@@ -1,0 +1,412 @@
+#+TITLE: Asteroid Radio - Development Guide
+#+AUTHOR: Development Team
+#+DATE: 2025-10-03
+
+* Development Setup
+
+** Prerequisites
+
+*** System Dependencies
+- SBCL (Steel Bank Common Lisp)
+- Quicklisp package manager
+- Git version control
+- Docker and Docker Compose
+- taglib for metadata extraction (for local development)
+
+*** Ubuntu/Debian Installation
+#+BEGIN_SRC bash
+# Install system packages
+sudo apt update
+sudo apt install sbcl git docker.io docker compose
+
+# Add user to docker group
+sudo usermod -a -G docker $USER
+# Log out and back in for group changes to take effect
+
+# Install Quicklisp (if not already installed)
+curl -O https://beta.quicklisp.org/quicklisp.lisp
+sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --quit
+#+END_SRC
+
+** Project Setup
+
+*** Clone Repository
+#+BEGIN_SRC bash
+git clone <repository-url>
+cd asteroid
+#+END_SRC
+
+*** Install Lisp Dependencies
+#+BEGIN_SRC bash
+# Start SBCL and load the system
+sbcl
+(ql:quickload :asteroid)
+#+END_SRC
+
+*** ASDF Configuration (Optional but Recommended)
+For easier development, configure ASDF to find the asteroid system:
+#+BEGIN_SRC bash
+# Create ASDF source registry configuration
+mkdir -p ~/.config/common-lisp
+cat > ~/.config/common-lisp/source-registry.conf
+;; -*-lisp-*-
+(:source-registry
+ (:tree "/path/to/your/projects/")
+ :inherit-configuration)
+#+END_SRC
+
+This allows you to load the asteroid system from any directory without changing paths.
+
+* Development Workflow
+
+** Local Development Server
+
+*** Starting Development Environment
+#+BEGIN_SRC bash
+# Start Docker streaming services
+cd docker/
+docker compose up -d
+
+# Verify containers are running
+docker compose ps
+
+# View logs
+docker compose logs -f
+
+# Start RADIANCE web server (local development)
+sbcl --eval "(ql:quickload :asteroid)" --eval "(asteroid:start-server)"
+#+END_SRC
+
+*** Development URLs
+- *Web Interface*: http://localhost:8080/asteroid/
+- *Admin Panel*: http://localhost:8080/asteroid/admin
+- *Live Stream*: http://localhost:8000/asteroid.mp3
+- *Icecast Admin*: http://localhost:8000/admin/ (admin/asteroid_admin_2024)
+
+** Music Library Management
+
+*** Directory Structure
+The music directory structure is:
+#+BEGIN_SRC
+asteroid/docker/music/          # Host directory (mounted to containers)
+├── artist1/
+│   ├── album1/
+│   │   ├── track1.mp3
+│   │   └── track2.flac
+│   └── album2/
+│       └── track3.ogg
+└── artist2/
+    └── single.wav
+#+END_SRC
+
+*** Recursive Scanning Capabilities
+The Asteroid application includes built-in recursive directory scanning:
+- *Function*: =scan-music-library= in =stream-media.lisp=
+- *Supports*: MP3, FLAC, OGG, WAV formats
+- *Recursive*: Automatically scans all subdirectories
+- *Metadata*: Extracts title, artist, album, duration using taglib
+- *Database*: Stores track information in RADIANCE database
+
+*** Adding Music to Development Environment
+#+BEGIN_SRC bash
+# Option 1: Copy music files directly
+cp -r /path/to/your/music/* docker/music/
+
+# Option 2: Mount remote directory (for large collections)
+# Edit docker-compose.yml to change volume mount:
+# volumes:
+#   - /mnt/remote-music:/app/music:ro
+
+# Option 3: Symlink to existing collection
+ln -s /path/to/existing/music docker/music/collection
+
+# Trigger library scan via API
+curl -X POST http://localhost:8080/asteroid/api/scan-library
+#+END_SRC
+
+** Code Organization
+
+*** Main Components
+- =asteroid.lisp= - Main server with RADIANCE routes and API endpoints
+- =asteroid.asd= - System definition with dependencies
+- =template/= - CLIP HTML templates for web interface
+- =static/= - CSS stylesheets and static assets
+- =asteroid-radio.liq= - Liquidsoap streaming configuration
+
+*** Key Modules
+- *Web Routes*: RADIANCE framework with =#@= URL patterns
+- *Database*: RADIANCE DB abstraction for track metadata
+- *Streaming*: Docker containers with Icecast2 and Liquidsoap
+- *File Processing*: Metadata extraction and library management
+- *Docker Integration*: Containerized streaming infrastructure
+
+** Development Practices
+
+*** Code Style
+- Use 2-space indentation for Lisp code
+- Follow Common Lisp naming conventions
+- Document functions with docstrings
+- Use meaningful variable and function names
+
+*** Database Development
+#+BEGIN_SRC lisp
+;; Always use quoted symbols for field names
+(db:select 'tracks (db:query (:= 'artist "Artist Name")))
+
+;; Primary key is "_id" internally, "id" in JSON responses
+(gethash "_id" track-record)
+#+END_SRC
+
+*** Template Development
+- Use CLIP templating with =data-text= attributes
+- Keep templates in =template/= directory
+- Test template changes with browser refresh
+- Maintain responsive design principles
+
+*** CSS Development with LASS
+- CSS is generated dynamically from =static/asteroid.lass= using LASS (Lisp Augmented Style Sheets)
+- Edit the =.lass= file, not the generated =.css= file
+- CSS is automatically compiled when the server starts via =compile-styles= function
+- Use Lisp syntax for CSS: =(body :background "#0a0a0a" :color "#00ffff")=
+- Supports nested selectors, variables, and programmatic CSS generation
+
+** Testing
+
+*** Manual Testing Checklist
+- [ ] Web interface loads correctly
+- [ ] Admin panel functions work
+- [ ] File upload and processing works
+- [ ] Live stream plays audio
+- [ ] Database queries return expected results
+- [ ] API endpoints respond correctly
+
+*** Docker Container Testing
+#+BEGIN_SRC bash
+# Check container status
+docker compose ps
+
+# Test stream connectivity
+curl -I http://localhost:8000/asteroid.mp3
+
+# Test with media player
+vlc http://localhost:8000/asteroid.mp3
+
+# Check container logs
+docker compose logs icecast
+docker compose logs liquidsoap
+#+END_SRC
+
+*** API Testing
+#+BEGIN_SRC bash
+# Test track listing
+curl http://localhost:8080/asteroid/api/tracks
+
+# Test file processing
+curl -X POST http://localhost:8080/asteroid/api/copy-files
+#+END_SRC
+
+** Debugging
+
+*** Common Development Issues
+
+**** Stream Not Playing
+- Check Docker container status: =docker compose ps=
+- Check Liquidsoap container logs: =docker compose logs liquidsoap=
+- Check Icecast2 container logs: =docker compose logs icecast=
+- Verify music files exist in =docker/music/library/=
+- Restart containers: =docker compose restart=
+
+**** Database Errors
+- Ensure proper field name quoting in queries
+- Check RADIANCE database configuration
+- Verify database file permissions
+
+**** Template Rendering Issues
+- Check CLIP template syntax
+- Verify template file paths
+- Test with simplified templates first
+
+*** Debug Configuration
+#+BEGIN_SRC bash
+# Enable verbose logging in Docker containers
+# Edit docker/liquidsoap/asteroid-radio.liq
+settings.log.level := 4
+settings.log.stdout := true
+settings.log.file := true
+settings.log.file.path := "/var/log/liquidsoap/asteroid.log"
+
+# View real-time container logs
+docker compose logs -f liquidsoap
+docker compose logs -f icecast
+#+END_SRC
+
+** Contributing Guidelines
+
+*** Branch Strategy
+- =main= - Stable production code
+- =develop= - Integration branch for new features
+- =feature/*= - Individual feature development
+- =bugfix/*= - Bug fixes and patches
+
+*** Commit Messages
+- Use clear, descriptive commit messages
+- Reference issue numbers when applicable
+- Keep commits focused on single changes
+
+*** Pull Request Process
+1. Create feature branch from =develop=
+2. Implement changes with tests
+3. Update documentation if needed
+4. Submit pull request with description
+5. Address code review feedback
+6. Merge after approval
+
+*** Code Review Checklist
+- [ ] Code follows project style guidelines
+- [ ] Functions are properly documented
+- [ ] No hardcoded values or credentials
+- [ ] Error handling is appropriate
+- [ ] Performance considerations addressed
+
+** Development Tools
+
+*** Recommended Editor Setup
+- *Emacs*: SLIME for interactive Lisp development
+
+*** Useful Development Commands
+#+BEGIN_SRC lisp
+;; Reload system during development
+(ql:quickload :asteroid :force t)
+
+;; Restart RADIANCE server
+(radiance:shutdown)
+(asteroid:start-server)
+
+;; Clear database for testing
+(db:drop 'tracks)
+(asteroid:setup-database)
+#+END_SRC
+
+** Performance Considerations
+
+*** Development vs Production
+- Use smaller music libraries in =docker/music/= for faster testing
+- Enable debug logging in Docker containers only when needed
+- Consider memory usage with large track collections in containers
+- Test with realistic concurrent user loads using Docker scaling
+- Use =docker compose.dev.yml= for development-specific settings
+
+*** Optimization Tips
+- Cache database queries where appropriate
+- Optimize playlist generation for large libraries
+- Monitor memory usage during development
+- Profile streaming performance under load
+
+* Configuration Files
+- =radiance-core.conf.lisp= - RADIANCE framework configuration
+- =docker/liquidsoap/asteroid-radio.liq= - Liquidsoap streaming setup
+- =docker/icecast.xml= - Icecast2 server configuration
+- =docker/docker-compose.yml= - Container orchestration
+
+** Docker Development
+#+BEGIN_SRC bash
+# Start development containers
+cd docker/
+docker compose up -d
+
+# Build development container with changes
+docker compose up --build
+
+# Access container shell for debugging
+docker compose exec liquidsoap bash
+docker compose exec icecast bash
+
+# Stop all containers
+docker compose down
+#+END_SRC
+
+* Troubleshooting
+
+** Development Environment Issues
+
+*** SBCL/Quicklisp Problems
+- Ensure Quicklisp is properly installed
+- Check for conflicting Lisp installations
+- Verify system dependencies are installed
+
+*** Docker Container Issues
+- Check container status: =docker compose ps=
+- Verify Docker daemon is running: =docker info=
+- Check container logs: =docker compose logs [service]=
+- Restart containers: =docker compose restart=
+
+*** Network Access Issues
+- Check firewall settings for ports 8000, 8080
+- Verify WSL networking configuration if applicable
+- Test container networking: =docker compose exec liquidsoap ping icecast=
+- Check port binding: =docker compose port icecast 8000=
+
+*** File Permission Issues
+- Ensure =docker/music/= directory is accessible
+- Check ownership: =ls -la docker/music/=
+- Fix permissions: =sudo chown -R $USER:$USER docker/music/=
+- Verify container volume mounts in =docker-compose.yml=
+- For remote mounts: ensure network storage is accessible
+
+*** Music Library Issues
+- Check if music files exist: =find docker/music/ -name "*.mp3" -o -name "*.flac"=
+- Verify supported formats: MP3, FLAC, OGG, WAV
+- Test recursive scanning: =curl -X POST http://localhost:8080/asteroid/api/scan-library=
+- Check database for tracks: =curl http://localhost:8080/asteroid/api/tracks=
+- For large collections: avoid network mounts, use local storage (see memory about 175+ files causing timeouts)
+
+** Getting Help
+- Check existing issues in project repository
+- Review RADIANCE framework documentation
+- Consult Liquidsoap manual for streaming issues
+- Join our IRC chat room: **#asteroid.music** on **irc.libera.chat**
+- Ask questions in project discussions
+
+This development guide provides the foundation for contributing to Asteroid Radio. For deployment and production considerations, see the Installation Guide and Performance Testing documentation.
+
+* Development Stack Links
+
+** Core Technologies
+- **SBCL** (Steel Bank Common Lisp): https://www.sbcl.org/
+- **Quicklisp** (Common Lisp package manager): https://www.quicklisp.org/
+- **ASDF** (Another System Definition Facility): https://common-lisp.net/project/asdf/
+
+** Web Framework & Libraries
+- **RADIANCE** (Web framework): https://shirakumo.github.io/radiance/
+- **CLIP** (HTML templating): https://shinmera.github.io/clip/
+- **LASS** (CSS in Lisp): https://shinmera.github.io/LASS/
+- **Alexandria** (Utility library): https://alexandria.common-lisp.dev/
+- **Local-Time** (Time handling): https://common-lisp.net/project/local-time/
+
+** Audio & Streaming
+- **Docker** (Containerization): https://www.docker.com/
+- **Icecast2** (Streaming server): https://icecast.org/
+- **Liquidsoap** (Audio streaming): https://www.liquidsoap.info/
+- **TagLib** (Audio metadata): https://taglib.org/
+
+** Database & Data
+- **cl-json** (JSON handling): https://common-lisp.net/project/cl-json/
+- **cl-fad** (File/directory utilities): https://edicl.github.io/cl-fad/
+- **Ironclad** (Cryptography): https://github.com/sharplispers/ironclad
+- **Babel** (Character encoding): https://common-lisp.net/project/babel/
+
+** Development Tools
+- **Emacs** (Editor): https://www.gnu.org/software/emacs/
+- **SLIME** (Emacs Lisp IDE): https://common-lisp.net/project/slime/
+- **Slynk** (SLIME backend): https://github.com/joaotavora/sly
+- **Git** (Version control): https://git-scm.com/
+
+** System Libraries
+- **Bordeaux-Threads** (Threading): https://common-lisp.net/project/bordeaux-threads/
+- **Drakma** (HTTP client): https://edicl.github.io/drakma/
+- **CIFS-Utils** (Network file systems): https://wiki.samba.org/index.php/LinuxCIFS_utils
+
+** Documentation & Standards
+- **Common Lisp HyperSpec**: http://www.lispworks.com/documentation/HyperSpec/Front/
+- **Docker Compose**: https://docs.docker.com/compose/
+- **Org Mode** (Documentation format): https://orgmode.org/

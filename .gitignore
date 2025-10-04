@@ -17,19 +17,6 @@
 *.wx32fsl
 /slime.lisp
 asteroid
-buildapp
-quicklisp-manifest.txt
-notes/
-run-asteroid.sh
-build-sbcl.sh
-
-# Music files - don't commit audio files to repository
-*.mp3
-*.flac
-*.ogg
-*.wav
-*.m4a
-*.aac
 *.wma
 
 # Docker music directory - keep folder but ignore music files
@@ -56,15 +43,6 @@ docker-compose.yml.backup.*
 # Log files
 *.log
 logs/
+performance-logs/
 
 # Temporary files
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
-
-# Shell scripts (exclude from repository)
-*.sh
-# Exception: Docker utility scripts should be included
-!docker/start.sh
-!docker/stop.sh

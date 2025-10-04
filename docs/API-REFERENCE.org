@@ -1,0 +1,176 @@
+#+TITLE: Asteroid Radio - Interface Reference
+#+AUTHOR: Interface Team  
+#+DATE: 2025-10-03
+
+* Current Interfaces
+
+Asteroid Radio currently operates as a Docker-based streaming platform using Icecast2 and Liquidsoap. The system provides streaming interfaces and control mechanisms rather than a traditional REST API.
+
+** Available Interfaces
+
+*** Streaming Endpoints
+- **High Quality MP3**: http://localhost:8000/asteroid.mp3 (128kbps)
+- **High Quality AAC**: http://localhost:8000/asteroid.aac (96kbps) 
+- **Low Quality MP3**: http://localhost:8000/asteroid-low.mp3 (64kbps)
+
+*** Administrative Interfaces
+- **Icecast Admin**: http://localhost:8000/admin/ (admin/asteroid_admin_2024)
+- **Liquidsoap Control**: =telnet localhost 1234= (telnet interface)
+
+* Streaming Interface
+
+** Stream Access
+All streams are accessible via standard HTTP and can be played in any media player that supports internet radio streams.
+
+*** Testing Stream Connectivity
+#+BEGIN_SRC bash
+# Test all three streams
+curl -I http://localhost:8000/asteroid.mp3     # 128kbps MP3
+curl -I http://localhost:8000/asteroid.aac     # 96kbps AAC  
+curl -I http://localhost:8000/asteroid-low.mp3 # 64kbps MP3
+#+END_SRC
+
+*** Playing Streams
+#+BEGIN_SRC bashfutu
+# With VLC
+vlc http://localhost:8000/asteroid.mp3
+
+# With mpv  
+mpv http://localhost:8000/asteroid.aac
+
+# With curl (save to file)
+curl http://localhost:8000/asteroid-low.mp3 > stream.mp3
+#+END_SRC
+
+* Icecast Admin Interface
+
+** Web Administration
+Access the Icecast admin interface at http://localhost:8000/admin/
+
+*** Login Credentials
+- **Username**: admin
+- **Password**: asteroid_admin_2024
+
+*** Available Functions
+- **Stream Status**: View current streams and listener counts
+- **Mount Points**: Manage stream mount points  
+- **Listener Statistics**: Real-time listener data
+- **Server Configuration**: View server settings
+- **Log Files**: Access server logs
+
+** Icecast Status XML
+Get server status in XML format:
+#+BEGIN_SRC bash
+curl http://localhost:8000/admin/stats.xml
+#+END_SRC
+
+** Stream Statistics  
+Get individual stream stats:
+#+BEGIN_SRC bash
+curl http://localhost:8000/admin/stats.xml?mount=/asteroid.mp3
+curl http://localhost:8000/admin/stats.xml?mount=/asteroid.aac
+curl http://localhost:8000/admin/stats.xml?mount=/asteroid-low.mp3
+#+END_SRC
+
+* Liquidsoap Control Interface
+
+** Telnet Access
+Connect to Liquidsoap's telnet interface for real-time control:
+#+BEGIN_SRC bash
+telnet localhost 1234
+#+END_SRC
+
+** Available Commands
+Once connected via telnet, you can use these commands:
+
+*** Basic Information
+#+BEGIN_SRC
+help                    # List all available commands
+version                 # Show Liquidsoap version
+uptime                  # Show server uptime  
+#+END_SRC
+
+*** Source Control  
+#+BEGIN_SRC
+request.queue           # Show current queue
+request.push <uri>      # Add track to queue
+request.skip            # Skip current track
+#+END_SRC
+
+*** Metadata
+#+BEGIN_SRC
+request.metadata        # Show current track metadata
+request.on_air          # Show what's currently playing
+#+END_SRC
+
+*** Volume and Audio
+#+BEGIN_SRC
+var.get amplify         # Get current amplification level
+var.set amplify 1.2     # Set amplification level
+#+END_SRC
+
+** Telnet Scripting
+You can script Liquidsoap commands:
+#+BEGIN_SRC bash
+# Get current track info
+echo "request.metadata" | nc localhost 1234
+
+# Skip current track
+echo "request.skip" | nc localhost 1234
+
+# Check queue status
+echo "request.queue" | nc localhost 1234
+#+END_SRC
+
+* Docker Container Management
+
+** Container Status
+#+BEGIN_SRC bash
+# Check running containers
+docker compose ps
+
+# View logs
+docker compose logs icecast
+docker compose logs liquidsoap
+
+# Restart services
+docker compose restart
+#+END_SRC
+
+** Music Library Management
+#+BEGIN_SRC bash
+# Add music files (container will detect automatically)
+cp ~/path/to/music/*.mp3 docker/music/
+cp ~/path/to/music/*.flac docker/music/
+
+# Check what Liquidsoap is seeing
+echo "request.queue" | nc localhost 1234
+#+END_SRC
+
+* Future Development
+
+** Potential REST API
+A REST API may be developed in the future if deemed necessary for:
+- **Web Interface**: Browser-based control panel
+- **Mobile Applications**: Native mobile apps
+- **Third-party Integration**: External service integration
+- **User Management**: Account and playlist management
+
+Such an API would likely be built using the RADIANCE Common Lisp web framework and would provide endpoints for:
+- Track and playlist management
+- User authentication and profiles  
+- Streaming control and statistics
+- System administration
+
+However, the current Docker streaming setup provides all essential functionality through existing interfaces (Icecast admin, Liquidsoap telnet, and direct stream access).
+
+* Getting Help
+
+For support with interfaces and streaming setup:
+- Check project documentation and troubleshooting guides
+- Review Docker container logs for error messages  
+- Join our IRC chat room: **#asteroid.music** on **irc.libera.chat**
+- Submit issues with detailed system information
+
+This interface reference covers all currently available methods for interacting with Asteroid Radio's streaming infrastructure.
+#+END_SRC

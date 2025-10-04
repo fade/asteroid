@@ -234,8 +234,8 @@
       const query = document.getElementById('track-search').value.toLowerCase();
       const filtered = tracks.filter(track => 
         (track.title || '').toLowerCase().includes(query) ||
-                                            (track.artist || '').toLowerCase().includes(query) ||
-                                            (track.album || '').toLowerCase().includes(query)
+        (track.artist || '').toLowerCase().includes(query) ||
+        (track.album || '').toLowerCase().includes(query)
       );
       displayTracks(filtered);
     }
@@ -244,11 +244,9 @@
     function sortTracks() {
       const sortBy = document.getElementById('sort-tracks').value;
       const sorted = [...tracks].sort((a, b) => {
-          /* const aVal = a[sortBy] ? a[sortBy][0] : '';
-           * const bVal = b[sortBy] ? b[sortBy][0] : ''; */
-          const aVal = a[sortBy] ? a[sortBy] : '';
-          const bVal = b[sortBy] ? b[sortBy] : '';
-          return aVal.localeCompare(bVal);
+        const aVal = a[sortBy] || '';
+        const bVal = b[sortBy] || '';
+        return aVal.localeCompare(bVal);
       });
       displayTracks(sorted);
     }

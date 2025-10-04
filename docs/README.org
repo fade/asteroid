@@ -1,0 +1,116 @@
+#+TITLE: Asteroid Radio - Documentation Index
+#+AUTHOR: Documentation Team
+#+DATE: 2025-10-03
+
+* Welcome to Asteroid Radio Documentation
+
+Asteroid Radio is a modern internet radio platform designed for developers and music enthusiasts who want to run their own radio stations streaming **Asteroid Music** - the perfect soundtrack for coding and hacking sessions.
+
+* Quick Start
+
+For immediate setup, see:
+1. **[[file:INSTALLATION.org][Installation Guide]]** - Get Asteroid Radio running
+2. **[[file:DOCKER-STREAMING.org][Docker Streaming Setup]]** - Docker-based streaming infrastructure
+
+* Documentation Structure
+
+** Core Documentation
+
+*** [[file:PROJECT-OVERVIEW.org][Project Overview]]
+Complete overview of Asteroid Radio's architecture, technology stack, and vision. Start here to understand what Asteroid Radio is and how it works.
+
+*** [[file:INSTALLATION.org][Installation Guide]]  
+Comprehensive installation instructions for multiple operating systems, including system requirements, dependencies, and production deployment considerations.
+
+*** [[file:DOCKER-STREAMING.org][Docker Streaming Setup]]
+Complete guide to the Docker-based streaming infrastructure using Icecast2 and Liquidsoap. Includes container configuration, management scripts, and troubleshooting.
+
+** Development & Integration
+
+*** [[file:DEVELOPMENT.org][Development Guide]]
+Development environment setup, contributing guidelines, coding standards, and debugging procedures for developers working on Asteroid Radio.
+
+*** [[file:API-REFERENCE.org][Interface Reference]]
+Documentation of all available interfaces including streaming endpoints, Icecast admin interface, Liquidsoap telnet control, and Docker management commands.
+
+* Current System Status
+
+** What's Working Now
+- **Docker Streaming Infrastructure**: Icecast2 + Liquidsoap containers
+- **Three Quality Streams**: 128kbps MP3, 96kbps AAC, 64kbps MP3  
+- **Admin Interface**: Icecast web admin at http://localhost:8000/admin/
+- **Telnet Control**: Liquidsoap control via telnet localhost:1234
+- **Professional Features**: Crossfading, normalization, metadata support
+
+** Stream URLs (when running)
+- **High Quality MP3**: http://localhost:8000/asteroid.mp3 (128kbps)
+- **High Quality AAC**: http://localhost:8000/asteroid.aac (96kbps)
+- **Low Quality MP3**: http://localhost:8000/asteroid-low.mp3 (64kbps)
+
+* Getting Started
+
+** New Users
+1. Read the **[[file:PROJECT-OVERVIEW.org][Project Overview]]** to understand Asteroid Radio
+2. Follow the **[[file:INSTALLATION.org][Installation Guide]]** for your operating system
+3. Set up streaming with the **[[file:DOCKER-STREAMING.org][Docker Guide]]**
+
+** Developers  
+1. Review the **[[file:DEVELOPMENT.org][Development Guide]]** for setup procedures
+2. Check the **[[file:API-REFERENCE.org][Interface Reference]]** for available controls
+3. Join our IRC channel: **#asteroid.music** on **irc.libera.chat**
+
+** System Administrators
+1. Follow the **[[file:INSTALLATION.org][Installation Guide]]** production deployment section
+2. Review **[[file:DOCKER-STREAMING.org][Docker Streaming Setup]]** for container management
+3. Monitor system resources and streaming performance
+
+* Support & Community
+
+** Getting Help
+- **Documentation**: Start with the relevant guide above
+- **IRC Chat**: Join **#asteroid.music** on **irc.libera.chat**
+- **Issues**: Submit detailed bug reports with system information
+- **Logs**: Check Docker container logs for troubleshooting
+
+** Contributing
+- Review the **[[file:DEVELOPMENT.org][Development Guide]]** for contribution guidelines
+- Follow coding standards and testing procedures
+- Submit pull requests with clear descriptions
+
+* About Asteroid Music
+
+Asteroid Radio streams **Asteroid Music** - a carefully curated genre designed for developers:
+
+- **Focus-Enhancing**: Ambient, electronic, and instrumental tracks
+- **Coding-Optimized**: Rhythms that complement programming flow
+- **Hacker Culture**: Music that resonates with developer aesthetics
+- **Flow State**: Tracks selected to maintain deep concentration
+
+This isn't just background music - it's the soundtrack to the hacker lifestyle, designed by hackers for hackers who understand that the right music can elevate your code.
+
+* Technical Architecture
+
+Asteroid Radio uses a modern, containerized architecture:
+
+#+BEGIN_EXAMPLE
+┌─────────────────────────────────────────────────────────────┐
+│                    Asteroid Radio Platform                  │
+├─────────────────────────────────────────────────────────────┤
+│  Streaming Infrastructure (Docker)                         │
+│  ├── Icecast2 (HTTP Streaming Server)                     │
+│  ├── Liquidsoap (Audio Processing Pipeline)               │
+│  └── Multiple Format Support (AAC, MP3)                   │
+├─────────────────────────────────────────────────────────────┤
+│  Control Interfaces                                        │
+│  ├── Icecast Admin Web Interface                          │
+│  ├── Liquidsoap Telnet Control                            │
+│  └── Docker Container Management                          │
+└─────────────────────────────────────────────────────────────┘
+#+END_EXAMPLE
+
+For detailed technical information, see the **[[file:PROJECT-OVERVIEW.org][Project Overview]]**.
+
+---
+
+*Last Updated: 2025-10-03*
+*Documentation Version: 1.0*
