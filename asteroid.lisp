@@ -439,6 +439,16 @@
      :track-count (format nil "~d" track-count)
      :library-path "/home/glenn/Projects/Code/asteroid/music/library/")))
 
+;; User Management page (requires authentication)
+(define-page users-management #@"/admin/user" ()
+  "User Management dashboard"
+  (require-authentication)
+  (let ((template-path (merge-pathnames "template/users.chtml"
+                                       (asdf:system-source-directory :asteroid))))
+    (clip:process-to-string 
+     (plump:parse (alexandria:read-file-into-string template-path))
+     :title "🎵 ASTEROID RADIO - User Management")))
+
 (define-page player #@"/player" ()
   (let ((template-path (merge-pathnames "template/player.chtml" 
                                        (asdf:system-source-directory :asteroid))))
