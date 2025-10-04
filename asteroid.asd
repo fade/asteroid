@@ -33,6 +33,7 @@
   :components ((:file "app-utils")
                (:file "module")
                (:file "database")
+               (:file "template-utils")
                (:file "stream-media")
                (:file "user-management")
                (:file "auth-routes")

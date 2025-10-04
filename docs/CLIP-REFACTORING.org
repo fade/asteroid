@@ -1,0 +1,166 @@
+#+TITLE: CLIP Template System Refactoring
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-04
+
+* Overview
+
+This document describes the refactoring of Asteroid Radio's template system to use proper CLIP machinery with centralized template management, caching, and consistent rendering patterns.
+
+* What Changed
+
+** Before: Inconsistent Implementation
+- Manual template loading with ~plump:parse~ and ~alexandria:read-file-into-string~ in every route
+- Keyword arguments passed directly to ~clip:process-to-string~
+- No template caching - files read on every request
+- Duplicate template loading code across routes
+- Custom ~data-text~ attribute processor defined in main file
+
+** After: Proper CLIP System
+- Centralized template utilities in ~template-utils.lisp~
+- Template caching for better performance (templates loaded once)
+- Consistent ~render-template-with-plist~ function across all routes
+- Custom ~data-text~ attribute processor properly organized
+- CLIP's standard keyword argument approach
+
+* New Template Utilities
+
+** File: ~template-utils.lisp~
+
+*** Template Caching
+- ~*template-cache*~ - Hash table for parsed template DOMs
+- ~get-template~ - Load and cache templates by name
+- ~clear-template-cache~ - Clear cache during development
+
+*** Rendering Functions
+- ~render-template-with-plist~ - Main rendering function using plist-style keyword arguments
+  - Accepts template name and keyword arguments
+  - Passes arguments directly to CLIP's ~process-to-string~
+  - CLIP makes values available via ~(clip:clipboard key-name)~
+
+*** CLIP Attribute Processor
+- ~data-text~ - Custom attribute processor for text replacement
+  - Usage: ~<span data-text="key-name">Default Text</span>~
+  - Replaces element text content with clipboard value
+  - This is CLIP's standard approach for custom processors
+
+* Template Changes
+
+** Templates Remain Unchanged
+Templates continue to use ~data-text~ attributes (CLIP's standard for custom processors):
+
+- ~template/admin.chtml~
+- ~template/front-page.chtml~
+- ~template/player.chtml~
+- ~template/login.chtml~
+
+** Template Attribute Usage
+#+BEGIN_SRC html
+<!-- Templates use data-text for dynamic content -->
+<title data-text="title">🎵 ASTEROID RADIO 🎵</title>
+<h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
+<p class="status" data-text="server-status">🟢 Running</p>
+<span data-text="track-count">0</span>
+#+END_SRC
+
+*Note:* The ~data-text~ attributes remain in the rendered HTML output. This is normal CLIP behavior - the attribute is processed and content is replaced, but the attribute itself is not removed.
+
+* Route Handler Changes
+
+** Updated Files
+- ~asteroid.lisp~ - Front page, admin, player routes
+- ~auth-routes.lisp~ - Login route
+
+** Example Change
+#+BEGIN_SRC lisp
+;; Before - Manual template loading in every route
+(define-page front-page #@"/" ()
+  (let ((template-path (merge-pathnames "template/front-page.chtml" 
+                                       (asdf:system-source-directory :asteroid))))
+    (clip:process-to-string 
+     (plump:parse (alexandria:read-file-into-string template-path))
+     :title "🎵 ASTEROID RADIO 🎵"
+     :station-name "🎵 ASTEROID RADIO 🎵")))
+
+;; After - Centralized template rendering with caching
+(define-page front-page #@"/" ()
+  (render-template-with-plist "front-page"
+     :title "🎵 ASTEROID RADIO 🎵"
+     :station-name "🎵 ASTEROID RADIO 🎵"))
+#+END_SRC
+
+** How It Works
+1. ~render-template-with-plist~ calls ~get-template~ to load/cache the template
+2. Template is loaded once and cached in ~*template-cache*~
+3. Keyword arguments are passed directly to ~clip:process-to-string~
+4. CLIP's ~data-text~ processor replaces content using ~(clip:clipboard key-name)~
+
+* Benefits
+
+1. **Performance** - Template caching reduces file I/O
+2. **Consistency** - All routes use the same rendering approach
+3. **Maintainability** - Centralized template logic
+4. **Standards Compliance** - Uses CLIP's intended design patterns
+5. **Extensibility** - Easy to add new attribute processors
+6. **Debugging** - Clear separation between template loading and rendering
+
+* JavaScript Updates
+
+JavaScript selectors remain unchanged - they continue to use ~data-text~ attributes:
+#+BEGIN_SRC javascript
+// JavaScript uses data-text attributes to find and update elements
+document.querySelector('[data-text="now-playing-artist"]').textContent = artist;
+document.querySelector('[data-text="now-playing-track"]').textContent = track;
+document.querySelector('[data-text="listeners"]').textContent = listeners;
+#+END_SRC
+
+* Testing Checklist
+
+To verify the refactoring works correctly:
+
+- [X] Build executable with ~make~
+- [X] Restart Asteroid server
+- [X] Visit front page (/) - verify content displays correctly
+- [X] Verify template caching is working (templates loaded once)
+- [ ] Visit admin page (/admin) - verify status indicators work
+- [ ] Visit player page (/player) - verify player loads
+- [ ] Test login (/login) - verify error messages display
+- [ ] Check browser console for JavaScript errors
+- [ ] Verify "Now Playing" updates work
+- [ ] Test track scanning and playback
+
+** Test Results
+- ✅ Templates render correctly with ~data-text~ attributes
+- ✅ Content is properly replaced via CLIP's clipboard system
+- ✅ Template caching reduces file I/O operations
+- ✅ All routes use consistent ~render-template-with-plist~ function
+
+* Future Enhancements
+
+Potential improvements to the template system:
+
+1. **Template Composition** - Add support for including partial templates
+2. **Template Inheritance** - Implement layout/block system for shared structure
+3. **Hot Reloading** - Auto-reload templates in development mode when files change
+4. **Additional Processors** - Create more custom attribute processors as needed:
+   - ~data-if~ for conditional rendering
+   - ~data-loop~ for iterating over collections
+   - ~data-attr~ for dynamic attribute values
+5. **Template Validation** - Add linting/validation tools to catch errors early
+
+* Related TODO Items
+
+This refactoring completes the following TODO.org item:
+- [X] Templates: move our template hydration into the Clip machinery
+
+** What Was Accomplished
+- ✅ Centralized template processing utilities
+- ✅ Implemented template caching for performance
+- ✅ Standardized rendering approach across all routes
+- ✅ Properly organized CLIP attribute processors
+- ✅ Maintained CLIP's standard patterns and conventions
+
+* References
+
+- CLIP Documentation: https://shinmera.github.io/clip/
+- Plump Documentation: https://shinmera.github.io/plump/
+- Radiance Framework: https://shirakumo.github.io/radiance/

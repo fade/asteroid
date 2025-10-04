@@ -16,7 +16,7 @@
     
     <!-- Live Stream Section -->
     <div class="player-section">
-      <h2>🔴 Live Radio Stream</h2>
+      <h2 style="color: #00ff00;">🟢 Live Radio Stream</h2>
       <div class="live-player">
         <p><strong>Now Playing:</strong> <span id="live-now-playing">Loading...</span></p>
         <p><strong>Listeners:</strong> <span id="live-listeners">0</span></p>

@@ -24,7 +24,7 @@ services:
     depends_on:
       - icecast
     volumes:
-      - ./music:/app/music:ro
+      - ../music/library:/app/music:ro
       - ./asteroid-radio-docker.liq:/app/asteroid-radio.liq:ro
     restart: unless-stopped
     networks:

@@ -7,9 +7,7 @@
 (define-page login #@"/login" ()
   "User login page"
   (let ((username (radiance:post-var "username"))
-        (password (radiance:post-var "password"))
-        (template-path (merge-pathnames "template/login.chtml" 
-                                       (asdf:system-source-directory :asteroid))))
+        (password (radiance:post-var "password")))
     (if (and username password)
         ;; Handle login form submission
         (let ((user (authenticate-user username password)))
@@ -27,14 +25,12 @@
                     (format t "Session error: ~a~%" e)
                     "Login successful but session error occurred")))
               ;; Login failed - show form with error
-              (clip:process-to-string 
-               (plump:parse (alexandria:read-file-into-string template-path))
+              (render-template-with-plist "login"
                :title "Asteroid Radio - Login"
                :error-message "Invalid username or password"
                :display-error "display: block;")))
         ;; Show login form (no POST data)
-        (clip:process-to-string 
-         (plump:parse (alexandria:read-file-into-string template-path))
+        (render-template-with-plist "login"
          :title "Asteroid Radio - Login"
          :error-message ""
          :display-error "display: none;"))))
@@ -84,3 +80,30 @@
       (cl-json:encode-json-to-string
        `(("status" . "error")
          ("message" . ,(format nil "Error retrieving user stats: ~a" e)))))))
+
+;; API: Create new user (admin only)
+(define-page api-create-user #@"/api/users/create" ()
+  "API endpoint to create a new user"
+  (require-role :admin)
+  (setf (radiance:header "Content-Type") "application/json")
+  (handler-case
+      (let ((username (radiance:post-var "username"))
+            (email (radiance:post-var "email"))
+            (password (radiance:post-var "password"))
+            (role-str (radiance:post-var "role")))
+        (if (and username email password)
+            (let ((role (intern (string-upcase role-str) :keyword)))
+              (if (create-user username email password :role role :active t)
+                  (cl-json:encode-json-to-string
+                   `(("status" . "success")
+                     ("message" . ,(format nil "User ~a created successfully" username))))
+                  (cl-json:encode-json-to-string
+                   `(("status" . "error")
+                     ("message" . "Failed to create user")))))
+            (cl-json:encode-json-to-string
+             `(("status" . "error")
+               ("message" . "Missing required fields")))))
+    (error (e)
+      (cl-json:encode-json-to-string
+       `(("status" . "error")
+         ("message" . ,(format nil "Error creating user: ~a" e)))))))

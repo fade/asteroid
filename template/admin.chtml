@@ -12,6 +12,7 @@
     <div class="nav">
       <a href="/asteroid/">← Back to Main</a>
       <a href="/asteroid/player/">Web Player</a>
+      <a href="/asteroid/admin/users">👥 Users</a>
     </div>
     
     <!-- System Status -->
@@ -62,11 +63,11 @@
       <div class="admin-controls">
         <button id="scan-library" class="btn btn-primary">🔍 Scan Library</button>
         <button id="refresh-tracks" class="btn btn-secondary">🔄 Refresh Track List</button>
+        <span id="scan-status" style="margin-left: 15px; font-weight: bold;"></span>
       </div>
       
       <div class="track-stats">
         <p>Total Tracks: <span id="track-count" data-text="track-count">0</span></p>
-        <p>Library Path: <span data-text="library-path">/music/library/</span></p>
       </div>
     </div>
 
@@ -79,12 +80,26 @@
           <option value="title">Sort by Title</option>
           <option value="artist">Sort by Artist</option>
           <option value="album">Sort by Album</option>
-          <option value="added-date">Sort by Date Added</option>
+        </select>
+        <select id="tracks-per-page" class="sort-select" onchange="changeTracksPerPage()">
+          <option value="10">10 per page</option>
+          <option value="20" selected>20 per page</option>
+          <option value="50">50 per page</option>
+          <option value="100">100 per page</option>
         </select>
       </div>
       
       <div id="tracks-container" class="tracks-list">
         <div class="loading">Loading tracks...</div>
+      </div>
+      
+      <!-- Pagination Controls -->
+      <div id="pagination-controls" style="display: none; margin-top: 20px; text-align: center;">
+        <button onclick="goToPage(1)" class="btn btn-secondary">« First</button>
+        <button onclick="previousPage()" class="btn btn-secondary">‹ Prev</button>
+        <span id="page-info" style="margin: 0 15px; font-weight: bold;">Page 1 of 1</span>
+        <button onclick="nextPage()" class="btn btn-secondary">Next ›</button>
+        <button onclick="goToLastPage()" class="btn btn-secondary">Last »</button>
       </div>
     </div>
 
@@ -107,27 +122,9 @@
 
       <div class="card">
         <h3>👥 User Management</h3>
-        <div class="user-stats" id="user-stats">
-          <div class="stat-card">
-            <span class="stat-number" id="total-users">0</span>
-            <span class="stat-label">Total Users</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-number" id="active-users">0</span>
-            <span class="stat-label">Active Users</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-number" id="admin-users">0</span>
-            <span class="stat-label">Admins</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-number" id="dj-users">0</span>
-            <span class="stat-label">DJs</span>
-          </div>
-        </div>
+        <p>Manage user accounts, roles, and permissions.</p>
         <div class="controls">
-          <button class="btn btn-primary" onclick="loadUsers()">👥 Manage Users</button>
-          <button class="btn btn-secondary" onclick="showCreateUser()">➕ Create User</button>
+          <a href="/asteroid/admin/users" class="btn btn-primary">👥 Manage Users</a>
         </div>
       </div>
     </div>
@@ -137,6 +134,11 @@
     // Admin Dashboard JavaScript
     let tracks = [];
     let currentTrackId = null;
+    
+    // Pagination variables
+    let currentPage = 1;
+    let tracksPerPage = 20;
+    let filteredTracks = [];
 
     // Load tracks on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -175,16 +177,31 @@
       }
     }
 
-    // Display tracks in the UI
+    // Display tracks in the UI with pagination
     function displayTracks(trackList) {
+      filteredTracks = trackList;
+      currentPage = 1; // Reset to first page
+      renderPage();
+    }
+    
+    function renderPage() {
       const container = document.getElementById('tracks-container');
+      const paginationControls = document.getElementById('pagination-controls');
       
-      if (trackList.length === 0) {
+      if (filteredTracks.length === 0) {
         container.innerHTML = '<div class="no-tracks">No tracks found. Click "Scan Library" to add tracks.</div>';
+        paginationControls.style.display = 'none';
         return;
       }
-
-      const tracksHtml = trackList.map(track => `
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredTracks.length / tracksPerPage);
+      const startIndex = (currentPage - 1) * tracksPerPage;
+      const endIndex = startIndex + tracksPerPage;
+      const tracksToShow = filteredTracks.slice(startIndex, endIndex);
+      
+      // Render tracks for current page
+      const tracksHtml = tracksToShow.map(track => `
         <div class="track-item" data-track-id="${track.id}">
           <div class="track-info">
             <div class="track-title">${track.title || 'Unknown Title'}</div>
@@ -200,6 +217,46 @@
       `).join('');
       
       container.innerHTML = tracksHtml;
+      
+      // Update pagination controls
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages} (${filteredTracks.length} tracks)`;
+      paginationControls.style.display = totalPages > 1 ? 'block' : 'none';
+    }
+    
+    // Pagination functions
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredTracks.length / tracksPerPage);
+      if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderPage();
+      }
+    }
+    
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderPage();
+      }
+    }
+    
+    function nextPage() {
+      const totalPages = Math.ceil(filteredTracks.length / tracksPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderPage();
+      }
+    }
+    
+    function goToLastPage() {
+      const totalPages = Math.ceil(filteredTracks.length / tracksPerPage);
+      currentPage = totalPages;
+      renderPage();
+    }
+    
+    function changeTracksPerPage() {
+      tracksPerPage = parseInt(document.getElementById('tracks-per-page').value);
+      currentPage = 1;
+      renderPage();
     }
 
     // Scan music library
@@ -251,6 +308,25 @@
       displayTracks(sorted);
     }
 
+    // Audio player element
+    let audioPlayer = null;
+    
+    // Initialize audio player
+    function initAudioPlayer() {
+      if (!audioPlayer) {
+        audioPlayer = new Audio();
+        audioPlayer.addEventListener('ended', () => {
+          currentTrackId = null;
+          updatePlayerStatus();
+        });
+        audioPlayer.addEventListener('error', (e) => {
+          console.error('Audio playback error:', e);
+          alert('Error playing audio file');
+        });
+      }
+      return audioPlayer;
+    }
+    
     // Player functions
     async function playTrack(trackId) {
       if (!trackId) {
@@ -259,15 +335,11 @@
       }
       
       try {
-        const response = await fetch(`/api/play?track-id=${trackId}`, { method: 'POST' });
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-          currentTrackId = trackId;
-          updatePlayerStatus();
-        } else {
-          alert('Error playing track: ' + data.message);
-        }
+        const player = initAudioPlayer();
+        player.src = `/asteroid/tracks/${trackId}/stream`;
+        player.play();
+        currentTrackId = trackId;
+        updatePlayerStatus();
       } catch (error) {
         console.error('Play error:', error);
         alert('Error playing track');
@@ -276,8 +348,10 @@
 
     async function pausePlayer() {
       try {
-        await fetch('/api/pause', { method: 'POST' });
-        updatePlayerStatus();
+        if (audioPlayer && !audioPlayer.paused) {
+          audioPlayer.pause();
+          updatePlayerStatus();
+        }
       } catch (error) {
         console.error('Pause error:', error);
       }
@@ -285,9 +359,12 @@
 
     async function stopPlayer() {
       try {
-        await fetch('/api/stop', { method: 'POST' });
-        currentTrackId = null;
-        updatePlayerStatus();
+        if (audioPlayer) {
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+          currentTrackId = null;
+          updatePlayerStatus();
+        }
       } catch (error) {
         console.error('Stop error:', error);
       }
@@ -295,8 +372,10 @@
 
     async function resumePlayer() {
       try {
-        await fetch('/api/resume', { method: 'POST' });
-        updatePlayerStatus();
+        if (audioPlayer && audioPlayer.paused && currentTrackId) {
+          audioPlayer.play();
+          updatePlayerStatus();
+        }
       } catch (error) {
         console.error('Resume error:', error);
       }
@@ -352,152 +431,8 @@
       alert('Copy your MP3 files to: /home/glenn/Projects/Code/asteroid/music/incoming/\n\nThen click "Copy Files to Library" to add them to your music collection.');
     }
 
-    // User Management Functions
-    async function loadUserStats() {
-      try {
-        const response = await fetch('/asteroid/api/users/stats');
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-          const stats = result.stats;
-          document.getElementById('total-users').textContent = stats.total;
-          document.getElementById('active-users').textContent = stats.active;
-          document.getElementById('admin-users').textContent = stats.admins;
-          document.getElementById('dj-users').textContent = stats.djs;
-        }
-      } catch (error) {
-        console.error('Error loading user stats:', error);
-      }
-    }
-
-    async function loadUsers() {
-      try {
-        const response = await fetch('/asteroid/api/users');
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-          showUsersTable(result.users);
-        }
-      } catch (error) {
-        console.error('Error loading users:', error);
-        alert('Error loading users. Please try again.');
-      }
-    }
-
-    function showUsersTable(users) {
-      const container = document.createElement('div');
-      container.className = 'user-management';
-      container.innerHTML = `
-        <h3>User Management</h3>
-        <table class="users-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Last Login</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${users.map(user => `
-              <tr>
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>
-                  <select onchange="updateUserRole('${user.id}', this.value)">
-                    <option value="listener" ${user.role === 'listener' ? 'selected' : ''}>Listener</option>
-                    <option value="dj" ${user.role === 'dj' ? 'selected' : ''}>DJ</option>
-                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                  </select>
-                </td>
-                <td>${user.active ? '✅ Active' : '❌ Inactive'}</td>
-                <td>${user['last-login'] ? new Date(user['last-login'] * 1000).toLocaleString() : 'Never'}</td>
-                <td class="user-actions">
-                  ${user.active ? 
-                    `<button class="btn btn-danger" onclick="deactivateUser('${user.id}')">Deactivate</button>` :
-                    `<button class="btn btn-success" onclick="activateUser('${user.id}')">Activate</button>`
-                  }
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <button class="btn btn-secondary" onclick="hideUsersTable()">Close</button>
-      `;
-      
-      document.body.appendChild(container);
-    }
-
-    function hideUsersTable() {
-      const userManagement = document.querySelector('.user-management');
-      if (userManagement) {
-        userManagement.remove();
-      }
-    }
-
-    async function updateUserRole(userId, newRole) {
-      try {
-        const formData = new FormData();
-        formData.append('role', newRole);
-        
-        const response = await fetch(`/asteroid/api/users/${userId}/role`, {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-          loadUserStats();
-          alert('User role updated successfully');
-        } else {
-          alert('Error updating user role: ' + result.message);
-        }
-      } catch (error) {
-        console.error('Error updating user role:', error);
-        alert('Error updating user role. Please try again.');
-      }
-    }
-
-    async function deactivateUser(userId) {
-      if (!confirm('Are you sure you want to deactivate this user?')) {
-        return;
-      }
-      
-      try {
-        const response = await fetch(`/asteroid/api/users/${userId}/deactivate`, {
-          method: 'POST'
-        });
-        
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-          loadUsers();
-          loadUserStats();
-          alert('User deactivated successfully');
-        } else {
-          alert('Error deactivating user: ' + result.message);
-        }
-      } catch (error) {
-        console.error('Error deactivating user:', error);
-        alert('Error deactivating user. Please try again.');
-      }
-    }
-
-    function showCreateUser() {
-      window.location.href = '/asteroid/register';
-    }
-
-    // Load user stats on page load
-    loadUserStats();
-
     // Update player status every 5 seconds
     setInterval(updatePlayerStatus, 5000);
-    
-    // Update user stats every 30 seconds
-    setInterval(loadUserStats, 30000);
   </script>
 </body>
 </html>
