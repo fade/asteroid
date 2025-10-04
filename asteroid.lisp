@@ -426,13 +426,8 @@
   ;; Initialize user management before server starts
   (initialize-user-system)
   
-  ;; Scan music library on startup to load existing tracks
-  (format t "Scanning music library for existing tracks...~%")
-  (handler-case
-      (let ((tracks-added (scan-music-library)))
-        (format t "✅ Loaded ~a tracks from library~%" tracks-added))
-    (error (e)
-      (format t "⚠️  Library scan failed: ~a~%" e)))
+  ;; TODO: Add auto-scan on startup once database timing issues are resolved
+  ;; For now, use the "Scan Library" button in the admin interface
   
   (run-server))
 

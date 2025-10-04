@@ -59,6 +59,10 @@
 
 (defun insert-track-to-database (metadata)
   "Insert track metadata into database"
+  ;; Ensure tracks collection exists
+  (unless (db:collection-exists-p "tracks")
+    (error "Tracks collection does not exist in database"))
+  
   (db:insert "tracks" 
              (list (list "title" (getf metadata :title))
                    (list "artist" (getf metadata :artist))
