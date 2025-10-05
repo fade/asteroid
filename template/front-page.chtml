@@ -33,9 +33,9 @@
         <h2 style="color: #00ff00;">🟢 LIVE STREAM</h2>
         
         <!-- Stream Quality Selector -->
-        <div style="margin: 10px 0;">
-          <label for="stream-quality"><strong>Quality:</strong></label>
-          <select id="stream-quality" onchange="changeStreamQuality()" style="margin-left: 10px; padding: 5px;">
+        <div class="live-stream-quality">
+          <label for="stream-quality" ><strong>Quality:</strong></label>
+          <select id="stream-quality" onchange="changeStreamQuality()">
             <option value="aac">AAC 96kbps (Recommended)</option>
             <option value="mp3">MP3 128kbps (Compatible)</option>
             <option value="low">MP3 64kbps (Low Bandwidth)</option>

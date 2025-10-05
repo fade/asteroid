@@ -18,20 +18,20 @@
     <!-- Live Stream Section -->
     <div class="player-section">
       <h2 style="color: #00ff00;">🟢 Live Radio Stream</h2>
-      <div class="live-player">
+      <div class="live-stream">
         <p><strong>Now Playing:</strong> <span id="live-now-playing">Loading...</span></p>
         <p><strong>Listeners:</strong> <span id="live-listeners">0</span></p>
         <!-- Stream Quality Selector -->
-        <div style="margin: 10px 0;">
+        <div class="live-stream-quality">
           <label for="live-stream-quality"><strong>Quality:</strong></label>
-          <select id="live-stream-quality" onchange="changeLiveStreamQuality()" style="margin-left: 10px; padding: 5px;">
+          <select id="live-stream-quality" onchange="changeLiveStreamQuality()">
             <option value="aac">AAC 96kbps (Recommended)</option>
             <option value="mp3">MP3 128kbps (Compatible)</option>
             <option value="low">MP3 64kbps (Low Bandwidth)</option>
           </select>
         </div>
         
-        <audio id="live-stream-audio" controls style="width: 80%; margin: 10px 0;">
+        <audio id="live-stream-audio" controls style="width: 100%; margin: 10px 0;">
           <source id="live-stream-source" src="http://localhost:8000/asteroid.aac" type="audio/aac">
           Your browser does not support the audio element.
         </audio>
@@ -44,7 +44,7 @@
       <h2>Personal Track Library</h2>
       <div class="track-browser">
         <input type="text" id="search-tracks" placeholder="Search tracks..." class="search-input">
-        <select id="library-tracks-per-page" class="sort-select" onchange="changeLibraryTracksPerPage()" style="margin-left: 10px;">
+        <select id="library-tracks-per-page" class="sort-select" onchange="changeLibraryTracksPerPage()" style="margin: 10px 0px;">
           <option value="10">10 per page</option>
           <option value="20" selected>20 per page</option>
           <option value="50">50 per page</option>
