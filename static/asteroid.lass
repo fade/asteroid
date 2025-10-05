@@ -1,582 +1,584 @@
 ;; LASS stylesheet for Asteroid Radio
 ;; Hacker-themed green terminal styling
 
-(body
- ;; :font-family "Courier New, monospace"
- :font-family "VT323, monospace"
- :font-weight 400
- :font-style normal
- :background "#0a0a0a"
- :color "#00ffff"
- :margin 0
- :padding "20px"
+(:let ()
+  (:import (url "https://fonts.googleapis.com/css2?family=VT323&display=swap"))
+  (body
+    ;; :font-family "Courier New, monospace"
+    :font-family "VT323, monospace"
+    :font-weight 400
+    :font-style normal
+    :background "#0a0a0a"
+    :color "#00ffff"
+    :margin 0
+    :padding "20px"
 
- (.container
-  :max-width "1200px"
-  :margin "0 auto")
+    (.container
+     :max-width "1200px"
+     :margin "0 auto")
 
- (h1
-  :color "#4488ff"
-  :text-align center
-  :font-size "2.5em"
-  :margin-bottom "30px")
+    (h1
+     :color "#4488ff"
+     :text-align center
+     :font-size "2.5em"
+     :margin-bottom "30px")
 
- (h2
-  :color "#4488ff")
+    (h2
+     :color "#4488ff")
 
- (.status
-  :background "#1a2332"
-  :padding "20px"
-  :border "1px solid #2a3441"
-  :margin "20px 0")
+    (.status
+     :background "#1a2332"
+     :padding "20px"
+     :border "1px solid #2a3441"
+     :margin "20px 0")
 
- (.panel
-  :background "#1a2332"
-  :padding "20px"
-  :border "1px solid #2a3441"
-  :margin "20px 0")
+    (.panel
+     :background "#1a2332"
+     :padding "20px"
+     :border "1px solid #2a3441"
+     :margin "20px 0")
 
- (.nav
-  :margin "20px 0"
-  (a
-   :color "#00ffff"
-   :text-decoration none
-   :margin "0 15px"
-   :padding "10px 20px"
-   :border "1px solid #2a3441"
-   :background "#1a2332"
-   :display inline-block
-   (:hover
-    :background "#2a3441")))
-
- (.controls
-  :margin "20px 0"
-  (button
-   :background "#1a2332"
-   :color "#00ffff"
-   :border "1px solid #2a3441"
-   :padding "10px 20px"
-   :margin "5px"
-   :cursor pointer
-   (:hover
-    :background "#2a3441")))
-
- (button
-  :background "#2a3441"
-  :color "#00ffff"
-  :border "1px solid #3a4551"
-  :padding "10px 20px"
-  :margin "5px"
-  :cursor pointer
-  (:hover
-   :background "#3a4551"))
-
- (.now-playing
-  :background "#1a2332"
-  :padding "20px"
-  :border "1px solid #2a3441"
-  :margin "20px 0"
-  :font-size "1.5em"
-  :color "#4488ff")
-
- (.back
-  :color "#00ffff"
-  :text-decoration none
-  :margin-bottom "20px"
-  :display inline-block
-  (:hover
-   :text-decoration underline))
-
- ;; Player-specific styles
- (.player
-  :background "#1a2332"
-  :padding "40px"
-  :border "1px solid #2a3441"
-  :margin "40px auto"
-  :max-width "600px"
-  (.controls
-   (button
-    :padding "15px 30px"
-    :margin "10px"
-    :font-size "1.2em")))
-
- ;; Web Player Widget Styles
- (.player-section
-  :background "#1a2332"
-  :padding "25px"
-  :border "1px solid #2a3441"
-  :margin "20px 0"
-  :border-radius "5px")
-
- (.track-browser
-  :margin "15px 0")
-
- (.search-input
-  :width "100%"
-  :padding "12px"
-  :background "#0a0a0a"
-  :color "#00ffff"
-  :border "1px solid #2a3441"
-  :font-family "Courier New, monospace"
-  :font-size "14px"
-  :margin-bottom "15px")
-
- (.track-list
-  :max-height "400px"
-  :overflow-y auto
-  :border "1px solid #2a3441"
-  :background "#0a0a0a")
-
- (.track-item
-  :display flex
-  :justify-content space-between
-  :align-items center
-  :padding "12px 15px"
-  :border-bottom "1px solid #2a3441"
-  :transition "background-color 0.2s"
-  (:hover
-   :background "#1a2332"))
-
- (.track-info
-  :flex 1
-  (.track-title
-   :color "#00ffff"
-   :font-weight bold
-   :margin-bottom "4px")
-  (.track-meta
-   :color "#888"
-   :font-size "0.9em"))
-
- (.track-actions
-  :display flex
-  :gap "8px")
-
- (.audio-player
-  :text-align center)
-
- (.track-art
-  :font-size "3em"
-  :margin-right "20px"
-  :color "#4488ff")
-
- (.track-details
-  (.track-title
-   :font-size "1.4em"
-   :color "#00ffff"
-   :margin-bottom "5px")
-  (.track-artist
-   :font-size "1.1em"
-   :color "#4488ff"
-   :margin-bottom "3px")
-  (.track-album
-   :color "#888"))
-
- (.player-controls
-  :margin "20px 0"
-  :display flex
-  :justify-content center
-  :gap "10px"
-  :flex-wrap wrap)
-
- (.player-info
-  :display flex
-  :justify-content space-between
-  :align-items center
-  :margin-top "15px"
-  :padding "10px"
-  :background "#0a0a0a"
-  :border "1px solid #2a3441"
-  :border-radius "3px")
-
- (.time-display
-  :color "#00ffff"
-  :font-family "Courier New, monospace")
-
- (.volume-control
-  :display flex
-  :align-items center
-  :gap "10px"
-  (label
-   :color "#4488ff"))
-
- (.volume-slider
-  :width "100px"
-  :height "5px"
-  :background "#2a3441"
-  :outline none
-  :border-radius "3px")
-
- ;; Button styles
- (.btn
-  :background "#2a3441"
-  :color "#00ffff"
-  :border "1px solid #3a4551"
-  :padding "8px 16px"
-  :margin "3px"
-  :cursor pointer
-  :font-family "Courier New, monospace"
-  :font-size "14px"
-  :border-radius "3px"
-  :transition "all 0.2s"
-  (:hover
-   :background "#3a4551"
-   :border-color "#3a4551")
-
- (.btn-primary
-  :background "#0066cc"
-  :border-color "#0088ff"
-  (:hover
-   :background "#0088ff"))
-
- (.btn-secondary
-  :background "#444"
-  :border-color "#2a3441"
-  (:hover
-  :background "#666"))
-
- (.btn-sm
-  :padding "4px 8px"
-  :font-size "12px")
-
- (.btn.active
-  :background "#4488ff"
-  :border-color "#5599ff"
-  :color "#000")
-
- ;; Playlist and Queue styles
- (.playlist-controls
-  :margin-bottom "15px"
-  :display flex
-  :gap "10px"
-  :align-items center)
-
- (.playlist-input
-  :flex 1
-  :padding "8px 12px"
-  :background "#0a0a0a"
-  :color "#00ffff"
-  :border "1px solid #2a3441"
-  :font-family "Courier New, monospace")
-
- (.playlist-list
-  :border "1px solid #2a3441"
-  :background "#0a0a0a"
-  :min-height "100px"
-  :padding "10px")
-
- (.queue-controls
-  :margin-bottom "15px"
-  :display flex
-  :gap "10px")
-
- (.play-queue
-  :border "1px solid #2a3441"
-  :background "#0a0a0a"
-  :min-height "150px"
-  :max-height "300px"
-  :overflow-y auto
-  :padding "10px")
-
- (.queue-item
-  :display flex
-  :justify-content space-between
-  :align-items center
-  :padding "8px 10px"
-  :border-bottom "1px solid #2a3441"
-  :margin-bottom "5px"
-  (:last-child
-   :border-bottom none
-   :margin-bottom 0))
-
- (.empty-queue
-  :text-align center
-  :color "#666"
-  :padding "20px"
-  :font-style italic)
-
- (.no-tracks
-  :text-align center
-  :color "#666"
-  :padding "20px"
-  :font-style italic)
-
- (.no-playlists
-  :text-align center
-  :color "#666"
-  :padding "20px"
-  :font-style italic)
-
- (.loading
-  :text-align center
-  :color "#4488ff"
-  :padding "20px")
-
- (.error
-  :text-align center
-  :color "#ff0000"
-  :padding "20px"
-  :font-weight bold)
-
- ;; Upload interface styles
- (.upload-section
-  :margin "20px 0"
-  :padding "20px"
-  :background "#0a0a0a"
-  :border "1px solid #2a3441"
-  :border-radius "5px")
-
- (.upload-controls
-  :display flex
-  :gap "15px"
-  :align-items center
-  :margin-bottom "15px")
-
- (.upload-info
-  :color "#888"
-  :font-size "0.9em")
-
- (.upload-progress
-  :margin-top "10px"
-  :padding "10px"
-  :background "#1a2332"
-  :border "1px solid #2a3441"
-  :border-radius "3px")
-
- (.progress-bar
-  :height "20px"
-  :background "#4488ff"
-  :border-radius "3px"
-  :transition "width 0.3s ease"
-  :width "0%")
-
- (.progress-text
-  :display block
-  :margin-top "5px"
-  :color "#00ffff"
-  :font-size "0.9em")
-
- (input
-  :padding "8px 12px"
-  :background "#1a2332"
-  :color "#00ffff"
-  :border "1px solid #2a3441"
-  :border-radius "3px"
-  :font-family "Courier New, monospace")
-
- (.upload-interface
-   :margin-top 2rem
-   :padding 1.5rem
-   :background-color "#1a2332"
-   :border-radius 8px
-   :border "1px solid #2a3441"
-   
-   (h3 :color "#00ffff"
-       :margin-bottom 1rem)
-   
-   (.upload-area
-    :border "2px dashed #2a3441"
-    :border-radius 8px
-    :padding 2rem
-    :text-align center
-    :background-color "#0f0f0f"
-    :transition "border-color 0.3s ease"
-    
-    ("&:hover" :border-color "#00ffff")
-    
-    (.upload-icon :font-size 3rem
-                  :color "#666"
-                  :margin-bottom 1rem)
-    
-    (p :color "#999"
-       :margin-bottom 1rem)
-    
-    (.btn :margin-top 1rem)))
-
-  ;; Authentication Styles
-  (.auth-container
-   :display flex
-   :justify-content center
-   :align-items center
-   :min-height "60vh"
-   :padding 2rem)
-
-  (.auth-form
-   :background-color "#1a2332"
-   :border "1px solid #2a3441"
-   :border-radius 8px
-   :padding 2rem
-   :width "100%"
-   :max-width 400px
-   :box-shadow "0 4px 6px rgba(0, 0, 0, 0.3)"
-   
-   (h2 :color "#00ffff"
-       :text-align center
-       :margin-bottom 1.5rem
-       :font-size 1.5rem)
-   
-   (h3 :color "#00ffff"
-       :margin-bottom 1rem
-       :font-size 1.2rem))
-
-  (.form-group
-   :margin-bottom 1rem
-   
-   (label :display block
-          :color "#ccc"
-          :margin-bottom 0.5rem
-          :font-weight bold)
-   
-   (input :width "100%"
-          :padding 0.75rem
-          :background-color "#0f0f0f"
-          :border "1px solid #2a3441"
-          :border-radius 4px
-          :color "#fff"
-          :font-size 1rem
-          :box-sizing border-box
-          
-          ("&:focus" :border-color "#00ffff"
-                     :outline none
-                     :box-shadow "0 0 0 2px rgba(0, 255, 0, 0.2)")))
-
-  (.form-actions
-   :display flex
-   :gap 1rem
-   :margin-top 1.5rem)
-
-  (.message
-   :padding 0.75rem
-   :border-radius 4px
-   :margin-top 1rem
-   :text-align center
-   :font-weight bold
-   
-   ("&.success" :background-color "rgba(0, 255, 0, 0.1)"
-                :border "1px solid #00ffff"
-                :color "#00ffff")
-   
-   ("&.error" :background-color "rgba(255, 0, 0, 0.1)"
-              :border "1px solid #ff0000"
-              :color "#ff0000"))
-
-  (.auth-link
-   :text-align center
-   :margin-top 1.5rem
-   :color "#999"
-   
-   (a :color "#00ffff"
+    (.nav
+     :margin "20px 0"
+     (a
+      :color "#00ffff"
       :text-decoration none
-      
-      ("&:hover" :text-decoration underline)))
+      :margin "0 15px"
+      :padding "10px 20px"
+      :border "1px solid #2a3441"
+      :background "#1a2332"
+      :display inline-block
+      (:hover
+          :background "#2a3441")))
 
-  ;; Profile Styles
-  (.profile-container
-   :max-width 600px
-   :margin "2rem auto"
-   :padding 0 1rem)
+    (.controls
+     :margin "20px 0"
+     (button
+      :background "#1a2332"
+      :color "#00ffff"
+      :border "1px solid #2a3441"
+      :padding "10px 20px"
+      :margin "5px"
+      :cursor pointer
+      (:hover
+          :background "#2a3441")))
 
-  (.profile-card
-   :background-color "#1a2332"
-   :border "1px solid #2a3441"
-   :border-radius 8px
-   :padding 2rem
-   :margin-bottom 2rem
-   
-   (h2 :color "#00ffff"
-       :margin-bottom 1.5rem
-       :text-align center))
+    (button
+     :background "#2a3441"
+     :color "#00ffff"
+     :border "1px solid #3a4551"
+     :padding "10px 20px"
+     :margin "5px"
+     :cursor pointer
+     (:hover
+      :background "#3a4551"))
 
-  (.profile-info
-   :margin-bottom 2rem)
+    (.now-playing
+     :background "#1a2332"
+     :padding "20px"
+     :border "1px solid #2a3441"
+     :margin "20px 0"
+     :font-size "1.5em"
+     :color "#4488ff")
 
-  (.info-group
-   :display flex
-   :justify-content space-between
-   :align-items center
-   :padding 0.75rem 0
-   :border-bottom "1px solid #2a3441"
-   
-   ("&:last-child" :border-bottom none)
-   
-   (label :color "#ccc"
-          :font-weight bold)
-   
-   (span :color "#fff"))
+    (.back
+     :color "#00ffff"
+     :text-decoration none
+     :margin-bottom "20px"
+     :display inline-block
+     (:hover
+      :text-decoration underline))
 
-  (.role-badge
-   :background-color "#00ffff"
-   :color "#000"
-   :padding "0.25rem 0.5rem"
-   :border-radius 4px
-   :font-size 0.875rem
-   :font-weight bold)
+    ;; Player-specific styles
+    (.player
+     :background "#1a2332"
+     :padding "40px"
+     :border "1px solid #2a3441"
+     :margin "40px auto"
+     :max-width "600px"
+     (.controls
+      (button
+          :padding "15px 30px"
+          :margin "10px"
+          :font-size "1.2em")))
 
-  (.profile-actions
-   :display flex
-   :gap 1rem
-   :justify-content center)
+    ;; Web Player Widget Styles
+    (.player-section
+     :background "#1a2332"
+     :padding "25px"
+     :border "1px solid #2a3441"
+     :margin "20px 0"
+     :border-radius "5px")
 
-  ;; User Management Styles
-  (.user-management
-   :margin-top 2rem)
+    (.track-browser
+     :margin "15px 0")
 
-  (.users-table
-   :width "100%"
-   :border-collapse collapse
-   :background-color "#1a2332"
-   :border "1px solid #2a3441"
-   :border-radius 8px
-   :overflow hidden
-   
-   (thead
-    :background-color "#0f0f0f"
-    
-    (th :padding 1rem
-        :text-align left
-        :color "#00ffff"
-        :font-weight bold
-        :border-bottom "1px solid #2a3441"))
-   
-   (tbody
-    (tr :border-bottom "1px solid #2a3441"
-        
-        ("&:hover" :background-color "#222")
-        
-        (td :padding 1rem
-            :color "#fff"
-            :vertical-align middle))
-    
-    (.user-actions
+    (.search-input
+     :width "100%"
+     :padding "12px"
+     :background "#0a0a0a"
+     :color "#00ffff"
+     :border "1px solid #2a3441"
+     :font-family "Courier New, monospace"
+     :font-size "14px"
+     :margin-bottom "15px")
+
+    (.track-list
+     :max-height "400px"
+     :overflow-y auto
+     :border "1px solid #2a3441"
+     :background "#0a0a0a")
+
+    (.track-item
      :display flex
-     :gap 0.5rem
-     
-     (.btn :padding "0.25rem 0.5rem"
-           :font-size 0.875rem))))
+     :justify-content space-between
+     :align-items center
+     :padding "12px 15px"
+     :border-bottom "1px solid #2a3441"
+     :transition "background-color 0.2s"
+     (:hover
+      :background "#1a2332"))
 
-  (.user-stats
-   :display grid
-   :grid-template-columns "repeat(auto-fit, minmax(150px, 1fr))"
-   :gap 1rem
-   :margin-bottom 2rem)
+    (.track-info
+     :flex 1
+     (.track-title
+      :color "#00ffff"
+      :font-weight bold
+      :margin-bottom "4px")
+     (.track-meta
+      :color "#888"
+      :font-size "0.9em"))
 
-  (.stat-card
-   :background-color "#1a2332"
-   :border "1px solid #2a3441"
-   :border-radius 8px
-   :padding 1rem
-   :text-align center
-   
-   (.stat-number :font-size 2rem
-                 :font-weight bold
-                 :color "#00ffff"
-                 :display block)
-   
-   (.stat-label :color "#ccc"
-                :font-size 0.875rem
-                :margin-top 0.5rem)))
+    (.track-actions
+     :display flex
+     :gap "8px")
 
- ;; Center alignment for player page
-;; (body.player-page
-;;  :text-align center)
+    (.audio-player
+     :text-align center)
 
-) ;; Close main body block
+    (.track-art
+     :font-size "3em"
+     :margin-right "20px"
+     :color "#4488ff")
+
+    (.track-details
+     (.track-title
+      :font-size "1.4em"
+      :color "#00ffff"
+      :margin-bottom "5px")
+     (.track-artist
+      :font-size "1.1em"
+      :color "#4488ff"
+      :margin-bottom "3px")
+     (.track-album
+      :color "#888"))
+
+    (.player-controls
+     :margin "20px 0"
+     :display flex
+     :justify-content center
+     :gap "10px"
+     :flex-wrap wrap)
+
+    (.player-info
+     :display flex
+     :justify-content space-between
+     :align-items center
+     :margin-top "15px"
+     :padding "10px"
+     :background "#0a0a0a"
+     :border "1px solid #2a3441"
+     :border-radius "3px")
+
+    (.time-display
+     :color "#00ffff"
+     :font-family "Courier New, monospace")
+
+    (.volume-control
+     :display flex
+     :align-items center
+     :gap "10px"
+     (label
+      :color "#4488ff"))
+
+    (.volume-slider
+     :width "100px"
+     :height "5px"
+     :background "#2a3441"
+     :outline none
+     :border-radius "3px")
+
+    ;; Button styles
+    (.btn
+     :background "#2a3441"
+     :color "#00ffff"
+     :border "1px solid #3a4551"
+     :padding "8px 16px"
+     :margin "3px"
+     :cursor pointer
+     :font-family "Courier New, monospace"
+     :font-size "14px"
+     :border-radius "3px"
+     :transition "all 0.2s"
+     (:hover
+      :background "#3a4551"
+      :border-color "#3a4551")
+
+     (.btn-primary
+      :background "#0066cc"
+      :border-color "#0088ff"
+      (:hover
+       :background "#0088ff"))
+
+     (.btn-secondary
+      :background "#444"
+      :border-color "#2a3441"
+      (:hover
+       :background "#666"))
+
+     (.btn-sm
+      :padding "4px 8px"
+      :font-size "12px")
+
+     (.btn.active
+      :background "#4488ff"
+      :border-color "#5599ff"
+      :color "#000")
+
+    ;; Playlist and Queue styles
+     (.playlist-controls
+      :margin-bottom "15px"
+      :display flex
+      :gap "10px"
+      :align-items center)
+
+     (.playlist-input
+      :flex 1
+      :padding "8px 12px"
+      :background "#0a0a0a"
+      :color "#00ffff"
+      :border "1px solid #2a3441"
+      :font-family "Courier New, monospace")
+
+     (.playlist-list
+      :border "1px solid #2a3441"
+      :background "#0a0a0a"
+      :min-height "100px"
+      :padding "10px")
+
+     (.queue-controls
+      :margin-bottom "15px"
+      :display flex
+      :gap "10px")
+
+     (.play-queue
+      :border "1px solid #2a3441"
+      :background "#0a0a0a"
+      :min-height "150px"
+      :max-height "300px"
+      :overflow-y auto
+      :padding "10px")
+
+     (.queue-item
+      :display flex
+      :justify-content space-between
+      :align-items center
+      :padding "8px 10px"
+      :border-bottom "1px solid #2a3441"
+      :margin-bottom "5px"
+      (:last-child
+       :border-bottom none
+       :margin-bottom 0))
+
+     (.empty-queue
+      :text-align center
+      :color "#666"
+      :padding "20px"
+      :font-style italic)
+
+     (.no-tracks
+      :text-align center
+      :color "#666"
+      :padding "20px"
+      :font-style italic)
+
+     (.no-playlists
+      :text-align center
+      :color "#666"
+      :padding "20px"
+      :font-style italic)
+
+     (.loading
+      :text-align center
+      :color "#4488ff"
+      :padding "20px")
+
+     (.error
+      :text-align center
+      :color "#ff0000"
+      :padding "20px"
+      :font-weight bold)
+
+    ;; Upload interface styles
+     (.upload-section
+      :margin "20px 0"
+      :padding "20px"
+      :background "#0a0a0a"
+      :border "1px solid #2a3441"
+      :border-radius "5px")
+
+     (.upload-controls
+      :display flex
+      :gap "15px"
+      :align-items center
+      :margin-bottom "15px")
+
+     (.upload-info
+      :color "#888"
+      :font-size "0.9em")
+
+     (.upload-progress
+      :margin-top "10px"
+      :padding "10px"
+      :background "#1a2332"
+      :border "1px solid #2a3441"
+      :border-radius "3px")
+
+     (.progress-bar
+      :height "20px"
+      :background "#4488ff"
+      :border-radius "3px"
+      :transition "width 0.3s ease"
+      :width "0%")
+
+     (.progress-text
+      :display block
+      :margin-top "5px"
+      :color "#00ffff"
+      :font-size "0.9em")
+
+     (input
+      :padding "8px 12px"
+      :background "#1a2332"
+      :color "#00ffff"
+      :border "1px solid #2a3441"
+      :border-radius "3px"
+      :font-family "Courier New, monospace")
+
+     (.upload-interface
+      :margin-top 2rem
+      :padding 1.5rem
+      :background-color "#1a2332"
+      :border-radius 8px
+      :border "1px solid #2a3441"
+    
+      (h3 :color "#00ffff"
+          :margin-bottom 1rem)
+    
+      (.upload-area
+          :border "2px dashed #2a3441"
+          :border-radius 8px
+          :padding 2rem
+          :text-align center
+          :background-color "#0f0f0f"
+          :transition "border-color 0.3s ease"
+        
+          ("&:hover" :border-color "#00ffff")
+        
+          (.upload-icon :font-size 3rem
+                      :color "#666"
+                      :margin-bottom 1rem)
+        
+          (p :color "#999"
+           :margin-bottom 1rem)
+        
+          (.btn :margin-top 1rem)))
+
+    ;; Authentication Styles
+     (.auth-container
+      :display flex
+      :justify-content center
+      :align-items center
+      :min-height "60vh"
+      :padding 2rem)
+
+     (.auth-form
+      :background-color "#1a2332"
+      :border "1px solid #2a3441"
+      :border-radius 8px
+      :padding 2rem
+      :width "100%"
+      :max-width 400px
+      :box-shadow "0 4px 6px rgba(0, 0, 0, 0.3)"
+    
+      (h2 :color "#00ffff"
+          :text-align center
+          :margin-bottom 1.5rem
+          :font-size 1.5rem)
+    
+      (h3 :color "#00ffff"
+          :margin-bottom 1rem
+          :font-size 1.2rem))
+
+     (.form-group
+      :margin-bottom 1rem
+    
+      (label :display block
+              :color "#ccc"
+              :margin-bottom 0.5rem
+              :font-weight bold)
+    
+      (input :width "100%"
+              :padding 0.75rem
+              :background-color "#0f0f0f"
+              :border "1px solid #2a3441"
+              :border-radius 4px
+              :color "#fff"
+              :font-size 1rem
+              :box-sizing border-box
+            
+              ("&:focus" :border-color "#00ffff"
+                          :outline none
+                          :box-shadow "0 0 0 2px rgba(0, 255, 0, 0.2)")))
+
+     (.form-actions
+      :display flex
+      :gap 1rem
+      :margin-top 1.5rem)
+
+     (.message
+      :padding 0.75rem
+      :border-radius 4px
+      :margin-top 1rem
+      :text-align center
+      :font-weight bold
+    
+      ("&.success" :background-color "rgba(0, 255, 0, 0.1)"
+                      :border "1px solid #00ffff"
+                      :color "#00ffff")
+    
+      ("&.error" :background-color "rgba(255, 0, 0, 0.1)"
+                  :border "1px solid #ff0000"
+                  :color "#ff0000"))
+
+     (.auth-link
+      :text-align center
+      :margin-top 1.5rem
+      :color "#999"
+    
+      (a :color "#00ffff"
+          :text-decoration none
+        
+          ("&:hover" :text-decoration underline)))
+
+    ;; Profile Styles
+     (.profile-container
+      :max-width 600px
+      :margin "2rem auto"
+      :padding 0 1rem)
+
+     (.profile-card
+      :background-color "#1a2332"
+      :border "1px solid #2a3441"
+      :border-radius 8px
+      :padding 2rem
+      :margin-bottom 2rem
+    
+      (h2 :color "#00ffff"
+          :margin-bottom 1.5rem
+          :text-align center))
+
+     (.profile-info
+      :margin-bottom 2rem)
+
+     (.info-group
+      :display flex
+      :justify-content space-between
+      :align-items center
+      :padding 0.75rem 0
+      :border-bottom "1px solid #2a3441"
+    
+      ("&:last-child" :border-bottom none)
+    
+      (label :color "#ccc"
+              :font-weight bold)
+    
+      (span :color "#fff"))
+
+     (.role-badge
+      :background-color "#00ffff"
+      :color "#000"
+      :padding "0.25rem 0.5rem"
+      :border-radius 4px
+      :font-size 0.875rem
+      :font-weight bold)
+
+     (.profile-actions
+      :display flex
+      :gap 1rem
+      :justify-content center)
+
+    ;; User Management Styles
+     (.user-management
+      :margin-top 2rem)
+
+     (.users-table
+      :width "100%"
+      :border-collapse collapse
+      :background-color "#1a2332"
+      :border "1px solid #2a3441"
+      :border-radius 8px
+      :overflow hidden
+    
+      (thead
+          :background-color "#0f0f0f"
+        
+          (th :padding 1rem
+              :text-align left
+              :color "#00ffff"
+              :font-weight bold
+              :border-bottom "1px solid #2a3441"))
+    
+      (tbody
+          (tr :border-bottom "1px solid #2a3441"
+            
+              ("&:hover" :background-color "#222")
+            
+              (td :padding 1rem
+                  :color "#fff"
+                  :vertical-align middle))
+        
+          (.user-actions
+           :display flex
+           :gap 0.5rem
+        
+           (.btn :padding "0.25rem 0.5rem"
+               :font-size 0.875rem))))
+
+     (.user-stats
+      :display grid
+      :grid-template-columns "repeat(auto-fit, minmax(150px, 1fr))"
+      :gap 1rem
+      :margin-bottom 2rem)
+
+     (.stat-card
+      :background-color "#1a2332"
+      :border "1px solid #2a3441"
+      :border-radius 8px
+      :padding 1rem
+      :text-align center
+    
+      (.stat-number :font-size 2rem
+                      :font-weight bold
+                      :color "#00ffff"
+                      :display block)
+    
+      (.stat-label :color "#ccc"
+                      :font-size 0.875rem
+                      :margin-top 0.5rem)))))
+
+    ;; Center alignment for player page
+    ;; (body.player-page
+    ;;  :text-align center)
+
+     ;; Close main body block
