@@ -8,6 +8,7 @@ body{
     color: #00ffff;
     margin: 0;
     padding: 20px;
+    box-sizing: boder-box;
 }
 
 body .container{
@@ -47,14 +48,19 @@ body .nav{
 body .nav a{
     color: #00ffff;
     text-decoration: none;
-    margin: 0 15px;
+    margin: 0 10px;
     padding: 10px 20px;
     border: 1px solid #2a3441;
     background: #1a2332;
+    cursor: pointer;
     display: inline-block;
 }
 
-body .nav a :hover{
+body .nav a:first-child{
+    margin-left: 0;
+}
+
+body .nav a:hover{
     background: #2a3441;
 }
 
@@ -71,7 +77,7 @@ body .controls button{
     cursor: pointer;
 }
 
-body .controls button :hover{
+body .controls button:hover{
     background: #2a3441;
 }
 
@@ -84,7 +90,7 @@ body button{
     cursor: pointer;
 }
 
-body button :hover{
+body button:hover{
     background: #3a4551;
 }
 
@@ -95,6 +101,7 @@ body .now-playing{
     margin: 20px 0;
     font-size: 1.5em;
     color: #4488ff;
+    overflow: scroll;
 }
 
 body .back{
@@ -104,7 +111,7 @@ body .back{
     display: inline-block;
 }
 
-body .back :hover{
+body .back:hover{
     text-decoration: underline;
 }
 
@@ -132,6 +139,27 @@ body .player-section{
     border-radius: 5px;
 }
 
+body .player-section .live-stream{
+    overflow: scroll;
+}
+
+
+
+
+
+body .live-stream .live-stream-quality label,
+body .live-stream .live-stream-quality select{
+    margin: 10px 0;
+}
+
+body .live-stream .live-stream-quality label{
+    margin-right: 10px;
+}
+
+body .live-stream .live-stream-quality select{
+    padding: 5px;
+}
+
 body .track-browser{
     margin: 15px 0;
 }
@@ -145,6 +173,12 @@ body .search-input{
     font-family: Courier New, monospace;
     font-size: 14px;
     margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+body .sort-select{
+    padding: 0.25rem;
+    margin-right: 10px;
 }
 
 body .track-list{
@@ -165,10 +199,6 @@ body .track-item{
     -webkit-transition: background-color 0.2s;
     -ms-transition: background-color 0.2s;
     transition: background-color 0.2s;
-}
-
-body .track-item :hover{
-    background: #1a2332;
 }
 
 body .track-info{
@@ -278,17 +308,19 @@ body .btn{
     transition: all 0.2s;
 }
 
-body .btn :hover{
+body .btn:hover{
     background: #3a4551;
     border-color: #3a4551;
 }
+
+
 
 body .btn .btn-primary{
     background: #0066cc;
     border-color: #0088ff;
 }
 
-body .btn .btn-primary :hover{
+body .btn .btn-primary:hover{
     background: #0088ff;
 }
 
@@ -297,7 +329,7 @@ body .btn .btn-secondary{
     border-color: #2a3441;
 }
 
-body .btn .btn-secondary :hover{
+body .btn .btn-secondary:hover{
     background: #666;
 }
 
@@ -359,7 +391,7 @@ body .queue-item{
     margin-bottom: 5px;
 }
 
-body .queue-item :last-child{
+body .queue-item:last-child{
     border-bottom: none;
     margin-bottom: 0;
 }
@@ -480,10 +512,6 @@ body .upload-interface .upload-area{
     transition: border-color 0.3s ease;
 }
 
-body .upload-interface .upload-area &:hover{
-    border-color: #00ffff;
-}
-
 body .upload-interface .upload-area .upload-icon{
     font-size: 3rem;
     color: #666;
@@ -497,6 +525,10 @@ body .upload-interface .upload-area p{
 
 body .upload-interface .upload-area .btn{
     margin-top: 1rem;
+}
+
+body .upload-interface .upload-area:hover{
+    border-color: #00ffff;
 }
 
 body .auth-container{
@@ -556,7 +588,7 @@ body .form-group input{
     box-sizing: border-box;
 }
 
-body .form-group input &:focus{
+body .form-group input:focus{
     border-color: #00ffff;
     outline: none;
     -moz-box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
@@ -580,13 +612,13 @@ body .message{
     font-weight: bold;
 }
 
-body .message &.success{
+body .message.success{
     background-color: rgba(0, 255, 0, 0.1);
     border: 1px solid #00ffff;
     color: #00ffff;
 }
 
-body .message &.error{
+body .message.error{
     background-color: rgba(255, 0, 0, 0.1);
     border: 1px solid #ff0000;
     color: #ff0000;
@@ -603,7 +635,7 @@ body .auth-link a{
     text-decoration: none;
 }
 
-body .auth-link a &:hover{
+body .auth-link a:hover{
     text-decoration: underline;
 }
 
@@ -639,10 +671,6 @@ body .info-group{
     border-bottom: 1px solid #2a3441;
 }
 
-body .info-group &:last-child{
-    border-bottom: none;
-}
-
 body .info-group label{
     color: #ccc;
     font-weight: bold;
@@ -650,6 +678,10 @@ body .info-group label{
 
 body .info-group span{
     color: #fff;
+}
+
+body .info-group:last-child{
+    border-bottom: none;
 }
 
 body .role-badge{
@@ -698,14 +730,14 @@ body .users-table tbody tr{
     border-bottom: 1px solid #2a3441;
 }
 
-body .users-table tbody tr &:hover{
-    background-color: #222;
-}
-
 body .users-table tbody tr td{
     padding: 1rem;
     color: #fff;
     vertical-align: middle;
+}
+
+body .users-table tbody tr:hover{
+    background-color: #222;
 }
 
 body .users-table tbody .user-actions{
