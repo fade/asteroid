@@ -30,8 +30,8 @@
         </form>
         <div class="panel" style="margin-top: 20px; text-align: center;">
           <strong style="color: #ff6600;">Default Admin Credentials:</strong><br>
-          Username: <code style="color: #00ff00;">admin</code><br>
-          Password: <code style="color: #00ff00;">asteroid123</code>
+          Username: <br><code style="color: #00ff00;">admin</code><br>
+          Password: <br><code style="color: #00ff00;">asteroid123</code>
         </div>
       </div>
     </div>

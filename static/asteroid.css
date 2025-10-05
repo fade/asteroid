@@ -312,14 +312,14 @@ body .btn .btn.active{
     color: #000;
 }
 
-body .btn .playlist-controls{
+body .playlist-controls{
     margin-bottom: 15px;
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-body .btn .playlist-input{
+body .playlist-input{
     flex: 1;
     padding: 8px 12px;
     background: #0a0a0a;
@@ -328,20 +328,20 @@ body .btn .playlist-input{
     font-family: Courier New, monospace;
 }
 
-body .btn .playlist-list{
+body .playlist-list{
     border: 1px solid #2a3441;
     background: #0a0a0a;
     min-height: 100px;
     padding: 10px;
 }
 
-body .btn .queue-controls{
+body .queue-controls{
     margin-bottom: 15px;
     display: flex;
     gap: 10px;
 }
 
-body .btn .play-queue{
+body .play-queue{
     border: 1px solid #2a3441;
     background: #0a0a0a;
     min-height: 150px;
@@ -350,7 +350,7 @@ body .btn .play-queue{
     padding: 10px;
 }
 
-body .btn .queue-item{
+body .queue-item{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -359,46 +359,46 @@ body .btn .queue-item{
     margin-bottom: 5px;
 }
 
-body .btn .queue-item :last-child{
+body .queue-item :last-child{
     border-bottom: none;
     margin-bottom: 0;
 }
 
-body .btn .empty-queue{
+body .empty-queue{
     text-align: center;
     color: #666;
     padding: 20px;
     font-style: italic;
 }
 
-body .btn .no-tracks{
+body .no-tracks{
     text-align: center;
     color: #666;
     padding: 20px;
     font-style: italic;
 }
 
-body .btn .no-playlists{
+body .no-playlists{
     text-align: center;
     color: #666;
     padding: 20px;
     font-style: italic;
 }
 
-body .btn .loading{
+body .loading{
     text-align: center;
     color: #4488ff;
     padding: 20px;
 }
 
-body .btn .error{
+body .error{
     text-align: center;
     color: #ff0000;
     padding: 20px;
     font-weight: bold;
 }
 
-body .btn .upload-section{
+body .upload-section{
     margin: 20px 0;
     padding: 20px;
     background: #0a0a0a;
@@ -406,19 +406,19 @@ body .btn .upload-section{
     border-radius: 5px;
 }
 
-body .btn .upload-controls{
+body .upload-controls{
     display: flex;
     gap: 15px;
     align-items: center;
     margin-bottom: 15px;
 }
 
-body .btn .upload-info{
+body .upload-info{
     color: #888;
     font-size: 0.9em;
 }
 
-body .btn .upload-progress{
+body .upload-progress{
     margin-top: 10px;
     padding: 10px;
     background: #1a2332;
@@ -426,7 +426,7 @@ body .btn .upload-progress{
     border-radius: 3px;
 }
 
-body .btn .progress-bar{
+body .progress-bar{
     height: 20px;
     background: #4488ff;
     border-radius: 3px;
@@ -438,14 +438,14 @@ body .btn .progress-bar{
     width: 0%;
 }
 
-body .btn .progress-text{
+body .progress-text{
     display: block;
     margin-top: 5px;
     color: #00ffff;
     font-size: 0.9em;
 }
 
-body .btn input{
+body input{
     padding: 8px 12px;
     background: #1a2332;
     color: #00ffff;
@@ -454,7 +454,7 @@ body .btn input{
     font-family: Courier New, monospace;
 }
 
-body .btn .upload-interface{
+body .upload-interface{
     margin-top: 2rem;
     padding: 1.5rem;
     background-color: #1a2332;
@@ -462,12 +462,12 @@ body .btn .upload-interface{
     border: 1px solid #2a3441;
 }
 
-body .btn .upload-interface h3{
+body .upload-interface h3{
     color: #00ffff;
     margin-bottom: 1rem;
 }
 
-body .btn .upload-interface .upload-area{
+body .upload-interface .upload-area{
     border: 2px dashed #2a3441;
     border-radius: 8px;
     padding: 2rem;
@@ -480,26 +480,26 @@ body .btn .upload-interface .upload-area{
     transition: border-color 0.3s ease;
 }
 
-body .btn .upload-interface .upload-area &:hover{
+body .upload-interface .upload-area &:hover{
     border-color: #00ffff;
 }
 
-body .btn .upload-interface .upload-area .upload-icon{
+body .upload-interface .upload-area .upload-icon{
     font-size: 3rem;
     color: #666;
     margin-bottom: 1rem;
 }
 
-body .btn .upload-interface .upload-area p{
+body .upload-interface .upload-area p{
     color: #999;
     margin-bottom: 1rem;
 }
 
-body .btn .upload-interface .upload-area .btn{
+body .upload-interface .upload-area .btn{
     margin-top: 1rem;
 }
 
-body .btn .auth-container{
+body .auth-container{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -507,7 +507,7 @@ body .btn .auth-container{
     padding: 2rem;
 }
 
-body .btn .auth-form{
+body .auth-form{
     background-color: #1a2332;
     border: 1px solid #2a3441;
     border-radius: 8px;
@@ -521,31 +521,31 @@ body .btn .auth-form{
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-body .btn .auth-form h2{
+body .auth-form h2{
     color: #00ffff;
     text-align: center;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
 }
 
-body .btn .auth-form h3{
+body .auth-form h3{
     color: #00ffff;
     margin-bottom: 1rem;
     font-size: 1.2rem;
 }
 
-body .btn .form-group{
-    margin-bottom: 1rem;
+body .form-group{
+    margin-bottom: 3rem;
 }
 
-body .btn .form-group label{
+body .form-group label{
     display: block;
     color: #ccc;
     margin-bottom: 0.5rem;
     font-weight: bold;
 }
 
-body .btn .form-group input{
+body .form-group input{
     width: 100%;
     padding: 0.75rem;
     background-color: #0f0f0f;
@@ -556,7 +556,7 @@ body .btn .form-group input{
     box-sizing: border-box;
 }
 
-body .btn .form-group input &:focus{
+body .form-group input &:focus{
     border-color: #00ffff;
     outline: none;
     -moz-box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
@@ -566,13 +566,13 @@ body .btn .form-group input &:focus{
     box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
 }
 
-body .btn .form-actions{
+body .form-actions{
     display: flex;
     gap: 1rem;
     margin-top: 1.5rem;
 }
 
-body .btn .message{
+body .message{
     padding: 0.75rem;
     border-radius: 4px;
     margin-top: 1rem;
@@ -580,40 +580,40 @@ body .btn .message{
     font-weight: bold;
 }
 
-body .btn .message &.success{
+body .message &.success{
     background-color: rgba(0, 255, 0, 0.1);
     border: 1px solid #00ffff;
     color: #00ffff;
 }
 
-body .btn .message &.error{
+body .message &.error{
     background-color: rgba(255, 0, 0, 0.1);
     border: 1px solid #ff0000;
     color: #ff0000;
 }
 
-body .btn .auth-link{
+body .auth-link{
     text-align: center;
     margin-top: 1.5rem;
     color: #999;
 }
 
-body .btn .auth-link a{
+body .auth-link a{
     color: #00ffff;
     text-decoration: none;
 }
 
-body .btn .auth-link a &:hover{
+body .auth-link a &:hover{
     text-decoration: underline;
 }
 
-body .btn .profile-container{
+body .profile-container{
     max-width: 600px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-body .btn .profile-card{
+body .profile-card{
     background-color: #1a2332;
     border: 1px solid #2a3441;
     border-radius: 8px;
@@ -621,17 +621,17 @@ body .btn .profile-card{
     margin-bottom: 2rem;
 }
 
-body .btn .profile-card h2{
+body .profile-card h2{
     color: #00ffff;
     margin-bottom: 1.5rem;
     text-align: center;
 }
 
-body .btn .profile-info{
+body .profile-info{
     margin-bottom: 2rem;
 }
 
-body .btn .info-group{
+body .info-group{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -639,20 +639,20 @@ body .btn .info-group{
     border-bottom: 1px solid #2a3441;
 }
 
-body .btn .info-group &:last-child{
+body .info-group &:last-child{
     border-bottom: none;
 }
 
-body .btn .info-group label{
+body .info-group label{
     color: #ccc;
     font-weight: bold;
 }
 
-body .btn .info-group span{
+body .info-group span{
     color: #fff;
 }
 
-body .btn .role-badge{
+body .role-badge{
     background-color: #00ffff;
     color: #000;
     padding: 0.25rem 0.5rem;
@@ -661,17 +661,17 @@ body .btn .role-badge{
     font-weight: bold;
 }
 
-body .btn .profile-actions{
+body .profile-actions{
     display: flex;
     gap: 1rem;
     justify-content: center;
 }
 
-body .btn .user-management{
+body .user-management{
     margin-top: 2rem;
 }
 
-body .btn .users-table{
+body .users-table{
     width: 100%;
     border-collapse: collapse;
     background-color: #1a2332;
@@ -680,11 +680,11 @@ body .btn .users-table{
     overflow: hidden;
 }
 
-body .btn .users-table thead{
+body .users-table thead{
     background-color: #0f0f0f;
 }
 
-body .btn .users-table thead th{
+body .users-table thead th{
     padding: 1rem;
     text-align: left;
     color: #00ffff;
@@ -694,38 +694,38 @@ body .btn .users-table thead th{
 
 
 
-body .btn .users-table tbody tr{
+body .users-table tbody tr{
     border-bottom: 1px solid #2a3441;
 }
 
-body .btn .users-table tbody tr &:hover{
+body .users-table tbody tr &:hover{
     background-color: #222;
 }
 
-body .btn .users-table tbody tr td{
+body .users-table tbody tr td{
     padding: 1rem;
     color: #fff;
     vertical-align: middle;
 }
 
-body .btn .users-table tbody .user-actions{
+body .users-table tbody .user-actions{
     display: flex;
     gap: 0.5rem;
 }
 
-body .btn .users-table tbody .user-actions .btn{
+body .users-table tbody .user-actions .btn{
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
 }
 
-body .btn .user-stats{
+body .user-stats{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
     margin-bottom: 2rem;
 }
 
-body .btn .stat-card{
+body .stat-card{
     background-color: #1a2332;
     border: 1px solid #2a3441;
     border-radius: 8px;
@@ -733,14 +733,14 @@ body .btn .stat-card{
     text-align: center;
 }
 
-body .btn .stat-card .stat-number{
+body .stat-card .stat-number{
     font-size: 2rem;
     font-weight: bold;
     color: #00ffff;
     display: block;
 }
 
-body .btn .stat-card .stat-label{
+body .stat-card .stat-label{
     color: #ccc;
     font-size: 0.875rem;
     margin-top: 0.5rem;

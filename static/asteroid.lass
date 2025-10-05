@@ -243,173 +243,173 @@
      (.btn.active
       :background "#4488ff"
       :border-color "#5599ff"
-      :color "#000")
+      :color "#000"))
 
     ;; Playlist and Queue styles
-     (.playlist-controls
-      :margin-bottom "15px"
-      :display flex
-      :gap "10px"
-      :align-items center)
+    (.playlist-controls
+    :margin-bottom "15px"
+    :display flex
+    :gap "10px"
+    :align-items center)
 
-     (.playlist-input
-      :flex 1
-      :padding "8px 12px"
-      :background "#0a0a0a"
-      :color "#00ffff"
-      :border "1px solid #2a3441"
-      :font-family "Courier New, monospace")
+    (.playlist-input
+    :flex 1
+    :padding "8px 12px"
+    :background "#0a0a0a"
+    :color "#00ffff"
+    :border "1px solid #2a3441"
+    :font-family "Courier New, monospace")
 
-     (.playlist-list
-      :border "1px solid #2a3441"
-      :background "#0a0a0a"
-      :min-height "100px"
-      :padding "10px")
+    (.playlist-list
+    :border "1px solid #2a3441"
+    :background "#0a0a0a"
+    :min-height "100px"
+    :padding "10px")
 
-     (.queue-controls
-      :margin-bottom "15px"
-      :display flex
-      :gap "10px")
+    (.queue-controls
+    :margin-bottom "15px"
+    :display flex
+    :gap "10px")
 
-     (.play-queue
-      :border "1px solid #2a3441"
-      :background "#0a0a0a"
-      :min-height "150px"
-      :max-height "300px"
-      :overflow-y auto
-      :padding "10px")
+    (.play-queue
+    :border "1px solid #2a3441"
+    :background "#0a0a0a"
+    :min-height "150px"
+    :max-height "300px"
+    :overflow-y auto
+    :padding "10px")
 
-     (.queue-item
-      :display flex
-      :justify-content space-between
-      :align-items center
-      :padding "8px 10px"
-      :border-bottom "1px solid #2a3441"
-      :margin-bottom "5px"
-      (:last-child
-       :border-bottom none
-       :margin-bottom 0))
+    (.queue-item
+    :display flex
+    :justify-content space-between
+    :align-items center
+    :padding "8px 10px"
+    :border-bottom "1px solid #2a3441"
+    :margin-bottom "5px"
+    (:last-child
+    :border-bottom none
+    :margin-bottom 0))
 
-     (.empty-queue
-      :text-align center
-      :color "#666"
-      :padding "20px"
-      :font-style italic)
+    (.empty-queue
+    :text-align center
+    :color "#666"
+    :padding "20px"
+    :font-style italic)
 
-     (.no-tracks
-      :text-align center
-      :color "#666"
-      :padding "20px"
-      :font-style italic)
+    (.no-tracks
+    :text-align center
+    :color "#666"
+    :padding "20px"
+    :font-style italic)
 
-     (.no-playlists
-      :text-align center
-      :color "#666"
-      :padding "20px"
-      :font-style italic)
+    (.no-playlists
+    :text-align center
+    :color "#666"
+    :padding "20px"
+    :font-style italic)
 
-     (.loading
-      :text-align center
-      :color "#4488ff"
-      :padding "20px")
+    (.loading
+    :text-align center
+    :color "#4488ff"
+    :padding "20px")
 
-     (.error
-      :text-align center
-      :color "#ff0000"
-      :padding "20px"
-      :font-weight bold)
+    (.error
+    :text-align center
+    :color "#ff0000"
+    :padding "20px"
+    :font-weight bold)
 
     ;; Upload interface styles
-     (.upload-section
-      :margin "20px 0"
-      :padding "20px"
-      :background "#0a0a0a"
-      :border "1px solid #2a3441"
-      :border-radius "5px")
+    (.upload-section
+    :margin "20px 0"
+    :padding "20px"
+    :background "#0a0a0a"
+    :border "1px solid #2a3441"
+    :border-radius "5px")
 
-     (.upload-controls
-      :display flex
-      :gap "15px"
-      :align-items center
-      :margin-bottom "15px")
+    (.upload-controls
+    :display flex
+    :gap "15px"
+    :align-items center
+    :margin-bottom "15px")
 
-     (.upload-info
-      :color "#888"
-      :font-size "0.9em")
+    (.upload-info
+    :color "#888"
+    :font-size "0.9em")
 
-     (.upload-progress
-      :margin-top "10px"
-      :padding "10px"
-      :background "#1a2332"
-      :border "1px solid #2a3441"
-      :border-radius "3px")
+    (.upload-progress
+    :margin-top "10px"
+    :padding "10px"
+    :background "#1a2332"
+    :border "1px solid #2a3441"
+    :border-radius "3px")
 
-     (.progress-bar
-      :height "20px"
-      :background "#4488ff"
-      :border-radius "3px"
-      :transition "width 0.3s ease"
-      :width "0%")
+    (.progress-bar
+    :height "20px"
+    :background "#4488ff"
+    :border-radius "3px"
+    :transition "width 0.3s ease"
+    :width "0%")
 
-     (.progress-text
-      :display block
-      :margin-top "5px"
-      :color "#00ffff"
-      :font-size "0.9em")
+    (.progress-text
+    :display block
+    :margin-top "5px"
+    :color "#00ffff"
+    :font-size "0.9em")
 
-     (input
-      :padding "8px 12px"
-      :background "#1a2332"
-      :color "#00ffff"
-      :border "1px solid #2a3441"
-      :border-radius "3px"
-      :font-family "Courier New, monospace")
+    (input
+    :padding "8px 12px"
+    :background "#1a2332"
+    :color "#00ffff"
+    :border "1px solid #2a3441"
+    :border-radius "3px"
+    :font-family "Courier New, monospace")
 
-     (.upload-interface
-      :margin-top 2rem
-      :padding 1.5rem
-      :background-color "#1a2332"
-      :border-radius 8px
-      :border "1px solid #2a3441"
-    
-      (h3 :color "#00ffff"
-          :margin-bottom 1rem)
-    
-      (.upload-area
-          :border "2px dashed #2a3441"
-          :border-radius 8px
-          :padding 2rem
-          :text-align center
-          :background-color "#0f0f0f"
-          :transition "border-color 0.3s ease"
+    (.upload-interface
+    :margin-top 2rem
+    :padding 1.5rem
+    :background-color "#1a2332"
+    :border-radius 8px
+    :border "1px solid #2a3441"
+
+        (h3 :color "#00ffff"
+            :margin-bottom 1rem)
+
+        (.upload-area
+            :border "2px dashed #2a3441"
+            :border-radius 8px
+            :padding 2rem
+            :text-align center
+            :background-color "#0f0f0f"
+            :transition "border-color 0.3s ease"
         
-          ("&:hover" :border-color "#00ffff")
+            ("&:hover" :border-color "#00ffff")
         
-          (.upload-icon :font-size 3rem
-                      :color "#666"
-                      :margin-bottom 1rem)
+            (.upload-icon :font-size 3rem
+                        :color "#666"
+                        :margin-bottom 1rem)
         
-          (p :color "#999"
-           :margin-bottom 1rem)
+            (p :color "#999"
+            :margin-bottom 1rem)
         
-          (.btn :margin-top 1rem)))
+            (.btn :margin-top 1rem)))
 
     ;; Authentication Styles
-     (.auth-container
-      :display flex
-      :justify-content center
-      :align-items center
-      :min-height "60vh"
-      :padding 2rem)
+    (.auth-container
+    :display flex
+    :justify-content center
+    :align-items center
+    :min-height "60vh"
+    :padding 2rem)
 
-     (.auth-form
-      :background-color "#1a2332"
-      :border "1px solid #2a3441"
-      :border-radius 8px
-      :padding 2rem
-      :width "100%"
-      :max-width 400px
-      :box-shadow "0 4px 6px rgba(0, 0, 0, 0.3)"
+    (.auth-form
+    :background-color "#1a2332"
+    :border "1px solid #2a3441"
+    :border-radius 8px
+    :padding 2rem
+    :width "100%"
+    :max-width 400px
+    :box-shadow "0 4px 6px rgba(0, 0, 0, 0.3)"
     
       (h2 :color "#00ffff"
           :text-align center
@@ -420,8 +420,8 @@
           :margin-bottom 1rem
           :font-size 1.2rem))
 
-     (.form-group
-      :margin-bottom 1rem
+    (.form-group
+      :margin-bottom 3rem
     
       (label :display block
               :color "#ccc"
@@ -441,71 +441,71 @@
                           :outline none
                           :box-shadow "0 0 0 2px rgba(0, 255, 0, 0.2)")))
 
-     (.form-actions
+    (.form-actions
       :display flex
       :gap 1rem
       :margin-top 1.5rem)
 
-     (.message
+    (.message
       :padding 0.75rem
       :border-radius 4px
       :margin-top 1rem
       :text-align center
       :font-weight bold
-    
+
       ("&.success" :background-color "rgba(0, 255, 0, 0.1)"
                       :border "1px solid #00ffff"
                       :color "#00ffff")
-    
+
       ("&.error" :background-color "rgba(255, 0, 0, 0.1)"
                   :border "1px solid #ff0000"
                   :color "#ff0000"))
 
-     (.auth-link
+    (.auth-link
       :text-align center
       :margin-top 1.5rem
       :color "#999"
-    
+
       (a :color "#00ffff"
           :text-decoration none
-        
+
           ("&:hover" :text-decoration underline)))
 
     ;; Profile Styles
-     (.profile-container
+    (.profile-container
       :max-width 600px
       :margin "2rem auto"
       :padding 0 1rem)
 
-     (.profile-card
+    (.profile-card
       :background-color "#1a2332"
       :border "1px solid #2a3441"
       :border-radius 8px
       :padding 2rem
       :margin-bottom 2rem
-    
+
       (h2 :color "#00ffff"
           :margin-bottom 1.5rem
           :text-align center))
 
-     (.profile-info
+    (.profile-info
       :margin-bottom 2rem)
 
-     (.info-group
+    (.info-group
       :display flex
       :justify-content space-between
       :align-items center
       :padding 0.75rem 0
       :border-bottom "1px solid #2a3441"
-    
+
       ("&:last-child" :border-bottom none)
-    
+
       (label :color "#ccc"
               :font-weight bold)
-    
+
       (span :color "#fff"))
 
-     (.role-badge
+    (.role-badge
       :background-color "#00ffff"
       :color "#000"
       :padding "0.25rem 0.5rem"
@@ -513,72 +513,73 @@
       :font-size 0.875rem
       :font-weight bold)
 
-     (.profile-actions
+    (.profile-actions
       :display flex
       :gap 1rem
       :justify-content center)
 
     ;; User Management Styles
-     (.user-management
+    (.user-management
       :margin-top 2rem)
 
-     (.users-table
+    (.users-table
       :width "100%"
       :border-collapse collapse
       :background-color "#1a2332"
       :border "1px solid #2a3441"
       :border-radius 8px
       :overflow hidden
-    
+
       (thead
           :background-color "#0f0f0f"
-        
+
           (th :padding 1rem
               :text-align left
               :color "#00ffff"
               :font-weight bold
               :border-bottom "1px solid #2a3441"))
-    
+
       (tbody
           (tr :border-bottom "1px solid #2a3441"
-            
+
               ("&:hover" :background-color "#222")
-            
+
               (td :padding 1rem
                   :color "#fff"
                   :vertical-align middle))
-        
+
           (.user-actions
            :display flex
            :gap 0.5rem
-        
+
            (.btn :padding "0.25rem 0.5rem"
                :font-size 0.875rem))))
 
-     (.user-stats
+    (.user-stats
       :display grid
       :grid-template-columns "repeat(auto-fit, minmax(150px, 1fr))"
       :gap 1rem
       :margin-bottom 2rem)
 
-     (.stat-card
+    (.stat-card
       :background-color "#1a2332"
       :border "1px solid #2a3441"
       :border-radius 8px
       :padding 1rem
       :text-align center
-    
+
       (.stat-number :font-size 2rem
                       :font-weight bold
                       :color "#00ffff"
                       :display block)
-    
+
       (.stat-label :color "#ccc"
                       :font-size 0.875rem
-                      :margin-top 0.5rem)))))
+                      :margin-top 0.5rem))
 
     ;; Center alignment for player page
     ;; (body.player-page
     ;;  :text-align center)
 
-     ;; Close main body block
+    )) ;; Close main body block
+
