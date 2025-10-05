@@ -11,7 +11,7 @@
   <div class="container">
     <header>
       <h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
-      <nav>
+      <nav class="nav">
         <a href="/asteroid/">Home</a>
         <a href="/asteroid/player">Player</a>
         <a href="/asteroid/admin">Admin</a>
