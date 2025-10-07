@@ -135,86 +135,50 @@
   "Require user to be authenticated. 
    If :api t, returns JSON error (401). Otherwise redirects to login page.
    Auto-detects API routes if not specified."
-  (handler-case
-      (let* ((user-id (session:field "user-id"))
-             (uri (uri-to-url (radiance:uri *request*) :representation :external))
-             ;; Use explicit flag if provided, otherwise auto-detect from URI
-             (is-api-request (if api t (search "/api/" uri))))
-        (format t "Authentication check - User ID: ~a, URI: ~a, Is API: ~a~%" 
-                user-id uri (if is-api-request "YES" "NO"))
-        (unless user-id
-          (if is-api-request
-              ;; API request - return JSON error with 401 status
-              (progn
-                (format t "Authentication failed - returning JSON 401~%")
-                (setf (radiance:header "Content-Type") "application/json")
-                (radiance:api-output
-                 (cl-json:encode-json-to-string
-                  `(("error" . "Authentication required")
-                    ("status" . 401)
-                    ("message" . "You must be logged in to access this resource")))))
-              ;; Page request - redirect to login
-              (progn
-                (format t "Authentication failed - redirecting to login~%")
-                (radiance:redirect "/asteroid/login")))))
-    (api-auth-error (e)
-      (format t "API auth error caught, returning JSON~%")
-      (get-json-response e))
-    (error (e)
-      (format t "Authentication error: ~a~%" e)
-      (let* ((uri (uri-to-url (radiance:uri *request*) :representation :external))
-             (is-api-request (if api t (search "/api/" uri))))
-        (if is-api-request
-            (progn
-              (setf (radiance:header "Content-Type") "application/json")
-              (cl-json:encode-json-to-string
-               `(("error" . "Internal server error")
-                 ("status" . 500)
-                 ("message" . ,(format nil "~a" e)))))
+  (let* ((user-id (session:field "user-id"))
+         (uri (uri-to-url (radiance:uri *request*) :representation :external))
+         ;; Use explicit flag if provided, otherwise auto-detect from URI
+         (is-api-request (if api t (search "/api/" uri))))
+    (format t "Authentication check - User ID: ~a, URI: ~a, Is API: ~a~%" 
+            user-id uri (if is-api-request "YES" "NO"))
+    (unless user-id
+      (if is-api-request
+          ;; API request - return JSON error with 401 status
+          (progn
+            (format t "Authentication failed - returning JSON 401~%")
+            (radiance:api-output
+             '(("error" . "Authentication required"))
+             :status 401
+             :message "You must be logged in to access this resource"))
+          ;; Page request - redirect to login
+          (progn
+            (format t "Authentication failed - redirecting to login~%")
             (radiance:redirect "/asteroid/login"))))))
 
 (defun require-role (role &key (api nil))
   "Require user to have a specific role.
    If :api t, returns JSON error (403). Otherwise redirects to login page.
    Auto-detects API routes if not specified."
-  (handler-case
-      (let* ((current-user (get-current-user))
-             (uri (uri-to-url (radiance:uri *request*) :representation :external))
-             ;; Use explicit flag if provided, otherwise auto-detect from URI
-             (is-api-request (if api t (search "/api/" uri))))
-        (format t "Current user for role check: ~a~%" (if current-user "FOUND" "NOT FOUND"))
-        (format t "Request URI: ~a, Is API: ~a~%" uri (if is-api-request "YES" "NO"))
-        (when current-user
-          (format t "User has role ~a: ~a~%" role (user-has-role-p current-user role)))
-        (unless (and current-user (user-has-role-p current-user role))
-          (if is-api-request
-              ;; API request - return JSON error with 403 status
-              (progn
-                (format t "Role check failed - returning JSON 403~%")
-                (setf (radiance:header "Content-Type") "application/json")
-                (radiance:api-output
-                 (cl-json:encode-json-to-string
-                  `(("error" . "Authentication required")
-                    ("status" . 403)
-                    ("message" . ,(format nil "You must be logged in with ~a role to access this resource" role))))))
-              ;; Page request - redirect to login
-              (progn
-                (format t "Role check failed - redirecting to login~%")
-                (radiance:redirect "/asteroid/login")))))
-    (api-auth-error (e)
-      (format t "API auth error caught in require-role, returning JSON~%")
-      (get-json-response e))
-    (error (e)
-      (format t "Role check error: ~a~%" e)
-      (let* ((uri (uri-to-url (radiance:uri *request*) :representation :external))
-             (is-api-request (if api t (search "/api/" uri))))
-        (if is-api-request
-            (progn
-              (setf (radiance:header "Content-Type") "application/json")
-              (cl-json:encode-json-to-string
-               `(("error" . "Internal server error")
-                 ("status" . 500)
-                 ("message" . ,(format nil "~a" e)))))
+  (let* ((current-user (get-current-user))
+         (uri (uri-to-url (radiance:uri *request*) :representation :external))
+         ;; Use explicit flag if provided, otherwise auto-detect from URI
+         (is-api-request (if api t (search "/api/" uri))))
+    (format t "Current user for role check: ~a~%" (if current-user "FOUND" "NOT FOUND"))
+    (format t "Request URI: ~a, Is API: ~a~%" uri (if is-api-request "YES" "NO"))
+    (when current-user
+      (format t "User has role ~a: ~a~%" role (user-has-role-p current-user role)))
+    (unless (and current-user (user-has-role-p current-user role))
+      (if is-api-request
+          ;; API request - return JSON error with 403 status
+          (progn
+            (format t "Role check failed - returning JSON 403~%")
+            (radiance:api-output
+             '(("error" . "Forbidden"))
+             :status 403
+             :message (format nil "You must be logged in with ~a role to access this resource" role)))
+          ;; Page request - redirect to login
+          (progn
+            (format t "Role check failed - redirecting to login~%")
             (radiance:redirect "/asteroid/login"))))))
 
 (defun update-user-role (user-id new-role)
