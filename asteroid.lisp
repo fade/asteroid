@@ -189,24 +189,29 @@
 ;; API endpoint to get all tracks (for web player)
 (define-page api-tracks #@"/api/tracks" ()
   "Get all tracks for web player"
-  (require-authentication)
-  (setf (radiance:header "Content-Type") "application/json")
-  (handler-case
-      (let ((tracks (db:select "tracks" (db:query :all))))
-        (cl-json:encode-json-to-string
-         `(("status" . "success")
-           ("tracks" . ,(mapcar (lambda (track)
-                                  `(("id" . ,(gethash "_id" track))
-                                    ("title" . ,(gethash "title" track))
-                                    ("artist" . ,(gethash "artist" track))
-                                    ("album" . ,(gethash "album" track))
-                                    ("duration" . ,(gethash "duration" track))
-                                    ("format" . ,(gethash "format" track))))
-                                tracks)))))
-    (error (e)
-      (cl-json:encode-json-to-string
-       `(("status" . "error")
-         ("message" . ,(format nil "Error retrieving tracks: ~a" e)))))))
+  (let ((auth-result (require-authentication)))
+    (if (eq auth-result t)
+        ;; Authenticated - return track data
+        (progn
+          (setf (radiance:header "Content-Type") "application/json")
+          (handler-case
+              (let ((tracks (db:select "tracks" (db:query :all))))
+                (cl-json:encode-json-to-string
+                 `(("status" . "success")
+                   ("tracks" . ,(mapcar (lambda (track)
+                                          `(("id" . ,(gethash "_id" track))
+                                            ("title" . ,(gethash "title" track))
+                                            ("artist" . ,(gethash "artist" track))
+                                            ("album" . ,(gethash "album" track))
+                                            ("duration" . ,(gethash "duration" track))
+                                            ("format" . ,(gethash "format" track))))
+                                        tracks)))))
+            (error (e)
+              (cl-json:encode-json-to-string
+               `(("status" . "error")
+                 ("message" . ,(format nil "Error retrieving tracks: ~a" e)))))))
+        ;; Auth failed - return the value from api-output
+        auth-result)))
 
 ;; API endpoint to get track by ID (for streaming)
 (define-page api-get-track-by-id #@"/api/tracks/(.*)" (:uri-groups (track-id))
