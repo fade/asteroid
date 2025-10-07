@@ -148,12 +148,11 @@
               (progn
                 (format t "Authentication failed - returning JSON 401~%")
                 (setf (radiance:header "Content-Type") "application/json")
-                (setf (radiance:response-data) 
-                      (cl-json:encode-json-to-string
-                       `(("error" . "Authentication required")
-                         ("status" . 401)
-                         ("message" . "You must be logged in to access this resource"))))
-                (radiance:redirect (radiance:uri)))
+                (radiance:api-output
+                 (cl-json:encode-json-to-string
+                  `(("error" . "Authentication required")
+                    ("status" . 401)
+                    ("message" . "You must be logged in to access this resource")))))
               ;; Page request - redirect to login
               (progn
                 (format t "Authentication failed - redirecting to login~%")
@@ -193,12 +192,11 @@
               (progn
                 (format t "Role check failed - returning JSON 403~%")
                 (setf (radiance:header "Content-Type") "application/json")
-                (error 'api-auth-error
-                       :status-code 403
-                       :json-response (cl-json:encode-json-to-string
-                                       `(("error" . "Authentication required")
-                                         ("status" . 403)
-                                         ("message" . ,(format nil "You must be logged in with ~a role to access this resource" role))))))
+                (radiance:api-output
+                 (cl-json:encode-json-to-string
+                  `(("error" . "Authentication required")
+                    ("status" . 403)
+                    ("message" . ,(format nil "You must be logged in with ~a role to access this resource" role))))))
               ;; Page request - redirect to login
               (progn
                 (format t "Role check failed - redirecting to login~%")
