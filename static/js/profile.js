@@ -9,7 +9,7 @@ function loadProfileData() {
     console.log('Loading profile data...');
     
     // Load user info
-    fetch('/asteroid/api/user/profile')
+    fetch('/api/asteroid/user/profile')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -50,7 +50,7 @@ function updateProfileDisplay(user) {
 }
 
 function loadListeningStats() {
-    fetch('/asteroid/api/user/listening-stats')
+    fetch('/api/asteroid/user/listening-stats')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -72,7 +72,7 @@ function loadListeningStats() {
 }
 
 function loadRecentTracks() {
-    fetch('/asteroid/api/user/recent-tracks?limit=3')
+    fetch('/api/asteroid/user/recent-tracks?limit=3')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success' && data.tracks.length > 0) {
@@ -99,7 +99,7 @@ function loadRecentTracks() {
 }
 
 function loadTopArtists() {
-    fetch('/asteroid/api/user/top-artists?limit=5')
+    fetch('/api/asteroid/user/top-artists?limit=5')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success' && data.artists.length > 0) {
@@ -139,7 +139,7 @@ function exportListeningData() {
     console.log('Exporting listening data...');
     showMessage('Preparing data export...', 'info');
     
-    fetch('/asteroid/api/user/export-data', {
+    fetch('/api/asteroid/user/export-data', {
         method: 'POST'
     })
     .then(response => response.blob())
@@ -168,7 +168,7 @@ function clearListeningHistory() {
     console.log('Clearing listening history...');
     showMessage('Clearing listening history...', 'info');
     
-    fetch('/asteroid/api/user/clear-history', {
+    fetch('/api/asteroid/user/clear-history', {
         method: 'POST'
     })
     .then(response => response.json())

@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadUserStats() {
     try {
-        const response = await fetch('/asteroid/api/users/stats');
+        const response = await fetch('/api/asteroid/users/stats');
         const result = await response.json();
 
         if (result.status === 'success') {
@@ -37,7 +37,7 @@ async function loadUserStats() {
 
 async function loadUsers() {
     try {
-        const response = await fetch('/asteroid/api/users');
+        const response = await fetch('/api/asteroid/users');
         const result = await response.json();
 
         if (result.status === 'success') {
@@ -101,7 +101,7 @@ async function updateUserRole(userId, newRole) {
         const formData = new FormData();
         formData.append('role', newRole);
 
-        const response = await fetch(`/asteroid/api/users/${userId}/role`, {
+        const response = await fetch(`/api/asteroid/users/${userId}/role`, {
             method: 'POST',
             body: formData
         });
@@ -126,7 +126,7 @@ async function deactivateUser(userId) {
     }
 
     try {
-        const response = await fetch(`/asteroid/api/users/${userId}/deactivate`, {
+        const response = await fetch(`/api/asteroid/users/${userId}/deactivate`, {
             method: 'POST'
         });
 
@@ -147,7 +147,7 @@ async function deactivateUser(userId) {
 
 async function activateUser(userId) {
     try {
-        const response = await fetch(`/asteroid/api/users/${userId}/activate`, {
+        const response = await fetch(`/api/asteroid/users/${userId}/activate`, {
             method: 'POST'
         });
 
@@ -195,7 +195,7 @@ async function createNewUser(event) {
         formData.append('password', password);
         formData.append('role', role);
 
-        const response = await fetch('/asteroid/api/users/create', {
+        const response = await fetch('/api/asteroid/users/create', {
             method: 'POST',
             body: formData
         });

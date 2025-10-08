@@ -57,9 +57,11 @@ async function updateNowPlaying() {
     try {
         const response = await fetch('/api/asteroid/icecast-status')
         const data = await response.json()
-        if (data.icestats && data.icestats.source) {
+        // Handle RADIANCE API wrapper format
+        const icecastData = data.data || data;
+        if (icecastData.icestats && icecastData.icestats.source) {
             // Find the high quality stream (asteroid.mp3)
-            const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+            const sources = Array.isArray(icecastData.icestats.source) ? icecastData.icestats.source : [icecastData.icestats.source];
             const mainStream = sources.find(s => s.listenurl && s.listenurl.includes('asteroid.mp3'));
 
             if (mainStream && mainStream.title) {

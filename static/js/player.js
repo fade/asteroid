@@ -56,11 +56,16 @@ async function loadTracks() {
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        const data = await response.json();
+        const result = await response.json();
+        // Handle RADIANCE API wrapper format
+        const data = result.data || result;
 
         if (data.status === 'success') {
             tracks = data.tracks || [];
             displayTracks(tracks);
+        } else {
+            console.error('Error loading tracks:', data.error);
+            document.getElementById('track-list').innerHTML = '<div class="error">Error loading tracks</div>';
         }
     } catch (error) {
         console.error('Error loading tracks:', error);
@@ -566,9 +571,11 @@ async function updateLiveStream() {
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        const data = await response.json();
-        console.log('Live stream data:', data); // Debug log
-
+        const result = await response.json();
+        console.log('Live stream data:', result); // Debug log
+        
+        // Handle RADIANCE API wrapper format
+        const data = result.data || result;
         if (data.icestats && data.icestats.source) {
             const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
             const mainStream = sources.find(s => s.listenurl && s.listenurl.includes('asteroid.mp3'));
