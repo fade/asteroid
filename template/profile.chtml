@@ -12,8 +12,8 @@
   <div class="container">
     <h1>👤 USER PROFILE</h1>
     <div class="nav">
-      <a href="/asteroid/">← Back to Main</a>
-      <a href="/asteroid/player/">Web Player</a>
+      <a href="/asteroid/">Home</a>
+      <a href="/asteroid/player/">Player</a>
       <a href="/asteroid/admin/" data-show-if-admin>Admin</a>
       <a href="/asteroid/logout" class="btn-logout">Logout</a>
     </div>

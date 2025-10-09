@@ -8,7 +8,16 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎵 ASTEROID RADIO - LOGIN</h1>
+    <header>
+      <h1>🎵 ASTEROID RADIO - LOGIN</h1>
+      <nav class="nav">
+        <a href="/asteroid/">Home</a>
+        <a href="/asteroid/player">Player</a>
+        <a href="/asteroid/status">Status</a>
+        <a href="/asteroid/register">Register</a>
+      </nav>
+    </header>
+
     <div class="auth-container">
       <div class="auth-form">
         <h2>System Access</h2>

@@ -11,8 +11,9 @@
   <div class="container">
     <h1>👥 USER MANAGEMENT</h1>
     <div class="nav">
-      <a href="/asteroid/admin">← Back to Admin</a>
       <a href="/asteroid/">Home</a>
+      <a href="/asteroid/admin">Admin</a>
+      <a href="/asteroid/logout" class="btn-logout">Logout</a>
     </div>
     
     <!-- User Statistics -->
