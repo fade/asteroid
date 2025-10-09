@@ -41,13 +41,21 @@
 
     (.nav
      :margin "20px 0"
+     :display "flex"
+     :gap "5px"
+     :flex-wrap "wrap"
+     :justify-content center
      (a
       :color "#00ffff"
       :text-decoration none
-      :margin "0 10px"
+      :margin "0"
       :padding "10px 20px"
       :border "1px solid #2a3441"
       :background "#1a2332"
+      :min-width "100px"
+      :text-align "center"
+      :border-sizing "border-box"
+      :letter-spacing "0.08rem"
       :cursor pointer
       :display inline-block)
 
@@ -55,8 +63,11 @@
        :margin-left "0")
 
       ((:and a :hover)
-          :background "#2a3441")
-      
+       :text-decoration underline
+       :text-underline-offset "5px"
+       :background "#2a3441"
+       :color "#00ff00")
+
       ;; Logout button styling - subtle, not alarming
       (.btn-logout
        :background "#2a3441"
@@ -67,7 +78,7 @@
        :background "#3a4551"
        :border-color "#4a5561"
        :color "#ffaaaa"))
-    
+
     ;; Hide conditional auth elements by default (JavaScript will show them)
     (|[data-show-if-logged-in]|
      :display none)

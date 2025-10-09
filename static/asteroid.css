@@ -43,15 +43,23 @@ body .panel{
 
 body .nav{
     margin: 20px 0;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 body .nav a{
     color: #00ffff;
     text-decoration: none;
-    margin: 0 10px;
+    margin: 0;
     padding: 10px 20px;
     border: 1px solid #2a3441;
     background: #1a2332;
+    min-width: 100px;
+    text-align: center;
+    border-sizing: border-box;
+    letter-spacing: 0.08rem;
     cursor: pointer;
     display: inline-block;
 }
@@ -61,7 +69,10 @@ body .nav a:first-child{
 }
 
 body .nav a:hover{
+    text-decoration: underline;
+    text-underline-offset: 5px;
     background: #2a3441;
+    color: #00ff00;
 }
 
 body .nav .btn-logout{
