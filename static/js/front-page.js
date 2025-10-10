@@ -1,29 +1,34 @@
 // Stream quality configuration
-const streamConfig = {
-    aac: {
-        url: 'http://localhost:8000/asteroid.aac',
-        format: 'AAC 96kbps Stereo',
-        type: 'audio/aac',
-        mount: 'asteroid.aac'
-    },
-    mp3: {
-        url: 'http://localhost:8000/asteroid.mp3',
-        format: 'MP3 128kbps Stereo', 
-        type: 'audio/mpeg',
-        mount: 'asteroid.mp3'
-    },
-    low: {
-        url: 'http://localhost:8000/asteroid-low.mp3',
-        format: 'MP3 64kbps Stereo',
-        type: 'audio/mpeg',
-        mount: 'asteroid-low.mp3'
-    }
+function getStreamConfig(streamBaseUrl, encoding) {
+    const config = {
+        aac: {
+            url: `${streamBaseUrl}/asteroid.aac`,
+            format: 'AAC 96kbps Stereo',
+            type: 'audio/aac',
+            mount: 'asteroid.aac'
+        },
+        mp3: {
+            url: `${streamBaseUrl}/asteroid.mp3`,
+            format: 'MP3 128kbps Stereo',
+            type: 'audio/mpeg',
+            mount: 'asteroid.mp3'
+        },
+        low: {
+            url: `${streamBaseUrl}/asteroid-low.mp3`,
+            format: 'MP3 64kbps Stereo',
+            type: 'audio/mpeg',
+            mount: 'asteroid-low.mp3'
+        }
+    };
+
+    return config[encoding]
 };
 
 // Change stream quality
 function changeStreamQuality() {
     const selector = document.getElementById('stream-quality');
-    const config = streamConfig[selector.value];
+    const streamBaseUrl = document.getElementById('stream-base-url');
+    const config = getStreamConfig(streamBaseUrl.value, selector.value);
 
     // Update UI elements
     document.getElementById('stream-url').textContent = config.url;
@@ -91,7 +96,8 @@ async function updateNowPlaying() {
 window.addEventListener('DOMContentLoaded', function() {
     // Set initial quality display to match the selected stream
     const selector = document.getElementById('stream-quality');
-    const config = streamConfig[selector.value];
+    const streamBaseUrl = document.getElementById('stream-base-url');
+    const config = getStreamConfig(streamBaseUrl.value, selector.value);
     document.getElementById('stream-url').textContent = config.url;
     document.getElementById('stream-format').textContent = config.format;
 

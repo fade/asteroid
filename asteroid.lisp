@@ -19,6 +19,7 @@
   (merge-pathnames "music/library/" 
                    (asdf:system-source-directory :asteroid)))
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
+(defparameter *stream-base-url* "http://localhost:8000")
 
 ;; Configure JSON as the default API format
 (define-api-format json (data)
@@ -444,6 +445,10 @@
      :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
      :listeners "0"
      :stream-quality "128kbps MP3"
+     :stream-base-url *stream-base-url*
+     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
+     :default-stream-encoding "audio/aac"
+     :default-stream-encoding-desc "AAC 96kbps Stereo"
      :now-playing-artist "The Void"
      :now-playing-track "Silence"
      :now-playing-album "Startup Sounds"
@@ -458,7 +463,7 @@
 (defun check-icecast-status ()
   "Check if Icecast server is running and accessible"
   (handler-case
-      (let ((response (drakma:http-request "http://localhost:8000/status-json.xsl"
+      (let ((response (drakma:http-request (concatenate 'string *stream-base-url* "/status-json.xsl")
                                           :want-stream nil
                                           :connection-timeout 2)))
         (if response "🟢 Running" "🔴 Not Running"))
@@ -695,7 +700,8 @@
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
      :title "Asteroid Radio - Web Player"
-     :stream-url "http://localhost:8000/asteroid"
+     :stream-base-url *stream-base-url*
+     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
      :bitrate "128kbps MP3"
      :now-playing-artist "The Void"
      :now-playing-track "Silence"
@@ -712,14 +718,14 @@
                                   ("artist" . "The Void")
                                   ("album" . "Startup Sounds")))
                 ("listeners" . 0)
-                ("stream-url" . "http://localhost:8000/asteroid.mp3")
+                ("stream-url" . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
                 ("stream-status" . "live"))))
 
 ;; Live stream status from Icecast
 (define-api asteroid/icecast-status () ()
   "Get live status from Icecast server"
   (handler-case
-    (let* ((icecast-url "http://localhost:8000/admin/stats.xml")
+    (let* ((icecast-url (concatenate 'string *stream-base-url* "/admin/stats.xml"))
            (response (drakma:http-request icecast-url 
                                          :want-stream nil
                                          :basic-authorization '("admin" "asteroid_admin_2024"))))
@@ -739,7 +745,7 @@
                          (listeners (or (cl-ppcre:regex-replace-all ".*<listeners>(.*?)</listeners>.*" source-section "\\1") "0")))
                     ;; Return JSON in format expected by frontend
                     (api-output
-                     `(("icestats" . (("source" . (("listenurl" . "http://localhost:8000/asteroid.mp3")
+                     `(("icestats" . (("source" . (("listenurl" . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
                                                    ("title" . ,title)
                                                    ("listeners" . ,(parse-integer listeners :junk-allowed t)))))))))
                   ;; No source found, return empty
@@ -798,8 +804,12 @@
 
 (defun -main (&optional args (debug t))
   (declare (ignorable args))
+  (when (uiop:getenvp "ASTEROID_STREAM_URL")
+    (setf *stream-base-url* (uiop:getenv "ASTEROID_STREAM_URL")))
   (format t "~&args of asteroid: ~A~%" args)
   (format t "~%🎵 ASTEROID RADIO - Music for Hackers 🎵~%")
+  (format t "Using stream server at ~a~%" *stream-base-url*)
+
   (format t "Starting RADIANCE web server...~%")
   (when debug
     (slynk:create-server :port 4009 :dont-close t))
