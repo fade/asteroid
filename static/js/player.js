@@ -525,28 +525,33 @@ async function loadPlaylist(playlistId) {
 }
 
 // Stream quality configuration (same as front page)
-const liveStreamConfig = {
-    aac: {
-        url: 'http://localhost:8000/asteroid.aac',
-        type: 'audio/aac',
-        mount: 'asteroid.aac'
-    },
-    mp3: {
-        url: 'http://localhost:8000/asteroid.mp3',
-        type: 'audio/mpeg',
-        mount: 'asteroid.mp3'
-    },
-    low: {
-        url: 'http://localhost:8000/asteroid-low.mp3',
-        type: 'audio/mpeg',
-        mount: 'asteroid-low.mp3'
-    }
+function getLiveStreamConfig(streamBaseUrl, quality) {
+    const config = {
+        aac: {
+            url: `${streamBaseUrl}/asteroid.aac`,
+            type: 'audio/aac',
+            mount: 'asteroid.aac'
+        },
+        mp3: {
+            url: `${streamBaseUrl}/asteroid.mp3`,
+            type: 'audio/mpeg',
+            mount: 'asteroid.mp3'
+        },
+        low: {
+            url: `${streamBaseUrl}/asteroid-low.mp3`,
+            type: 'audio/mpeg',
+            mount: 'asteroid-low.mp3'
+        }
+    };
+
+    return config[quality];
 };
 
 // Change live stream quality
 function changeLiveStreamQuality() {
+    const streamBaseUrl = document.getElementById('stream-base-url');
     const selector = document.getElementById('live-stream-quality');
-    const config = liveStreamConfig[selector.value];
+    const config = getLiveStreamConfig(streamBaseUrl.value, selector.value);
 
     // Update audio player
     const audioElement = document.getElementById('live-stream-audio');
