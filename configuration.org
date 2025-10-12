@@ -52,4 +52,4 @@
 12:22 < Fade> the project is here: https://github.com/fade/asteroid
 12:22 < Fade> thanks for your work. I really appreciate it.
 12:23 <shinmera> Glad you're finding it useful! Looks cool :)
-o
+
