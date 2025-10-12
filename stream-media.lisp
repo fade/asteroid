@@ -13,7 +13,7 @@
                    (cl-fad:list-directory directory :follow-symlinks nil))))
 
 (defun scan-directory-for-music-recursively (path)
-  "Recursively scan directory and all subdirectories for music files"
+  "Recursively scan directory PATH and all subdirectories for music files"
   (let ((files-in-current-dir (scan-directory-for-music path))
         (files-in-subdirs (loop for directory in (uiop:subdirectories path)
                                 appending (scan-directory-for-music-recursively directory))))
