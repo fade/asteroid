@@ -3,7 +3,7 @@
 11:45 < Fade> o/
 11:46 < Fade> I'm building an internet radio station in Radiance.
 11:47 < Fade> on Radiance? we're using Radiance. :)
-11:47 < Colleen> <shinmera> cool!
+11:47 <shinmera> cool!
 11:49 < Fade> I really like how Radiance is laid out.
 11:49 < Fade> it's very nice.
 11:49 < Fade> I do have a question that I haven't been able to answer reading the docs
@@ -11,44 +11,45 @@
 11:51 < Fade> but I want to switch from the default ilambda database to ipostmodern
 11:52 < Fade> I'm wondering where I define my configuration
 11:52 < Fade> in terms of how the image stands up
-12:11 < Colleen> <shinmera> it's in the radiance config
-12:12 < Colleen> <shinmera> the lengthy tutorial FAQ at the end mentions how to change the implementation of
-interfaces
+12:11 <shinmera> it's in the radiance config
+12:12 <shinmera> the lengthy tutorial FAQ at the end mentions how to change the implementation of
+                      interfaces
 12:12 < Fade> right. I read that. I'm wondering where I configure my module to override the default config.
 12:13 < Fade> if I define a ubiquitous conf for my module, will it take precedence, or do I need to register it
-with radiance for it to take effect?
-12:14 < Colleen> <shinmera> modules can't override the central config
-12:14 < Colleen> <shinmera> in general a module should not touch another's configuration, since the configuration
-is meant to be set by the ultimate administrator of an installation, not the developer of any
-particular module
+                 with radiance for it to take effect?
+12:14 <shinmera> modules can't override the central config
+12:14 <shinmera> in general a module should not touch another's configuration, since the configuration
+                      is meant to be set by the ultimate administrator of an installation, not the developer of any
+                      particular module
 12:15 < Fade> well, my system is a module only in the tutorial sense of 'everything is a module'. for my system,
-where does the config get defined?
+                 where does the config get defined?
 12:15 < Fade> (sorry for these elementary questions)
 12:15 < Fade> there're quite some layers in play here. :)
-12:15 < Colleen> <shinmera> I'm a bit confused
+12:15 <shinmera> I'm a bit confused
 12:16 < Fade> i'm using radiance to do the web stuff. I'm using radiance in my system to do that web stuff. I want
-to configure my system when it loads with paths and database access creds.
+                 to configure my system when it loads with paths and database access creds.
 12:16 < Fade> that kind of thing
-12:16 < Colleen> <shinmera> yeah. so you change the config file to suit your needs.
+12:16 <shinmera> yeah. so you change the config file to suit your needs.
 12:16 < Fade> I'm wondering what the intended way to accomplish this is.
 12:16 < Fade> the default one?
-12:17 < Colleen> <shinmera> sure, or you create another environment
+12:17 <shinmera> sure, or you create another environment
 12:17 < Fade> okay, cool. this is what I'm trying to work out.
 12:17 < Fade> is there a mechanism to create this environment, or do I just write it by hand?
-12:18 < Colleen> <shinmera> you could copy an existing env, or load radiance and then do (setf
-(radiance:environment) "my-env")
-12:18 < Colleen> <shinmera> during dev I just use the default
+12:18 <shinmera> you could copy an existing env, or load radiance and then do (setf
+                      (radiance:environment) "my-env")
+12:18 <shinmera> during dev I just use the default
 12:19 < Fade> yes, that is what I've been doing so far; it's very convenient
-12:19 < Colleen> <shinmera> but I often also have an env to use the production database and so on, so I can connect
-to that.
+12:19 <shinmera> but I often also have an env to use the production database and so on, so I can connect
+                      to that.
 12:19 < Fade> how do these environments interract? do they shaddow each other?
-12:19 < Colleen> <shinmera> you can only ever have one, so
+12:19 <shinmera> you can only ever have one, so
 12:19 < Fade> ah, okay. well, that makes sense.
-12:20 < Colleen> <shinmera> and you can't change it after it's been set, really, since the environment determines
-which implementations are loaded, and loading another implementation for an interface might lead
-to pretty gross stuff
-12:20 < Colleen> <shinmera> especially in the presence of macros and so on
+12:20 <shinmera> and you can't change it after it's been set, really, since the environment determines
+                      which implementations are loaded, and loading another implementation for an interface might lead
+                      to pretty gross stuff
+12:20 <shinmera> especially in the presence of macros and so on
 12:20 < Fade> right. there's a lot of macrology, so I suspected that
 12:22 < Fade> the project is here: https://github.com/fade/asteroid
 12:22 < Fade> thanks for your work. I really appreciate it.
-12:23 < Colleen> <shinmera> Glad you're finding it useful! Looks cool :)
+12:23 <shinmera> Glad you're finding it useful! Looks cool :)
+o
