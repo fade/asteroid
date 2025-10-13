@@ -40,4 +40,5 @@
                (:file "playlist-management")
                (:file "stream-control")
                (:file "auth-routes")
+               (:file "frontend-partials")
                (:file "asteroid")))

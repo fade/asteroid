@@ -1,0 +1,21 @@
+<h2>Now Playing</h2>
+<c:if test="stats">
+    <c:then>
+        <c:using value="stats">
+            <!--<p>Artist: <span>The Void</span></p>-->
+            <p>Track: <span lquery="(text title)">The Void - Silence</span></p>
+            <p>Listeners: <span lquery="(text listeners)">1</span></p>
+        </c:using>
+    </c:then>
+    <c:else>
+        <c:if test="connection-error">
+            <c:then>
+                <div class="message error">
+                     <span>There was an error trying to get information from stream.</span>
+                </div>
+            </c:then>
+        </c:if>
+        <p>Track: <span>NA</span></p>
+        <p>Listeners: <span>NA</span></p>
+    </c:else>
+</c:if>
