@@ -60,33 +60,15 @@ function changeStreamQuality() {
 // Update now playing info from Icecast
 async function updateNowPlaying() {
     try {
-        const response = await fetch('/api/asteroid/icecast-status')
-        const data = await response.json()
-        // Handle RADIANCE API wrapper format
-        const icecastData = data.data || data;
-        if (icecastData.icestats && icecastData.icestats.source) {
-            // Find the high quality stream (asteroid.mp3)
-            const sources = Array.isArray(icecastData.icestats.source) ? icecastData.icestats.source : [icecastData.icestats.source];
-            const mainStream = sources.find(s => s.listenurl && s.listenurl.includes('asteroid.mp3'));
-
-            if (mainStream && mainStream.title) {
-                // Parse "Artist - Track" format
-                const titleParts = mainStream.title.split(' - ');
-                const artist = titleParts.length > 1 ? titleParts[0] : 'Unknown Artist';
-                const track = titleParts.length > 1 ? titleParts.slice(1).join(' - ') : mainStream.title;
-
-                document.querySelector('[data-text="now-playing-artist"]').textContent = artist;
-                document.querySelector('[data-text="now-playing-track"]').textContent = track;
-                document.querySelector('[data-text="listeners"]').textContent = mainStream.listeners || '0';
-
-                // Update stream status
-                const statusElement = document.querySelector('.live-stream p:nth-child(3) span');
-                if (statusElement) {
-                    statusElement.textContent = '● LIVE - ' + track;
-                    statusElement.style.color = '#00ff00';
-                }
-            }
+        const response = await fetch('/api/asteroid/partial/now-playing')
+        const contentType = response.headers.get("content-type")
+        if (!contentType.includes('text/html')) {
+            throw new Error('Error connecting to stream')
         }
+
+        const data = await response.text()
+        document.getElementById('now-playing').innerHTML = data
+
     } catch(error) {
         console.log('Could not fetch stream status:', error);
     }

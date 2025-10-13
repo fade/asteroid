@@ -56,12 +56,7 @@
         </audio>
       </div>
       
-      <div class="now-playing">
-        <h2>Now Playing</h2>
-        <p>Artist: <span data-text="now-playing-artist">The Void</span></p>
-        <p>Track: <span data-text="now-playing-track">Silence</span></p>
-        <p>Listeners: <span data-text="listeners">0</span></p>
-      </div>
+      <div id="now-playing" class="now-playing"></div>
     </main>
   </div>
 </body>
