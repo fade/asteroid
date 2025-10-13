@@ -25,8 +25,6 @@
       <h2 style="color: #00ff00;">🟢 Live Radio Stream</h2>
       <div class="live-stream">
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
-        <p><strong>Now Playing:</strong> <span id="live-now-playing">Loading...</span></p>
-        <p><strong>Listeners:</strong> <span id="live-listeners">0</span></p>
         <!-- Stream Quality Selector -->
         <div class="live-stream-quality">
           <label for="live-stream-quality"><strong>Quality:</strong></label>
@@ -44,6 +42,8 @@
         <p><em>Listen to the live Asteroid Radio stream</em></p>
       </div>
     </div>
+
+    <div id="now-playing" class="now-playing"></div>
 
     <!-- Track Browser -->
     <div class="player-section">

@@ -566,41 +566,24 @@ function changeLiveStreamQuality() {
     }
 }
 
-// Live stream functionality
-async function updateLiveStream() {
+// Live stream informatio update
+async function updateNowPlaying() {
     try {
-        const response = await fetch('/api/asteroid/icecast-status')
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        const response = await fetch('/api/asteroid/partial/now-playing')
+        const contentType = response.headers.get("content-type")
+        if (!contentType.includes('text/html')) {
+            throw new Error('Error connecting to stream')
         }
-        const result = await response.json();
-        
-        // Handle RADIANCE API wrapper format
-        const data = result.data || result;
-        if (data.icestats && data.icestats.source) {
-            const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
-            const mainStream = sources.find(s => s.listenurl && s.listenurl.includes('asteroid.mp3'));
 
-            if (mainStream && mainStream.title) {
-                const titleParts = mainStream.title.split(' - ');
-                const artist = titleParts.length > 1 ? titleParts[0] : 'Unknown Artist';
-                const track = titleParts.length > 1 ? titleParts.slice(1).join(' - ') : mainStream.title;
+        const data = await response.text()
+        document.getElementById('now-playing').innerHTML = data
 
-                const nowPlayingEl = document.getElementById('live-now-playing');
-                const listenersEl = document.getElementById('live-listeners');
-
-                if (nowPlayingEl) nowPlayingEl.textContent = `${artist} - ${track}`;
-                if (listenersEl) listenersEl.textContent = mainStream.listeners || '0';
-            } else {
-            }
-        }
-    } catch (error) {
-        console.error('Live stream update error:', error);
-        const nowPlayingEl = document.getElementById('live-now-playing');
-        if (nowPlayingEl) nowPlayingEl.textContent = 'Stream unavailable';
+    } catch(error) {
+        console.log('Could not fetch stream status:', error);
     }
 }
 
+// Initial update after 1 second
+setTimeout(updateNowPlaying, 1000);
 // Update live stream info every 10 seconds
-setTimeout(updateLiveStream, 1000); // Initial update after 1 second
-setInterval(updateLiveStream, 10000);
+setInterval(updateNowPlaying, 10000);
