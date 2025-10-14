@@ -61,8 +61,17 @@
 
 (defun track-exists-p (file-path)
   "Check if a track with the given file path already exists in the database"
+  ;; Try direct query first
   (let ((existing (db:select "tracks" (db:query (:= "file-path" file-path)))))
-    (> (length existing) 0)))
+    (if (> (length existing) 0)
+        t
+        ;; If not found, search manually (file-path might be stored as list)
+        (let ((all-tracks (db:select "tracks" (db:query :all))))
+          (some (lambda (track)
+                  (let ((stored-path (gethash "file-path" track)))
+                    (or (equal stored-path file-path)
+                        (and (listp stored-path) (equal (first stored-path) file-path)))))
+                all-tracks)))))
 
 (defun insert-track-to-database (metadata)
   "Insert track metadata into database if it doesn't already exist"
@@ -73,9 +82,7 @@
   ;; Check if track already exists
   (let ((file-path (getf metadata :file-path)))
     (if (track-exists-p file-path)
-        (progn
-          (format t "Track already exists, skipping: ~a~%" file-path)
-          nil)
+        nil
         (progn
           (db:insert "tracks" 
                      (list (list "title" (getf metadata :title))
@@ -91,34 +98,27 @@
 
 (defun scan-music-library (&optional (directory *music-library-path*))
   "Scan music library directory and add tracks to database"
-  (format t "Scanning music library: ~a~%" directory)
   (let ((audio-files (scan-directory-for-music-recursively directory))
         (added-count 0)
         (skipped-count 0))
-    (format t "Found ~a audio files to process~%" (length audio-files))
     (dolist (file audio-files)
       (let ((metadata (extract-metadata-with-taglib file)))
         (when metadata
           (handler-case
               (if (insert-track-to-database metadata)
-                  (progn
-                    (incf added-count)
-                    (format t "Added: ~a~%" (getf metadata :file-path)))
+                  (incf added-count)
                   (incf skipped-count))
             (error (e)
               (format t "Error adding ~a: ~a~%" file e))))))
-    (format t "Library scan complete. Added ~a new tracks, skipped ~a existing tracks.~%" 
-            added-count skipped-count)
     added-count))
 
 ;; Initialize music directory structure
-(defun ensure-music-directories ()
-  "Create music directory structure if it doesn't exist"
-  (let ((base-dir (merge-pathnames "music/" (asdf:system-source-directory :asteroid))))
+(defun initialize-music-directories (&optional (base-dir *music-library-path*))
+  "Create necessary music directories if they don't exist"
+  (progn
     (ensure-directories-exist (merge-pathnames "library/" base-dir))
     (ensure-directories-exist (merge-pathnames "incoming/" base-dir))
-    (ensure-directories-exist (merge-pathnames "temp/" base-dir))
-    (format t "Music directories initialized at ~a~%" base-dir)))
+    (ensure-directories-exist (merge-pathnames "temp/" base-dir))))
 
 ;; Simple file copy endpoint for manual uploads
 (define-page copy-files #@"/admin/copy-files" ()

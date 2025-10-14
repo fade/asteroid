@@ -76,8 +76,6 @@
              (user-id-raw (gethash "_id" user))
              (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw))
              (playlists (get-user-playlists user-id)))
-        (format t "Fetching playlists for user-id: ~a~%" user-id)
-        (format t "Found ~a playlists~%" (length playlists))
         (api-output `(("status" . "success")
                       ("playlists" . ,(mapcar (lambda (playlist)
                                                 (let ((name-val (gethash "name" playlist))
@@ -85,7 +83,6 @@
                                                       (track-ids-val (gethash "track-ids" playlist))
                                                       (created-val (gethash "created-date" playlist))
                                                       (id-val (gethash "_id" playlist)))
-                                                  (format t "Playlist ID: ~a (type: ~a)~%" id-val (type-of id-val))
                                                   ;; Calculate track count from comma-separated string
                                                   ;; Handle nil, empty string, or list containing empty string
                                                   (let* ((track-ids-str (if (listp track-ids-val) 
@@ -114,9 +111,7 @@
       (let* ((user (get-current-user))
              (user-id-raw (gethash "_id" user))
              (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw)))
-        (format t "Creating playlist for user-id: ~a, name: ~a~%" user-id name)
         (create-playlist user-id name description)
-        (format t "Playlist created successfully~%")
         (if (string= "true" (post/get "browser"))
             (redirect "/asteroid/")
             (api-output `(("status" . "success")
@@ -148,8 +143,6 @@
   (handler-case
       (let* ((id (parse-integer playlist-id :junk-allowed t))
              (playlist (get-playlist-by-id id)))
-        (format t "Looking for playlist ID: ~a~%" id)
-        (format t "Found playlist: ~a~%" (if playlist "YES" "NO"))
         (if playlist
             (let* ((track-ids-raw (gethash "tracks" playlist))
                    (track-ids (if (listp track-ids-raw) track-ids-raw (list track-ids-raw)))
@@ -197,24 +190,101 @@
                     ("message" . ,(format nil "Error retrieving tracks: ~a" e)))
                   :status 500))))
 
-;; API endpoint to get track by ID (for streaming)
-(define-page api-get-track-by-id #@"/api/tracks/(.*)" (:uri-groups (track-id))
-  "Retrieve track from database by ID"
-  (let* ((id (if (stringp track-id) (parse-integer track-id) track-id))
-         (tracks (db:select "tracks" (db:query (:= '_id id)))))
-    (when tracks (first tracks))))
+;; Stream Control API Endpoints
+(define-api asteroid/stream/queue () ()
+  "Get the current stream queue"
+  (require-role :admin)
+  (handler-case
+      (let ((queue (get-stream-queue)))
+        (api-output `(("status" . "success")
+                      ("queue" . ,(mapcar (lambda (track-id)
+                                           (let ((track (get-track-by-id track-id)))
+                                             (when track
+                                               `(("id" . ,track-id)
+                                                 ("title" . ,(gethash "title" track))
+                                                 ("artist" . ,(gethash "artist" track))
+                                                 ("album" . ,(gethash "album" track))))))
+                                         queue)))))
+    (error (e)
+      (api-output `(("status" . "error")
+                    ("message" . ,(format nil "Error getting queue: ~a" e)))
+                  :status 500))))
+
+(define-api asteroid/stream/queue/add (track-id &optional (position "end")) ()
+  "Add a track to the stream queue"
+  (require-role :admin)
+  (handler-case
+      (let ((tr-id (parse-integer track-id :junk-allowed t))
+            (pos (if (string= position "next") :next :end)))
+        (add-to-stream-queue tr-id pos)
+        (api-output `(("status" . "success")
+                      ("message" . "Track added to stream queue"))))
+    (error (e)
+      (api-output `(("status" . "error")
+                    ("message" . ,(format nil "Error adding to queue: ~a" e)))
+                  :status 500))))
+
+(define-api asteroid/stream/queue/remove (track-id) ()
+  "Remove a track from the stream queue"
+  (require-role :admin)
+  (handler-case
+      (let ((tr-id (parse-integer track-id :junk-allowed t)))
+        (remove-from-stream-queue tr-id)
+        (api-output `(("status" . "success")
+                      ("message" . "Track removed from stream queue"))))
+    (error (e)
+      (api-output `(("status" . "error")
+                    ("message" . ,(format nil "Error removing from queue: ~a" e)))
+                  :status 500))))
+
+(define-api asteroid/stream/queue/clear () ()
+  "Clear the entire stream queue"
+  (require-role :admin)
+  (handler-case
+      (progn
+        (clear-stream-queue)
+        (api-output `(("status" . "success")
+                      ("message" . "Stream queue cleared"))))
+    (error (e)
+      (api-output `(("status" . "error")
+                    ("message" . ,(format nil "Error clearing queue: ~a" e)))
+                  :status 500))))
+
+(define-api asteroid/stream/queue/add-playlist (playlist-id) ()
+  "Add all tracks from a playlist to the stream queue"
+  (require-role :admin)
+  (handler-case
+      (let ((pl-id (parse-integer playlist-id :junk-allowed t)))
+        (add-playlist-to-stream-queue pl-id)
+        (api-output `(("status" . "success")
+                      ("message" . "Playlist added to stream queue"))))
+    (error (e)
+      (api-output `(("status" . "error")
+                    ("message" . ,(format nil "Error adding playlist to queue: ~a" e)))
+                  :status 500))))
+
+(define-api asteroid/stream/queue/reorder (track-ids) ()
+  "Reorder the stream queue (expects comma-separated track IDs)"
+  (require-role :admin)
+  (handler-case
+      (let ((ids (mapcar (lambda (id-str) (parse-integer id-str :junk-allowed t))
+                        (cl-ppcre:split "," track-ids))))
+        (reorder-stream-queue ids)
+        (api-output `(("status" . "success")
+                      ("message" . "Stream queue reordered"))))
+    (error (e)
+      (api-output `(("status" . "error")
+                    ("message" . ,(format nil "Error reordering queue: ~a" e)))
+                  :status 500))))
+
 (defun get-track-by-id (track-id)
   "Get a track by its ID - handles type mismatches"
-  (format t "get-track-by-id called with: ~a (type: ~a)~%" track-id (type-of track-id))
   ;; Try direct query first
   (let ((tracks (db:select "tracks" (db:query (:= "_id" track-id)))))
     (if (> (length tracks) 0)
-        (progn
-          (format t "Found via direct query~%")
-          (first tracks))
+        (first tracks)
         ;; If not found, search manually (ID might be stored as list)
         (let ((all-tracks (db:select "tracks" (db:query :all))))
-          (format t "Searching through ~a tracks manually~%" (length all-tracks))
           (find-if (lambda (track)
                      (let ((stored-id (gethash "_id" track)))
                        (or (equal stored-id track-id)
@@ -500,7 +570,9 @@
      :liquidsoap-status (check-liquidsoap-status)
      :icecast-status (check-icecast-status)
      :track-count (format nil "~d" track-count)
-     :library-path "/home/glenn/Projects/Code/asteroid/music/library/")))
+     :library-path "/home/glenn/Projects/Code/asteroid/music/library/"
+     :stream-base-url *stream-base-url*
+     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac"))))
 
 ;; User Management page (requires authentication)
 (define-page users-management #@"/admin/user" ()

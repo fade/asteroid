@@ -38,5 +38,6 @@
                (:file "stream-media")
                (:file "user-management")
                (:file "playlist-management")
+               (:file "stream-control")
                (:file "auth-routes")
                (:file "asteroid")))

@@ -1,0 +1,209 @@
+#+TITLE: Stream Queue Control System
+#+AUTHOR: Asteroid Radio Team
+#+DATE: 2025-10-14
+
+* Overview
+
+The stream queue control system allows administrators to manage what plays on the main Asteroid Radio broadcast stream. Instead of random playback from the music library, you can now curate the exact order of tracks.
+
+* How It Works
+
+1. *Stream Queue* - An ordered list of track IDs maintained in memory
+2. *M3U Generation* - The queue is converted to a =stream-queue.m3u= file
+3. *Liquidsoap Integration* - Liquidsoap reads the M3U file and reloads it every 60 seconds
+4. *Fallback* - If the queue is empty, Liquidsoap falls back to random directory playback
+
+* API Endpoints (Admin Only)
+
+All endpoints require admin authentication.
+
+** Get Current Queue
+#+BEGIN_SRC 
+GET /api/asteroid/stream/queue
+#+END_SRC
+
+Returns the current stream queue with track details.
+
+** Add Track to Queue
+#+BEGIN_SRC 
+POST /api/asteroid/stream/queue/add
+Parameters:
+  - track_id: ID of track to add
+  - position: "end" (default) or "next"
+#+END_SRC
+
+Adds a track to the end of the queue or as the next track to play.
+
+** Remove Track from Queue
+#+BEGIN_SRC 
+POST /api/asteroid/stream/queue/remove
+Parameters:
+  - track_id: ID of track to remove
+#+END_SRC
+
+Removes a specific track from the queue.
+
+** Clear Queue
+#+BEGIN_SRC 
+POST /api/asteroid/stream/queue/clear
+#+END_SRC
+
+Clears the entire queue (will fall back to random playback).
+
+** Add Playlist to Queue
+#+BEGIN_SRC 
+POST /api/asteroid/stream/queue/add-playlist
+Parameters:
+  - playlist_id: ID of playlist to add
+#+END_SRC
+
+Adds all tracks from a user playlist to the stream queue.
+
+** Reorder Queue
+#+BEGIN_SRC 
+POST /api/asteroid/stream/queue/reorder
+Parameters:
+  - track_ids: Comma-separated list of track IDs in desired order
+#+END_SRC
+
+Completely reorders the queue with a new track order.
+
+* Usage Examples
+
+** Building a Stream Queue
+
+#+BEGIN_SRC bash
+# Add a specific track to the end
+curl -X POST http://localhost:8080/api/asteroid/stream/queue/add \
+  -d "track-id=42" \
+  -H "Cookie: radiance-session=..."
+
+# Add a track to play next
+curl -X POST http://localhost:8080/api/asteroid/stream/queue/add \
+  -d "track-id=43&position=next" \
+  -H "Cookie: radiance-session=..."
+
+# Add an entire playlist
+curl -X POST http://localhost:8080/api/asteroid/stream/queue/add-playlist \
+  -d "playlist-id=5" \
+  -H "Cookie: radiance-session=..."
+#+END_SRC
+
+** Managing the Queue
+
+#+BEGIN_SRC bash
+# View current queue
+curl http://localhost:8080/api/asteroid/stream/queue \
+  -H "Cookie: radiance-session=..."
+
+# Remove a track
+curl -X POST http://localhost:8080/api/asteroid/stream/queue/remove \
+  -d "track-id=42" \
+  -H "Cookie: radiance-session=..."
+
+# Clear everything
+curl -X POST http://localhost:8080/api/asteroid/stream/queue/clear \
+  -H "Cookie: radiance-session=..."
+#+END_SRC
+
+* Lisp Functions
+
+If you're working directly in the Lisp REPL:
+
+#+BEGIN_SRC lisp
+;; Add tracks to queue
+(add-to-stream-queue 42 :end)
+(add-to-stream-queue 43 :next)
+
+;; View queue
+(get-stream-queue)
+
+;; Add a playlist
+(add-playlist-to-stream-queue 5)
+
+;; Remove a track
+(remove-from-stream-queue 42)
+
+;; Clear queue
+(clear-stream-queue)
+
+;; Reorder queue
+(reorder-stream-queue '(43 44 45 46))
+
+;; Build smart queues
+(build-smart-queue "electronic" 20)
+(build-queue-from-artist "Nine Inch Nails" 15)
+
+;; Manually regenerate playlist file
+(regenerate-stream-playlist)
+#+END_SRC
+
+* File Locations
+
+- *Stream Queue File*: =/home/glenn/Projects/Code/asteroid/stream-queue.m3u=
+- *Docker Mount*: =/app/stream-queue.m3u= (inside Liquidsoap container)
+- *Liquidsoap Config*: =docker/asteroid-radio-docker.liq=
+
+* How Liquidsoap Reads Updates
+
+The Liquidsoap configuration reloads the playlist file every 60 seconds:
+
+#+BEGIN_SRC liquidsoap
+radio = playlist.safe(
+  mode="normal",
+  reload=60,
+  "/app/stream-queue.m3u"
+)
+#+END_SRC
+
+This means changes to the queue will take effect within 1 minute.
+
+* Stream History
+
+The system also tracks recently played tracks:
+
+#+BEGIN_SRC lisp
+;; Get last 10 played tracks
+(get-stream-history 10)
+
+;; Add to history (usually automatic)
+(add-to-stream-history 42)
+#+END_SRC
+
+* Future Enhancements
+
+- [ ] Web UI for queue management (drag-and-drop reordering)
+- [ ] Telnet integration for real-time skip/next commands
+- [ ] Scheduled programming (time-based queue switching)
+- [ ] Auto-queue filling (automatically add tracks when queue runs low)
+- [ ] Genre-based smart queues
+- [ ] Listener request system
+
+* Troubleshooting
+
+** Queue changes not taking effect
+
+- Wait up to 60 seconds for Liquidsoap to reload
+- Check that =stream-queue.m3u= was generated correctly
+- Verify Docker volume mount is working: =docker exec asteroid-liquidsoap ls -la /app/stream-queue.m3u=
+- Check Liquidsoap logs: =docker logs asteroid-liquidsoap=
+
+** Empty queue falls back to random
+
+This is expected behavior. The system will play random tracks from the music library when the queue is empty to ensure continuous streaming.
+
+** Playlist file not updating
+
+- Ensure Asteroid server has write permissions to the project directory
+- Check that =regenerate-stream-playlist= is being called after queue modifications
+- Verify the file exists: =ls -la stream-queue.m3u=
+
+* Integration with Admin Interface
+
+The stream control system is designed to be integrated into the admin web interface. Future work will add:
+
+- Visual queue editor with drag-and-drop
+- "Add to Stream Queue" buttons on track listings
+- "Queue Playlist" buttons on playlist pages
+- Real-time queue display showing what's currently playing
+- Skip/Next controls for immediate playback changes (via Telnet)
