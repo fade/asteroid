@@ -12,7 +12,7 @@
     :color "#00ffff"
     :margin 0
     :padding "20px"
-    :box-sizing "boder-box"
+    :box-sizing "border-box"
 
     (.container
      :max-width "1200px"
@@ -315,7 +315,8 @@
      :background "#0a0a0a"
      :color "#00ffff"
      :border "1px solid #2a3441"
-     :font-family "Courier New, monospace")
+     :font-family "Courier New, monospace"
+     :box-sizing "border-box")
 
     (.playlist-list
      :border "1px solid #2a3441"
@@ -740,4 +741,14 @@
     ;;  :text-align center)
 
   ) ;; Close main body block
+
+  ;; media queries for reponsiveness
+  (:media "(max-width: 576px)"
+          (body
+           (.playlist-controls
+            :display block
+            ;;:width "100%"
+            (>* :width "100%")
+            (button :margin-left 0
+                    :margin-right 0))))
 ) ;; End of let block

@@ -8,7 +8,7 @@ body{
     color: #00ffff;
     margin: 0;
     padding: 20px;
-    box-sizing: boder-box;
+    box-sizing: border-box;
 }
 
 body .container{
@@ -393,6 +393,7 @@ body .playlist-input{
     color: #00ffff;
     border: 1px solid #2a3441;
     font-family: Courier New, monospace;
+    box-sizing: border-box;
 }
 
 body .playlist-list{
@@ -928,4 +929,17 @@ body .stat-card .stat-label{
     color: #ccc;
     font-size: 0.875rem;
     margin-top: 0.5rem;
+}
+
+@media (max-width: 576px){
+    body .playlist-controls{
+        display: block;
+    }
+    body .playlist-controls >*{
+        width: 100%;
+    }
+    body .playlist-controls button{
+        margin-left: 0;
+        margin-right: 0;
+    }
 }
