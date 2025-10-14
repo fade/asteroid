@@ -785,8 +785,10 @@
                   (let* ((source-section (subseq xml-string match-start 
                                                  (or (cl-ppcre:scan "</source>" xml-string :start match-start)
                                                      (length xml-string))))
-                         (title (or (cl-ppcre:regex-replace-all ".*<title>(.*?)</title>.*" source-section "\\1") "Unknown"))
-                         (listeners (or (cl-ppcre:regex-replace-all ".*<listeners>(.*?)</listeners>.*" source-section "\\1") "0")))
+                         (titlep (cl-ppcre:all-matches "<title>" source-section))
+                         (listenersp (cl-ppcre:all-matches "<listeners>" source-section))
+                         (title (if titlep (cl-ppcre:regex-replace-all ".*<title>(.*?)</title>.*" source-section "\\1") "Unknown"))
+                         (listeners (if listenersp (cl-ppcre:regex-replace-all ".*<listeners>(.*?)</listeners>.*" source-section "\\1") "0")))
                     ;; Return JSON in format expected by frontend
                     (api-output
                      `(("icestats" . (("source" . (("listenurl" . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
