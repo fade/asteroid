@@ -18,7 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
     loadPlaylists();
     setupEventListeners();
     updatePlayerDisplay();
-    updateVolume()
+    updateVolume();
+    
+    // Setup live stream with reduced buffering
+    const liveAudio = document.getElementById('live-stream-audio');
+    if (liveAudio) {
+        // Reduce buffer to minimize delay
+        liveAudio.preload = 'none';
+    }
 });
 
 function setupEventListeners() {
@@ -338,7 +345,6 @@ async function createPlaylist() {
         });
 
         const result = await response.json();
-        console.log('Create playlist result:', result);
 
         if (result.status === 'success') {
             alert(`Playlist "${name}" created successfully!`);
@@ -377,7 +383,6 @@ async function saveQueueAsPlaylist() {
         });
 
         const createResult = await createResponse.json();
-        console.log('Create playlist result:', createResult);
 
         if (createResult.status === 'success') {
             // Wait a moment for database to update
@@ -386,20 +391,16 @@ async function saveQueueAsPlaylist() {
             // Get the new playlist ID by fetching playlists
             const playlistsResponse = await fetch('/api/asteroid/playlists');
             const playlistsResult = await playlistsResponse.json();
-            console.log('Playlists result:', playlistsResult);
 
             if (playlistsResult.status === 'success' && playlistsResult.playlists.length > 0) {
                 // Find the playlist with matching name (most recent)
                 const newPlaylist = playlistsResult.playlists.find(p => p.name === name) || 
                     playlistsResult.playlists[playlistsResult.playlists.length - 1];
 
-                console.log('Found playlist:', newPlaylist);
-
                 // Add all tracks from queue to playlist
                 let addedCount = 0;
                 for (const track of playQueue) {
                     const trackId = track.id || (Array.isArray(track.id) ? track.id[0] : null);
-                    console.log('Adding track to playlist:', track, 'ID:', trackId);
 
                     if (trackId) {
                         const addFormData = new FormData();
@@ -412,7 +413,6 @@ async function saveQueueAsPlaylist() {
                         });
 
                         const addResult = await addResponse.json();
-                        console.log('Add track result:', addResult);
 
                         if (addResult.status === 'success') {
                             addedCount++;
@@ -441,12 +441,11 @@ async function loadPlaylists() {
         const response = await fetch('/api/asteroid/playlists');
         const result = await response.json();
 
-        console.log('Load playlists result:', result);
-
-        if (result.status === 'success') {
+        if (result.data && result.data.status === 'success') {
+            displayPlaylists(result.data.playlists || []);
+        } else if (result.status === 'success') {
             displayPlaylists(result.playlists || []);
         } else {
-            console.error('Error loading playlists:', result.message);
             displayPlaylists([]);
         }
     } catch (error) {
@@ -482,8 +481,6 @@ async function loadPlaylist(playlistId) {
     try {
         const response = await fetch(`/api/asteroid/playlists/get?playlist-id=${playlistId}`);
         const result = await response.json();
-
-        console.log('Load playlist result:', result);
 
         if (result.status === 'success' && result.playlist) {
             const playlist = result.playlist;
@@ -577,7 +574,6 @@ async function updateLiveStream() {
             throw new Error(`HTTP ${response.status}`);
         }
         const result = await response.json();
-        console.log('Live stream data:', result); // Debug log
         
         // Handle RADIANCE API wrapper format
         const data = result.data || result;
@@ -595,13 +591,8 @@ async function updateLiveStream() {
 
                 if (nowPlayingEl) nowPlayingEl.textContent = `${artist} - ${track}`;
                 if (listenersEl) listenersEl.textContent = mainStream.listeners || '0';
-
-                console.log('Updated live stream info:', `${artist} - ${track}`, 'Listeners:', mainStream.listeners);
             } else {
-                console.log('No main stream found or no title');
             }
-        } else {
-            console.log('No icestats or source in response');
         }
     } catch (error) {
         console.error('Live stream update error:', error);
