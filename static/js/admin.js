@@ -25,6 +25,30 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('player-pause').addEventListener('click', pausePlayer);
     document.getElementById('player-stop').addEventListener('click', stopPlayer);
     document.getElementById('player-resume').addEventListener('click', resumePlayer);
+    
+    // Queue controls
+    const refreshQueueBtn = document.getElementById('refresh-queue');
+    const clearQueueBtn = document.getElementById('clear-queue-btn');
+    const addRandomBtn = document.getElementById('add-random-tracks');
+    const queueSearchInput = document.getElementById('queue-track-search');
+    
+    if (refreshQueueBtn) refreshQueueBtn.addEventListener('click', loadStreamQueue);
+    if (clearQueueBtn) clearQueueBtn.addEventListener('click', clearStreamQueue);
+    if (addRandomBtn) addRandomBtn.addEventListener('click', addRandomTracks);
+    if (queueSearchInput) queueSearchInput.addEventListener('input', searchTracksForQueue);
+    
+    // Load initial queue
+    loadStreamQueue();
+    
+    // Setup live stream monitor
+    const liveAudio = document.getElementById('live-stream-audio');
+    if (liveAudio) {
+        liveAudio.preload = 'none';
+    }
+    
+    // Update live stream info
+    updateLiveStreamInfo();
+    setInterval(updateLiveStreamInfo, 10000); // Every 10 seconds
 });
 
 // Load tracks from API
@@ -81,6 +105,7 @@ function renderPage() {
             <div class="track-actions">
                 <button onclick="playTrack(${track.id})" class="btn btn-sm btn-success">▶️ Play</button>
                 <button onclick="streamTrack(${track.id})" class="btn btn-sm btn-info">🎵 Stream</button>
+                <button onclick="addToQueue(${track.id}, 'end')" class="btn btn-sm btn-primary">➕ Add to Queue</button>
                 <button onclick="deleteTrack(${track.id})" class="btn btn-sm btn-danger">🗑️ Delete</button>
             </div>
         </div>
@@ -304,3 +329,267 @@ function openIncomingFolder() {
 
 // Update player status every 5 seconds
 setInterval(updatePlayerStatus, 5000);
+
+// ========================================
+// Stream Queue Management
+// ========================================
+
+let streamQueue = [];
+let queueSearchTimeout = null;
+
+// Load current stream queue
+async function loadStreamQueue() {
+    try {
+        const response = await fetch('/api/asteroid/stream/queue');
+        const result = await response.json();
+        const data = result.data || result;
+        
+        if (data.status === 'success') {
+            streamQueue = data.queue || [];
+            displayStreamQueue();
+        }
+    } catch (error) {
+        console.error('Error loading stream queue:', error);
+        document.getElementById('stream-queue-container').innerHTML = 
+            '<div class="error">Error loading queue</div>';
+    }
+}
+
+// Display stream queue
+function displayStreamQueue() {
+    const container = document.getElementById('stream-queue-container');
+    
+    if (streamQueue.length === 0) {
+        container.innerHTML = '<div class="empty-state">Queue is empty. Add tracks below.</div>';
+        return;
+    }
+    
+    let html = '<div class="queue-items">';
+    streamQueue.forEach((item, index) => {
+        if (item) {
+            html += `
+                <div class="queue-item" data-track-id="${item.id}">
+                    <span class="queue-position">${index + 1}</span>
+                    <div class="queue-track-info">
+                        <div class="track-title">${item.title || 'Unknown'}</div>
+                        <div class="track-artist">${item.artist || 'Unknown Artist'}</div>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="removeFromQueue(${item.id})">Remove</button>
+                </div>
+            `;
+        }
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+// Clear stream queue
+async function clearStreamQueue() {
+    if (!confirm('Clear the entire stream queue? This will stop playback until new tracks are added.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/asteroid/stream/queue/clear', {
+            method: 'POST'
+        });
+        const result = await response.json();
+        const data = result.data || result;
+        
+        if (data.status === 'success') {
+            alert('Queue cleared successfully');
+            loadStreamQueue();
+        } else {
+            alert('Error clearing queue: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error clearing queue:', error);
+        alert('Error clearing queue');
+    }
+}
+
+// Remove track from queue
+async function removeFromQueue(trackId) {
+    try {
+        const response = await fetch('/api/asteroid/stream/queue/remove', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `track-id=${trackId}`
+        });
+        const result = await response.json();
+        const data = result.data || result;
+        
+        if (data.status === 'success') {
+            loadStreamQueue();
+        } else {
+            alert('Error removing track: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error removing track:', error);
+        alert('Error removing track');
+    }
+}
+
+// Add track to queue
+async function addToQueue(trackId, position = 'end', showNotification = true) {
+    try {
+        const response = await fetch('/api/asteroid/stream/queue/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `track-id=${trackId}&position=${position}`
+        });
+        const result = await response.json();
+        const data = result.data || result;
+        
+        if (data.status === 'success') {
+            // Only reload queue if we're in the queue management section
+            const queueContainer = document.getElementById('stream-queue-container');
+            if (queueContainer && queueContainer.offsetParent !== null) {
+                loadStreamQueue();
+            }
+            
+            // Show brief success notification
+            if (showNotification) {
+                showToast('✓ Added to queue');
+            }
+            return true;
+        } else {
+            alert('Error adding track: ' + (data.message || 'Unknown error'));
+            return false;
+        }
+    } catch (error) {
+        console.error('Error adding track:', error);
+        alert('Error adding track');
+        return false;
+    }
+}
+
+// Simple toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #00ff00;
+        color: #000;
+        padding: 12px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+// Add random tracks to queue
+async function addRandomTracks() {
+    if (tracks.length === 0) {
+        alert('No tracks available. Please scan the library first.');
+        return;
+    }
+    
+    const count = 10;
+    const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, Math.min(count, tracks.length));
+    
+    for (const track of selected) {
+        await addToQueue(track.id, 'end', false); // Don't show toast for each track
+    }
+    
+    showToast(`✓ Added ${selected.length} random tracks to queue`);
+}
+
+// Search tracks for adding to queue
+function searchTracksForQueue(event) {
+    clearTimeout(queueSearchTimeout);
+    const query = event.target.value.toLowerCase();
+    
+    if (query.length < 2) {
+        document.getElementById('queue-track-results').innerHTML = '';
+        return;
+    }
+    
+    queueSearchTimeout = setTimeout(() => {
+        const results = tracks.filter(track => 
+            (track.title && track.title.toLowerCase().includes(query)) ||
+            (track.artist && track.artist.toLowerCase().includes(query)) ||
+            (track.album && track.album.toLowerCase().includes(query))
+        ).slice(0, 20); // Limit to 20 results
+        
+        displayQueueSearchResults(results);
+    }, 300);
+}
+
+// Display search results for queue
+function displayQueueSearchResults(results) {
+    const container = document.getElementById('queue-track-results');
+    
+    if (results.length === 0) {
+        container.innerHTML = '<div class="empty-state">No tracks found</div>';
+        return;
+    }
+    
+    let html = '<div class="search-results">';
+    results.forEach(track => {
+        html += `
+            <div class="search-result-item">
+                <div class="track-info">
+                    <div class="track-title">${track.title || 'Unknown'}</div>
+                    <div class="track-artist">${track.artist || 'Unknown'} - ${track.album || 'Unknown Album'}</div>
+                </div>
+                <div class="track-actions">
+                    <button class="btn btn-sm btn-primary" onclick="addToQueue(${track.id}, 'end')">Add to End</button>
+                    <button class="btn btn-sm btn-success" onclick="addToQueue(${track.id}, 'next')">Play Next</button>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+// Live stream info update
+async function updateLiveStreamInfo() {
+    try {
+        const response = await fetch('/api/asteroid/icecast-status');
+        if (!response.ok) {
+            return;
+        }
+        
+        const result = await response.json();
+        
+        // Handle Radiance API response format
+        const data = result.data || result;
+        
+        // Sources are nested in icestats
+        const sources = data.icestats?.source;
+        
+        if (sources) {
+            const mainStream = Array.isArray(sources) 
+                ? sources.find(s => s.listenurl?.includes('/asteroid.aac') || s.listenurl?.includes('/asteroid.mp3'))
+                : sources;
+            
+            if (mainStream && mainStream.title) {
+                const nowPlayingEl = document.getElementById('live-now-playing');
+                if (nowPlayingEl) {
+                    const parts = mainStream.title.split(' - ');
+                    const artist = parts[0] || 'Unknown';
+                    const track = parts.slice(1).join(' - ') || 'Unknown';
+                    nowPlayingEl.textContent = `${artist} - ${track}`;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Could not fetch stream info:', error);
+    }
+}

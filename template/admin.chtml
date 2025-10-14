@@ -107,6 +107,41 @@
       </div>
     </div>
 
+    <!-- Live Stream Monitor -->
+    <div class="admin-section">
+      <h2>📻 Live Stream Monitor</h2>
+      <div class="live-stream-monitor">
+        <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
+        <p><strong>Now Playing:</strong> <span id="live-now-playing">Loading...</span></p>
+        <audio id="live-stream-audio" controls style="width: 100%; max-width: 600px;">
+          <source id="live-stream-source" lquery="(attr :src default-stream-url)" type="audio/aac">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    </div>
+
+    <!-- Stream Queue Management -->
+    <div class="admin-section">
+      <h2>🎵 Stream Queue Management</h2>
+      <p>Manage the live stream playback queue. Changes take effect within 5-10 seconds.</p>
+      
+      <div class="queue-controls">
+        <button id="refresh-queue" class="btn btn-secondary">🔄 Refresh Queue</button>
+        <button id="clear-queue-btn" class="btn btn-warning">🗑️ Clear Queue</button>
+        <button id="add-random-tracks" class="btn btn-info">🎲 Add 10 Random Tracks</button>
+      </div>
+      
+      <div id="stream-queue-container" class="queue-list">
+        <div class="loading">Loading queue...</div>
+      </div>
+      
+      <div class="queue-actions">
+        <h3>Add Tracks to Queue</h3>
+        <input type="text" id="queue-track-search" placeholder="Search tracks to add..." class="search-input">
+        <div id="queue-track-results" class="track-results"></div>
+      </div>
+    </div>
+
     <!-- Player Control -->
     <div class="admin-section">
       <h2>Player Control</h2>
