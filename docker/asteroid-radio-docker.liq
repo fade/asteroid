@@ -14,20 +14,46 @@ settings.server.telnet.set(true)
 settings.server.telnet.port.set(1234)
 settings.server.telnet.bind_addr.set("0.0.0.0")
 
-# Create playlist source from mounted music directory
-# Use playlist.safe which starts playing immediately without full scan
-radio = playlist.safe(
-  mode="randomize", 
+# Create playlist source from generated M3U file
+# This file is managed by Asteroid's stream control system
+# Falls back to directory scan if playlist file doesn't exist
+radio = playlist(
+  mode="normal",  # Play in order (not randomized)
+  reload=5,       # Check for playlist updates every 5 seconds
+  reload_mode="watch",  # Watch file for changes
+  "/app/stream-queue.m3u"
+)
+
+# Fallback to directory scan if playlist file is empty/missing
+radio_fallback = playlist.safe(
+  mode="randomize",
   reload=3600,
   "/app/music/"
 )
 
-# Add some audio processing
-radio = amplify(1.0, radio)
-radio = normalize(radio)
+# Use main playlist, fall back to directory scan
+radio = fallback(track_sensitive=false, [radio, radio_fallback])
 
-# Add crossfade between tracks
-radio = crossfade(radio)
+# Add some audio processing
+# Use ReplayGain for consistent volume without pumping
+radio = amplify(1.0, override="replaygain", radio)
+
+# Add smooth crossfade between tracks (5 seconds)
+radio = crossfade(
+  duration=5.0,        # 5 second crossfade
+  fade_in=3.0,         # 3 second fade in
+  fade_out=3.0,        # 3 second fade out
+  radio
+)
+
+# Add a compressor to prevent clipping
+radio = compress(
+  ratio=3.0,           # Compression ratio
+  threshold=-15.0,     # Threshold in dB
+  attack=50.0,         # Attack time in ms
+  release=400.0,       # Release time in ms
+  radio
+)
 
 # Create a fallback with emergency content
 emergency = sine(440.0)

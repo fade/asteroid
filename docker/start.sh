@@ -23,6 +23,7 @@ docker compose ps
 
 echo ""
 echo "🎵 Asteroid Radio is now streaming!"
-echo "📡 High Quality: http://localhost:8000/asteroid.mp3"
-echo "📡 Low Quality:  http://localhost:8000/asteroid-low.mp3"
-echo "🔧 Admin Panel:  http://localhost:8000/admin/"
+echo "📡 High Quality MP3: http://localhost:8000/asteroid.mp3"
+echo "📡 High Quality AAC: http://localhost:8000/asteroid.aac"
+echo "📡 Low Quality MP3:  http://localhost:8000/asteroid-low.mp3"
+echo "🔧 Admin Panel:      http://localhost:8000/admin/"
