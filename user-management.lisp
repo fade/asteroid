@@ -282,12 +282,15 @@
       ;; Fallback to delayed initialization
       (bt:make-thread 
        (lambda ()
-         (sleep 3) ; Give database more time to initialize
-         (handler-case
-             (progn
-               (format t "Retrying user management setup...~%")
-               (create-default-admin)
-               (format t "User management initialization complete.~%"))
-           (error (e)
-             (format t "Error initializing user system: ~a~%" e))))
+         (dotimes (a 5)
+           (unless (db:connected-p)
+             (sleep 3)) ; Give database more time to initialize
+           (handler-case
+               (progn
+                 (format t "Retrying user management setup...~%")
+                 (create-default-admin)
+                 (format t "User management initialization complete.~%")
+                 (return))
+             (error (e)
+               (format t "Error initializing user system: ~a~%" e)))))
        :name "user-init"))))
