@@ -380,7 +380,11 @@ sudo systemctl reload nginx
 
 * Docker Management
 
-** Container Management
+** Stream Services
+
+The stream services can be managed using docker from inside the =docker= folder on this repository.
+
+*** Container Management
 #+BEGIN_SRC bash
 # Start services
 docker compose up -d
@@ -395,11 +399,42 @@ docker compose logs -f
 docker compose restart
 #+END_SRC
 
-** Docker Configuration
+*** Docker Configuration
 See =docker/docker-compose.yml= for complete Docker setup with Icecast2 and Liquidsoap containers. The setup includes:
 - **Icecast2**: Streaming server with three output formats
 - **Liquidsoap**: Audio processing and stream generation
-- **Music Volume**: Mounted from =./music/= directory
+- **Music Volume**: Mounted to the =./music/library= directory (can also be set with the =MUSIC_LIBRARY= environment variable)
+- *Queue Playlist*: Mounted to the =./stream-queue.m3u= file (can also be set with the =QUEUE_PLAYLIST= environment variable)
+
+** Asteroid Radio Application
+
+The asteroid radio application can also be served and managed using docker from inside the =docker= folder on this repository.
+
+*** Container Management
+#+BEGIN_SRC bash
+# Build service
+docker compose -f docker-compose.asteroid.yml build
+
+# Start service
+docker compose -f docker-compose.asteroid.yml up -d
+
+# Stop service
+docker compose -f docker-compose.asteroid.yml down
+
+# View logs
+docker compose -f docker-compose.asteroid.yml logs -f
+
+# Restart service
+docker compose -f docker-compose.asteroid.yml restart
+#+END_SRC
+
+*** Docker Configuration
+See =docker/docker-compose.asteroid.yml= for complete Docker setup, which includes:
+- Buils the application using the current cloned branch for the repository
+- Uses the host network for easy access to the stream endpoint
+- *Stream endpoint* mapped to =http://localhost:8000= (can also be set with the =ASTEROID_STREAM_URL= environment variable)
+- **Music Volume**: Mounted to the =./music/library= directory (can also be set with the =MUSIC_LIBRARY= environment variable)
+- *Queue Playlist*: Mounted to the =./stream-queue.m3u= file (can also be set with the =QUEUE_PLAYLIST= environment variable)
 
 * Initial Configuration
 
