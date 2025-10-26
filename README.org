@@ -1,35 +1,45 @@
-#+TITLE: Asteroid Radio - Internet Streaming Implementation
-#+AUTHOR: Database Implementation Branch
-#+DATE: 2025-09-11
+#+TITLE: Asteroid Radio - Internet Radio Streaming Platform
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-26
 
 * Overview
 
-This branch implements a complete internet radio streaming system for Asteroid Radio, transforming it from a simple web interface into a fully functional streaming radio station with live broadcasting capabilities.
+Asteroid Radio is a complete internet radio streaming platform built with Common Lisp, featuring a hacker-themed terminal aesthetic. The project combines the Radiance web framework with Icecast/Liquidsoap streaming infrastructure to create a full-featured music streaming platform with live broadcasting capabilities.
+
+** Project Links
+- *Repository*: https://github.com/fade/asteroid
+- *IRC*: #asteroid.music on irc.libera.chat
+- *Documentation*: See =docs/= directory for comprehensive guides
 
 * Key Features
 
 ** Live Internet Radio Streaming
-- Continuous MP3 streaming at 128kbps stereo
-- Professional audio processing with crossfading and normalization
+- Multiple quality streams: 128kbps MP3, 96kbps AAC, 64kbps MP3
+- Professional audio processing with crossfading and ReplayGain normalization
 - Icecast2 streaming server integration
 - Liquidsoap audio pipeline for reliable broadcasting
+- Stream queue control for curated programming
 
 ** Music Library Management
 - Database-backed track storage with metadata extraction
 - Support for MP3, FLAC, OGG, and WAV formats
 - Automatic metadata extraction using taglib
-- Track search, filtering, and sorting capabilities
+- Track search, filtering, sorting, and pagination
+- Recursive directory scanning
 
 ** Web Interface
 - RADIANCE framework with CLIP templating
-- Admin dashboard for library management
-- Web player with HTML5 audio controls
+- Admin dashboard for library and user management
+- Multiple player modes: inline, pop-out, and persistent frameset
 - Live stream integration with embedded player
+- Responsive design for desktop and mobile
+- Role-based access control (Admin/DJ/Listener)
 
 ** Network Broadcasting
-- WSL-compatible networking for internal network access
+- Dynamic stream URL detection for multi-environment support
 - Professional streaming URLs for media players
 - Multi-listener support via Icecast2
+- Docker-based deployment for easy setup
 
 * Architecture Changes
 
@@ -40,46 +50,82 @@ This branch implements a complete internet radio streaming system for Asteroid R
 - Database abstraction layer for track storage
 
 ** Streaming Stack
-- *Icecast2*: Streaming server (port 8000)
-- *Liquidsoap*: Audio processing and streaming pipeline
+- *Icecast2*: Streaming server (port 8000) - Docker containerized
+- *Liquidsoap*: Audio processing and streaming pipeline - Docker containerized
 - *RADIANCE*: Web server and API (port 8080)
-- *Database*: Track metadata and playlist storage
+- *PostgreSQL*: Database backend (configured, ready for migration)
+- *Docker Compose*: Container orchestration
 
 ** File Structure
 #+BEGIN_SRC
 asteroid/
 ├── asteroid.lisp              # Main server with RADIANCE routes
 ├── asteroid.asd               # System definition with dependencies
-├── asteroid-radio.liq         # Liquidsoap streaming configuration
-├── playlist.m3u               # Generated playlist for streaming
-├── start-asteroid-radio.sh    # Launch script for all services
-├── stop-asteroid-radio.sh     # Stop script for all services
+├── stream-control.lisp        # Stream queue management
+├── user-management.lisp       # User administration
+├── playlist-management.lisp   # Playlist operations
+├── test-server.sh             # Automated test suite
+├── docker/                    # Docker infrastructure
+│   ├── docker-compose.yml     # Container orchestration
+│   ├── asteroid-radio-docker.liq  # Liquidsoap config
+│   ├── icecast.xml            # Icecast configuration
+│   └── music/                 # Music library mount
 ├── template/                  # CLIP HTML templates
 │   ├── front-page.chtml       # Main page with live stream
 │   ├── admin.chtml            # Admin dashboard
-│   └── player.chtml           # Web player interface
+│   ├── player.chtml           # Web player interface
+│   └── users.chtml            # User management
 ├── static/                    # CSS and assets
 │   └── asteroid.lass          # LASS stylesheet
-└── music/                     # Music library
-    ├── incoming/              # Upload staging area
-    └── library/               # Processed music files
+├── docs/                      # Comprehensive documentation
+│   ├── README.org             # Documentation index
+│   ├── PROJECT-OVERVIEW.org   # Architecture overview
+│   ├── PROJECT-HISTORY.org    # Development timeline
+│   ├── INSTALLATION.org       # Setup guide
+│   └── ...                    # Additional guides
+└── music/                     # Music library (local dev)
 #+END_SRC
 
-* Track Upload Workflow
+* Quick Start
 
-** Current Implementation (Manual Upload)
-1. *Copy files to staging*: Place MP3/FLAC files in =music/incoming/=
-2. *Access admin panel*: Navigate to =http://[IP]:8080/asteroid/admin=
-3. *Process files*: Click "Copy Files from Incoming" button
-4. *Database update*: Files are moved to =music/library/= and metadata extracted
-5. *Automatic playlist*: =playlist.m3u= is regenerated for streaming
+** Docker Installation (Recommended)
+#+BEGIN_SRC bash
+# Clone repository
+git clone https://github.com/fade/asteroid
+cd asteroid/docker
 
-** File Processing Steps
-1. Files copied from =music/incoming/= to =music/library/=
-2. Metadata extracted using taglib (title, artist, album, duration, bitrate)
-3. Database record created with file path and metadata
-4. Playlist file updated for Liquidsoap streaming
-5. Files immediately available for on-demand streaming
+# Start all services
+docker compose up -d
+
+# Verify streams are working
+curl -I http://localhost:8000/asteroid.mp3
+curl -I http://localhost:8000/asteroid.aac
+curl -I http://localhost:8000/asteroid-low.mp3
+#+END_SRC
+
+** Access Points
+- *Web Interface*: http://localhost:8080/asteroid/
+- *Admin Panel*: http://localhost:8080/asteroid/admin
+- *High Quality MP3*: http://localhost:8000/asteroid.mp3 (128kbps)
+- *High Quality AAC*: http://localhost:8000/asteroid.aac (96kbps)
+- *Low Quality MP3*: http://localhost:8000/asteroid-low.mp3 (64kbps)
+- *Icecast Admin*: http://localhost:8000/admin/ (admin/asteroid_admin_2024)
+
+* Music Library Management
+
+** Adding Music
+1. *Copy files*: Place MP3/FLAC files in =docker/music/= directory
+2. *Access admin panel*: Navigate to =http://localhost:8080/asteroid/admin=
+3. *Scan library*: Click "Scan Library" to index new tracks
+4. *Metadata extraction*: Track information automatically extracted
+5. *Stream queue*: Optionally add tracks to broadcast queue
+
+** Library Scanning
+1. Recursive directory scanning of music folder
+2. Metadata extracted using taglib (title, artist, album, duration)
+3. Database records created with file paths and metadata
+4. Tracks immediately available for playback and streaming
+5. Supports nested folder structures
 
 ** Supported Formats
 - *MP3*: Primary format, best compatibility
@@ -90,216 +136,259 @@ asteroid/
 * Icecast2 Integration
 
 ** Configuration
-- *Server*: localhost:8000
-- *Mount point*: =/asteroid.mp3=
-- *Password*: =b3l0wz3r0= (configured in Liquidsoap)
-- *Format*: MP3 128kbps stereo
+- *Server*: localhost:8000 (Docker container)
+- *Mount points*: =/asteroid.mp3=, =/asteroid.aac=, =/asteroid-low.mp3=
+- *Password*: =H1tn31EhsyLrfRmo= (configured in Docker setup)
+- *Formats*: MP3 128kbps, AAC 96kbps, MP3 64kbps
 
-** Installation (Ubuntu/Debian)
+** Docker Setup
+Icecast2 runs in a Docker container - no manual installation needed.
+
 #+BEGIN_SRC bash
-sudo apt update
-sudo apt install icecast2
-sudo systemctl enable icecast2
-sudo systemctl start icecast2
+# Managed via docker-compose
+cd docker
+docker compose up -d icecast
 #+END_SRC
 
 ** Stream Access
-- *Direct URL*: =http://[IP]:8000/asteroid.mp3=
-- *Admin interface*: =http://[IP]:8000/admin/=
-- *Statistics*: =http://[IP]:8000/status.xsl=
+- *High Quality MP3*: =http://localhost:8000/asteroid.mp3= (128kbps)
+- *High Quality AAC*: =http://localhost:8000/asteroid.aac= (96kbps)
+- *Low Quality MP3*: =http://localhost:8000/asteroid-low.mp3= (64kbps)
+- *Admin interface*: =http://localhost:8000/admin/= (admin/asteroid_admin_2024)
+- *Statistics*: =http://localhost:8000/status.xsl=
 
 * Liquidsoap Integration
 
-** Configuration File: =asteroid-radio.liq=
-#+BEGIN_SRC liquidsoap
-#!/usr/bin/liquidsoap
+** Docker Configuration
+Liquidsoap runs in a Docker container with configuration in =docker/asteroid-radio-docker.liq=
 
-# Set log level for debugging
-settings.log.level := 4
+** Key Features
+- *Multiple outputs*: Generates 3 simultaneous streams (MP3 128k, AAC 96k, MP3 64k)
+- *Audio processing*: Crossfading, normalization, ReplayGain
+- *Stream queue*: Reads from M3U playlist for curated programming
+- *Telnet control*: Remote control interface on port 1234
+- *Metadata*: Broadcasts track information to listeners
 
-# Create playlist from directory
-radio = playlist(mode="randomize", reload=3600, "/path/to/music/library/")
-
-# Add audio processing
-radio = amplify(1.0, radio)
-
-# Fallback with sine wave for debugging
-radio = fallback(track_sensitive=false, [radio, sine(440.0)])
-
-# Output to Icecast2
-output.icecast(
-  %mp3(bitrate=128),
-  host="localhost",
-  port=8000,
-  password="b3l0wz3r0",
-  mount="asteroid.mp3",
-  name="Asteroid Radio",
-  description="Music for Hackers - Streaming from the Asteroid",
-  genre="Electronic/Alternative",
-  url="http://localhost:8080/asteroid/",
-  radio
-)
-#+END_SRC
-
-** Installation (Ubuntu/Debian)
+** Management
 #+BEGIN_SRC bash
-sudo apt update
-sudo apt install liquidsoap
+# Start Liquidsoap container
+cd docker
+docker compose up -d liquidsoap
+
+# View logs
+docker compose logs -f liquidsoap
+
+# Restart streaming
+docker compose restart liquidsoap
 #+END_SRC
 
-** Features
-- *Random playlist*: Shuffles music library continuously
-- *Auto-reload*: Playlist refreshes every hour
-- *Audio processing*: Amplification and normalization
-- *Fallback*: Sine tone if no music available (debugging)
-- *Metadata*: Station info broadcast to listeners
-
-* Network Access
-
-** Local Development
-- *Web Interface*: =http://localhost:8080/asteroid/=
-- *Live Stream*: =http://localhost:8000/asteroid.mp3=
-- *Admin Panel*: =http://localhost:8080/asteroid/admin=
-
-** WSL Network Access
-- *WSL IP*: Check with =ip addr show eth0=
-- *Web Interface*: =http://[WSL-IP]:8080/asteroid/=
-- *Live Stream*: =http://[WSL-IP]:8000/asteroid.mp3=
-
-** Internal Network Broadcasting
-- Services bind to all interfaces (0.0.0.0)
-- Accessible from any device on local network
-- Compatible with media players (VLC, iTunes, etc.)
-
-* Usage Instructions
-
-** Starting the Radio Station
+** Telnet Control
 #+BEGIN_SRC bash
-# Launch all services
-./start-asteroid-radio.sh
+# Connect to Liquidsoap
+telnet localhost 1234
+
+# Or use netcat for scripting
+echo "request.queue" | nc localhost 1234
+echo "request.skip" | nc localhost 1234
 #+END_SRC
 
-** Stopping the Radio Station
-#+BEGIN_SRC bash
-# Stop all services
-./stop-asteroid-radio.sh
-#+END_SRC
+* User Management
 
-** Adding Music
-1. Copy MP3/FLAC files to =music/incoming/=
-2. Visit admin panel: =http://[IP]:8080/asteroid/admin=
-3. Click "Copy Files from Incoming"
-4. Files are processed and added to streaming playlist
+** Roles
+- *Admin*: Full system access, user management, stream control
+- *DJ*: Content management, playlist creation, library access
+- *Listener*: Basic playback and personal playlists
 
-** Listening to the Stream
-- *Web Browser*: Visit main page for embedded player
-- *Media Player*: Open =http://[IP]:8000/asteroid.mp3=
-- *Mobile Apps*: Use internet radio apps with stream URL
+** Default Credentials
+- Username: =admin=
+- Password: =asteroid123=
+- ⚠️ Change default password after first login
+
+** User Administration
+- Create/manage users via admin panel
+- Role-based access control
+- User profiles and preferences
+- Session management
+
+* Player Modes
+
+** Inline Player
+- Embedded in web pages
+- Standard HTML5 audio controls
+- Queue management
+
+** Pop-Out Player
+- Standalone player window
+- Independent from main browser window
+- Persistent across page navigation
+
+** Frameset Player
+- Bottom-frame persistent player
+- Audio continues during site navigation
+- Seamless listening experience
 
 * API Endpoints
 
+Asteroid Radio provides a comprehensive REST API with 15+ endpoints.
+
+** Status & Authentication
+- =GET /api/asteroid/status= - Server status
+- =GET /api/asteroid/auth-status= - Authentication status
+- =GET /api/asteroid/icecast-status= - Streaming status
+
 ** Track Management
-- =GET /api/tracks= - List all tracks with metadata
-- =GET /tracks/{id}/stream= - Stream individual track
-- =POST /api/scan-library= - Scan and update music library
-- =POST /api/copy-files= - Process files from incoming directory
+- =GET /api/asteroid/tracks= - List all tracks
+- =GET /api/asteroid/admin/tracks= - Admin track listing
+- =POST /api/asteroid/admin/scan-library= - Scan music library
 
 ** Player Control
-- =POST /api/player/play= - Start playback
-- =POST /api/player/pause= - Pause playback
-- =POST /api/player/stop= - Stop playback
-- =GET /api/status= - Get server status
+- =GET /api/asteroid/player/status= - Player status
+- =POST /api/asteroid/player/play= - Play track
+- =POST /api/asteroid/player/pause= - Pause playback
+- =POST /api/asteroid/player/stop= - Stop playback
+- =POST /api/asteroid/player/resume= - Resume playback
 
-** Search and Filter
-- =GET /api/tracks?search={query}= - Search tracks
-- =GET /api/tracks?sort={field}= - Sort by field
-- =GET /api/tracks?artist={name}= - Filter by artist
+** Playlist Management
+- =GET /api/asteroid/playlists= - List user playlists
+- =POST /api/asteroid/playlists/create= - Create playlist
+- =GET /api/asteroid/playlists/get= - Get playlist details
+- =POST /api/asteroid/playlists/add-track= - Add track to playlist
 
-* Database Schema
+** Stream Queue Control (Admin)
+- =GET /api/asteroid/stream/queue= - Get broadcast queue
+- =POST /api/asteroid/stream/queue/add= - Add track to queue
+- =POST /api/asteroid/stream/queue/remove= - Remove from queue
+- =POST /api/asteroid/stream/queue/clear= - Clear queue
 
-** Tracks Collection
-#+BEGIN_SRC lisp
-(db:create "tracks" '((title :text)
-                      (artist :text)
-                      (album :text)
-                      (duration :integer)
-                      (file-path :text)
-                      (format :text)
-                      (bitrate :integer)
-                      (added-date :integer)
-                      (play-count :integer)))
-#+END_SRC
+See =docs/API-ENDPOINTS.org= for complete API documentation.
 
-** Playlists Collection (Future)
-#+BEGIN_SRC lisp
-(db:create "playlists" '((name :text)
-                         (description :text)
-                         (created-date :integer)
-                         (track-ids :text)))
-#+END_SRC
+* Database
+
+** Current: Radiance DB
+- File-based database abstraction
+- Tracks, users, playlists, sessions
+- Suitable for development and small deployments
+
+** PostgreSQL (Configured)
+- Docker container ready
+- Full schema defined
+- Migration pending
+- See =docs/POSTGRESQL-SETUP.org= for details
+
+* Documentation
+
+Comprehensive documentation available in the =docs/= directory:
+
+- *README.org* - Documentation index
+- *PROJECT-OVERVIEW.org* - Architecture and features
+- *PROJECT-HISTORY.org* - Development timeline and milestones
+- *INSTALLATION.org* - Complete installation guide
+- *DEVELOPMENT.org* - Developer setup and guidelines
+- *DOCKER-STREAMING.org* - Docker streaming infrastructure
+- *API-ENDPOINTS.org* - REST API reference
+- *STREAM-CONTROL.org* - Stream queue management
+- *USER-MANAGEMENT-SYSTEM.org* - User administration
+- *PLAYLIST-SYSTEM.org* - Playlist functionality
+- *TESTING.org* - Automated testing guide
+- *POSTGRESQL-SETUP.org* - Database setup
 
 * Dependencies
 
-** Lisp Dependencies (asteroid.asd)
-- =:radiance= - Web framework
-- =:r-clip= - Templating system
-- =:lass= - CSS generation
-- =:cl-json= - JSON handling
-- =:alexandria= - Utilities
-- =:local-time= - Time handling
+** Lisp Dependencies
+- =radiance= - Web framework
+- =r-clip= - CLIP templating
+- =lass= - CSS preprocessing
+- =cl-json= - JSON handling
+- =alexandria= - Common Lisp utilities
+- =local-time= - Time handling
+- =taglib= - Audio metadata extraction
 
-** System Dependencies
-- =icecast2= - Streaming server
-- =liquidsoap= - Audio processing
-- =taglib= - Metadata extraction (via audio-streams)
+** System Dependencies (Docker)
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+- All streaming components containerized
 
-* Development Notes
+* Testing
 
-** RADIANCE Configuration
-- Domain: "asteroid"
-- Routes use =#@= syntax for URL patterns
-- Database abstraction via =db:= functions
-- CLIP templates with =data-text= attributes
+** Automated Test Suite
+#+BEGIN_SRC bash
+# Run comprehensive tests
+./test-server.sh
 
-** Database Queries
-- Use quoted symbols for field names: =(:= '_id id)=
-- RADIANCE returns hash tables with string keys
-- Primary key is "_id" internally, "id" in JSON responses
+# Verbose mode
+./test-server.sh -v
+#+END_SRC
 
-** Streaming Considerations
-- MP3 files with spaces in names require playlist.m3u approach
-- Liquidsoap fallback prevents stream silence
-- Icecast2 mount points must match Liquidsoap configuration
+** Test Coverage
+- 25+ automated tests
+- API endpoint validation
+- HTML page rendering
+- Static file serving
+- JSON response format
+- Authentication flows
 
-* Future Enhancements
+* Contributing
 
-** Planned Features
-- Playlist creation and management interface
-- Now-playing status tracking and display
-- Direct browser file uploads with progress
-- Listener statistics and analytics
-- Scheduled programming and automation
+** Development Workflow
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run test suite
+5. Submit pull request
 
-** Technical Improvements
-- WebSocket integration for real-time updates
-- Advanced audio processing options
-- Multi-bitrate streaming support
-- Mobile-responsive interface enhancements
+** Community
+- *IRC*: #asteroid.music on irc.libera.chat
+- *Issues*: GitHub issue tracker
+- *Discussions*: GitHub discussions
+
+** Core Team
+- Brian O'Reilly (Fade) - Project founder
+- Glenn Thompson (glenneth) - Core developer
+- Luis Pereira - UI/UX
 
 * Troubleshooting
 
-** Common Issues
-- *No audio in stream*: Check Liquidsoap logs, verify MP3 files
-- *Database errors*: Ensure proper field name quoting in queries
-- *Network access*: Verify WSL IP and firewall settings
-- *File upload issues*: Check permissions on music directories
+** Docker Issues
+#+BEGIN_SRC bash
+# Check container status
+docker compose ps
 
-** Debugging
-- Enable Liquidsoap debug logging: =settings.log.level := 4=
-- Check Icecast admin interface for stream status
-- Monitor RADIANCE logs for web server issues
-- Verify database connectivity and collections
+# View logs
+docker compose logs icecast
+docker compose logs liquidsoap
+
+# Restart services
+docker compose restart
+#+END_SRC
+
+** Stream Not Playing
+- Verify containers are running
+- Check music files exist in =docker/music/=
+- Test stream URLs with curl
+- Review Liquidsoap logs
+
+** Database Issues
+- Check Radiance DB file permissions
+- Verify database collections exist
+- Review application logs
+
+For detailed troubleshooting, see documentation in =docs/= directory.
 
 * License
 
-This implementation maintains compatibility with the original Asteroid Radio project license while adding comprehensive streaming capabilities for internet radio broadcasting.
+See LICENSE file for details.
+
+* Acknowledgments
+
+Built with:
+- Common Lisp (SBCL)
+- Radiance web framework
+- Icecast2 streaming server
+- Liquidsoap audio processing
+- Docker containerization
+
+Special thanks to all contributors and the Common Lisp community.
+
+---
+
+*Last Updated: 2025-10-26*

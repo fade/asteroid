@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Development Guide
 #+AUTHOR: Asteroid Radio Development Team
-#+DATE: 2025-10-10
+#+DATE: 2025-10-26
 
 * Development Setup
 
@@ -68,7 +68,7 @@ sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --quit
 
 *** Clone Repository
 #+BEGIN_SRC bash
-git clone <repository-url>
+git clone https://github.com/fade/asteroid
 cd asteroid
 #+END_SRC
 

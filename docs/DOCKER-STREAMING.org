@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Docker Streaming Setup
-#+AUTHOR: Docker Team
-#+DATE: 2025-10-03
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-26
 
 * Docker Streaming Overview
 
@@ -37,7 +37,7 @@ sudo usermod -a -G docker $USER
 ** One-Command Setup
 #+BEGIN_SRC bash
 # Clone and start
-git clone <repository-url> asteroid-radio
+git clone https://github.com/fade/asteroid asteroid-radio
 cd asteroid-radio/docker
 docker compose up -d
 #+END_SRC

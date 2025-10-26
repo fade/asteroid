@@ -1,0 +1,343 @@
+#+TITLE: Asteroid Radio - Project Development History
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-26
+#+DESCRIPTION: Comprehensive history of the Asteroid Radio project from inception to present
+
+* Project Overview
+
+Asteroid Radio is a web-based internet radio station built with Common Lisp, featuring a hacker-themed terminal aesthetic. The project combines the Radiance web framework with Icecast/Liquidsoap streaming infrastructure to create a full-featured music streaming platform.
+
+** Technology Stack
+- *Backend*: Common Lisp (SBCL), Radiance web framework
+- *Streaming*: Icecast2, Liquidsoap
+- *Database*: PostgreSQL (configured, ready for migration)
+- *Frontend*: HTML5, JavaScript, CLIP templating, LASS (CSS in Lisp)
+- *Infrastructure*: Docker, Docker Compose
+
+* Project Timeline
+
+** Phase 1: Project Inception (August 2025)
+
+*** 2025-08-12: Initial Commit
+- *Author*: Brian O'Reilly (Fade)
+- Project founded and initial repository created
+- Basic project structure established
+- Core Radiance framework integration begun
+
+** Phase 2: Foundation Building (September - Early October 2025)
+
+*** Core Features Established
+- Basic web server setup with Radiance
+- Initial music library scanning functionality
+- Database integration for track metadata
+- Basic authentication system
+- Front-end page structure
+
+*** Key Contributors Join
+- Glenn Thompson (glenneth) begins major contributions
+- Luis Pereira joins for UI/UX improvements
+- Collaborative development model established
+
+** Phase 3: Template System & UI Overhaul (October 2025)
+
+*** 2025-10-04 to 2025-10-06: CLIP Template Migration
+- *Lead*: Luis Pereira, Glenn Thompson
+- Migrated from inline HTML to CLIP templating system
+- Established consistent site-wide styling
+- Implemented VT323 retro terminal font
+- Created reusable template components
+
+*** 2025-10-04 to 2025-10-07: User Management System
+- *Lead*: Glenn Thompson
+- User profile pages with edit functionality
+- Registration and authentication UI
+- Role-based access control (admin, DJ, listener)
+- User profile management interface
+
+*** 2025-10-05: Navigation Improvements
+- *Lead*: Luis Pereira
+- Unified navigation bar across all pages
+- Improved responsive design
+- Better mobile experience
+
+** Phase 4: API Refactoring & Testing (October 8-10, 2025)
+
+*** 2025-10-08: Major API Overhaul
+- *Lead*: Glenn Thompson
+- Refactored all endpoints to use Radiance's define-api macro
+- Standardized JSON API responses
+- API-aware authentication (auto-detects API vs web requests)
+- Comprehensive automated test suite added
+
+*** 2025-10-08 to 2025-10-09: Frontend JavaScript Updates
+- Fixed all frontend code to work with new API endpoints
+- Improved error handling
+- Better async/await patterns
+
+*** 2025-10-10: Documentation Sprint
+- *Lead*: Glenn Thompson
+- Major documentation cleanup
+- Added comprehensive API documentation
+- Created testing guides
+- Updated all core documentation files
+
+** Phase 5: Streaming Infrastructure (October 8-14, 2025)
+
+*** 2025-10-08: Liquidsoap DJ Controls
+- *Lead*: Glenn Thompson
+- Telnet integration with Liquidsoap
+- Real-time stream control
+- Skip track functionality
+- Queue management via telnet commands
+
+*** 2025-10-10: Dynamic Stream URL Support
+- *Lead*: Glenn Thompson
+- Stream base URL as template variable
+- Support for multiple deployment environments
+- Preparation for multi-network access
+
+*** 2025-10-14: Stream Queue System
+- *Lead*: Brian O'Reilly, Glenn Thompson
+- M3U playlist queue management
+- Admin UI for queue control
+- Add/remove tracks from stream queue
+- Real-time queue updates
+
+*** 2025-10-14: Audio Quality Improvements
+- ReplayGain volume normalization
+- Reduced buffering
+- Improved player UI
+- Better streaming performance
+
+** Phase 6: Advanced Features (October 12-17, 2025)
+
+*** 2025-10-12: Role-Based Page Flow
+- *Lead*: Glenn Thompson
+- Intelligent page routing based on user role
+- Admin-specific workflows
+- DJ control interfaces
+- Enhanced user experience
+
+*** 2025-10-13: HTML Partial Hydration
+- *Lead*: Luis Pereira
+- Now-playing partial component
+- Server-side rendering with client updates
+- Reduced JavaScript complexity
+- Better performance
+
+*** 2025-10-15 to 2025-10-16: Configuration System
+- *Lead*: Brian O'Reilly
+- Dedicated configuration namespace exploration
+- Environment-based configuration
+- Improved deployment flexibility
+
+*** 2025-10-16: Comprehensive Documentation Update
+- *Lead*: Glenn Thompson
+- PROJECT-OVERVIEW updated with all features
+- Stream queue and ReplayGain documentation
+- Complete feature documentation
+
+*** 2025-10-17: Code Quality Improvements
+- *Lead*: Glenn Thompson
+- Code consistency refactoring
+- Bug fixes (track search query variable)
+- Maintainability improvements
+- Better code organization
+
+** Phase 7: Player Evolution (October 19-25, 2025)
+
+*** 2025-10-19: Pop-Out Player
+- *Lead*: Glenn Thompson
+- Standalone pop-out player window
+- Independent audio playback
+- Queue management improvements
+- Multi-window support
+
+*** 2025-10-19: Persistent Audio Player (Frameset)
+- *Lead*: Glenn Thompson
+- Frameset-based persistent player
+- Audio continues during navigation
+- Bottom-frame player bar
+- Seamless listening experience
+
+*** 2025-10-21: Hybrid Player System
+- *Lead*: Glenn Thompson
+- Combined frameset and pop-out options
+- User preference storage (localStorage)
+- Flexible playback modes
+- Enhanced user choice
+
+*** 2025-10-24: Dynamic Stream URL Detection
+- *Lead*: Glenn Thompson
+- Automatic host detection from HTTP headers
+- Multi-environment support (localhost, Tailscale, LAN)
+- Fixed remote access issues
+- No configuration needed for different networks
+
+*** 2025-10-25: Typography Consistency Fix
+- *Lead*: Glenn Thompson
+- Replaced Courier New with VT323 in persistent player
+- Consistent font usage site-wide
+- Addressed styling feedback
+- Improved visual coherence
+
+* Development Statistics
+
+** Contributors (by commit count)
+1. Glenn Thompson (glenneth/Glenneth) - 131+ commits
+2. Brian O'Reilly (Fade) - 55+ commits
+3. Luis Pereira - 19+ commits
+
+** Total Commits: 205+ commits
+
+** Active Development Period
+- Start: August 12, 2025
+- Current: October 26, 2025
+- Duration: ~2.5 months of active development
+
+* Major Features Implemented
+
+** Core Functionality
+- ✅ Music library scanning and metadata extraction
+- ✅ PostgreSQL database integration (configured, ready for migration)
+- ✅ Track search and filtering
+- ✅ Playlist management
+- ✅ Stream queue control
+- ✅ Live streaming via Icecast/Liquidsoap
+
+** User Management
+- ✅ User registration and authentication
+- ✅ Role-based access control (Admin, DJ, Listener)
+- ✅ User profiles with edit functionality
+- ✅ Session management
+- ✅ Role-based page flow
+
+** Streaming Features
+- ✅ Multiple quality options (AAC 96k, MP3 128k, MP3 64k)
+- ✅ ReplayGain volume normalization
+- ✅ Live now-playing information
+- ✅ Icecast integration
+- ✅ Liquidsoap DJ controls
+- ✅ Stream queue management
+
+** Player Options
+- ✅ Inline web player
+- ✅ Pop-out player window
+- ✅ Persistent frameset player
+- ✅ Hybrid player system
+- ✅ Quality selector
+- ✅ Auto-reconnect on errors
+
+** API & Integration
+- ✅ RESTful JSON API
+- ✅ API-aware authentication
+- ✅ Comprehensive test suite
+- ✅ Telnet integration with Liquidsoap
+- ✅ Real-time status updates
+
+** UI/UX
+- ✅ Retro terminal aesthetic (VT323 font)
+- ✅ Responsive design
+- ✅ CLIP templating system
+- ✅ LASS CSS preprocessing
+- ✅ Consistent navigation
+- ✅ HTML partial hydration
+
+** Infrastructure
+- ✅ Docker containerization
+- ✅ Docker Compose orchestration
+- ✅ PostgreSQL database (configured)
+- ✅ Multi-environment support
+- ✅ Dynamic URL detection
+
+* Technical Milestones
+
+** Architecture Evolution
+1. *Initial*: Monolithic HTML generation
+2. *Template Migration*: CLIP templating system
+3. *API Standardization*: Radiance define-api macros
+4. *Component Architecture*: HTML partials and hydration
+5. *Multi-Mode Player*: Hybrid player system
+
+** Code Quality Improvements
+- Comprehensive test suite
+- API refactoring for consistency
+- Code organization and maintainability
+- Documentation standards
+- Consistent error handling
+
+** Performance Optimizations
+- ReplayGain normalization
+- Reduced buffering
+- Efficient database queries
+- Parallel music scanning
+- Client-side caching
+
+* Current State (October 2025)
+
+** Production Ready Features
+- Full music streaming platform
+- User management system
+- Admin control panel
+- DJ controls
+- Multiple player modes
+- Multi-environment deployment
+
+** Active Development Areas
+- Configuration system refinement
+- Additional UI improvements
+- Performance optimization
+- Feature expansion based on user feedback
+
+** Known Issues & Future Work
+- PostgreSQL migration (configured, pending data migration)
+- Continued UI/UX refinement
+- Additional streaming features
+- Enhanced playlist functionality
+- Mobile app considerations
+- Scalability improvements
+
+* Project Philosophy
+
+** Design Principles
+- *Hacker Aesthetic*: Terminal-inspired retro design
+- *User Choice*: Multiple player modes and options
+- *Simplicity*: Clean, focused interface
+- *Performance*: Fast, responsive experience
+- *Flexibility*: Multi-environment support
+
+** Development Approach
+- Collaborative development
+- Iterative improvements
+- Comprehensive testing
+- Documentation-first
+- User feedback driven
+
+* Acknowledgments
+
+** Core Team
+- *Brian O'Reilly (Fade)*: Project founder, architecture, streaming infrastructure
+- *Glenn Thompson (glenneth)*: Major features, API, player systems, documentation
+- *Luis Pereira*: UI/UX, templating, frontend improvements
+
+** Technologies
+- Radiance web framework
+- Icecast streaming server
+- Liquidsoap audio processing
+- PostgreSQL database
+- Common Lisp ecosystem
+
+* Conclusion
+
+Asteroid Radio has evolved from a simple concept into a full-featured internet radio platform in just 2.5 months of active development. The project demonstrates the power of Common Lisp for web development and the collaborative nature of open-source development.
+
+The project continues to evolve with regular improvements, bug fixes, and new features based on user needs and technical requirements.
+
+** Project Links
+- Repository: https://github.com/fade/asteroid
+- Contributors: https://github.com/fade/asteroid/graphs/contributors
+- IRC: #asteroid.music on irc.libera.chat
+
+---
+
+*Last Updated: 2025-10-26*

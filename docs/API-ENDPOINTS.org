@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - API Endpoints Reference
 #+AUTHOR: Asteroid Radio Development Team
-#+DATE: 2025-10-10
+#+DATE: 2025-10-26
 
 * Overview
 
