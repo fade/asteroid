@@ -1,0 +1,8 @@
+docker/
+music/
+data/
+*.org
+docker-compose.yml
+Dockerfile*
+Makefile
+.git/

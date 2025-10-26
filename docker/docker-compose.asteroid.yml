@@ -1,0 +1,14 @@
+services:
+  asteroid:
+    build:
+      context: ../
+      dockerfile: Dockerfile.asteroid
+    image: asteroid/app
+    container_name: asteroid
+    environment:
+      - ASTEROID_STREAM_URL=${ASTEROID_STREAM_URL:-http://localhost:8000}
+    volumes:
+      - ${MUSIC_LIBRARY:-../music/library}:/app/music/library:ro
+      - ${QUEUE_PLAYLIST:-../stream-queue.m3u}:/app/stream-queue.m3u
+    network_mode: host
+    restart: unless-stopped
