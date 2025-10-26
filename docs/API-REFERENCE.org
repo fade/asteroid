@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Interface Reference
 #+AUTHOR: Asteroid Radio Development Team
-#+DATE: 2025-10-10
+#+DATE: 2025-10-26
 
 * Current Interfaces
 

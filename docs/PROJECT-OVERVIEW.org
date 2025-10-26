@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Project Overview
 #+AUTHOR: Glenn Thompson & Brian O'Reilly (Fade)
-#+DATE: 2025-10-03
+#+DATE: 2025-10-26
 
 * 🎯 Mission
 
@@ -38,7 +38,8 @@ Asteroid Radio is a modern, web-based music streaming platform designed for hack
 - **Common Lisp** (SBCL) - Core application language
 - **Radiance Framework** - Web framework and module system
 - **LASS** - CSS preprocessing in Lisp
-- **PostgreSQL** - Database backend for user accounts and metadata
+- **PostgreSQL** - Database backend (configured, ready for migration)
+- **Radiance DB** - Current database abstraction layer
 
 **Frontend:**
 - **HTML5** with semantic templates
@@ -75,26 +76,32 @@ Asteroid Radio is a modern, web-based music streaming platform designed for hack
 ## 🚀 Features
 
 ### Current Features
-- ✅ **User Authentication** - Registration, login, profiles, role-based access
+- ✅ **User Authentication** - Registration, login, profiles, role-based access (Admin/DJ/Listener)
 - ✅ **User Management** - Admin interface for user administration
-- ✅ **Music Library** - Track management with pagination and search
+- ✅ **Music Library** - Track management with pagination, search, and filtering
 - ✅ **User Playlists** - Create, manage, and play personal music collections
-- ✅ **Web Player** - Browser-based player with queue management
+- ✅ **Multiple Player Modes** - Inline, pop-out, and persistent frameset players
+- ✅ **Stream Queue Control** - Admin control over broadcast stream queue (M3U-based)
 - ✅ **REST API** - Comprehensive JSON API with 15+ endpoints
-- ✅ **Music Streaming** - Multiple quality formats (MP3, AAC)
+- ✅ **Music Streaming** - Multiple quality formats (128k MP3, 96k AAC, 64k MP3)
 - ✅ **Rate Limiting** - Anti-abuse protection
 - ✅ **Docker Integration** - Icecast2/Liquidsoap streaming infrastructure
-- ✅ **PostgreSQL Database** - Persistent data storage
+- ✅ **PostgreSQL Database** - Configured and ready for migration
 - ✅ **Liquidsoap DJ Controls** - Telnet interface for live control
+- ✅ **Dynamic Stream URLs** - Automatic host detection for multi-environment support
+- ✅ **ReplayGain Normalization** - Consistent audio volume across tracks
 - ✅ **Responsive Design** - Works on desktop and mobile
 - ✅ **Automated Testing** - Comprehensive test suite
 
 ### Planned Features
+- 🔄 **PostgreSQL Migration** - Full migration from Radiance DB to PostgreSQL
+- 🔄 **Enhanced Playlist Management** - Full CRUD operations with PostgreSQL
 - 🔄 **Social Features** - Playlist sharing and discovery
 - 🔄 **Advanced Search** - Full-text search and filtering
 - 🔄 **Mobile App** - Native mobile applications
 - 🔄 **WebSocket Support** - Real-time updates
 - 🔄 **Analytics** - Listening statistics and insights
+- 🔄 **Scheduled Programming** - Time-based queue switching
 
 
 ## 🔮 Vision

@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Documentation Index
 #+AUTHOR: Asteroid Radio Development Team
-#+DATE: 2025-10-10
+#+DATE: 2025-10-26
 
 * Welcome to Asteroid Radio Documentation
 
@@ -18,6 +18,9 @@ For immediate setup, see:
 
 *** [[file:PROJECT-OVERVIEW.org][Project Overview]]
 Complete overview of Asteroid Radio's architecture, technology stack, and vision. Start here to understand what Asteroid Radio is and how it works.
+
+*** [[file:PROJECT-HISTORY.org][Project History]]
+Comprehensive development history from inception to present, including timeline, milestones, and contributor information.
 
 *** [[file:INSTALLATION.org][Installation Guide]]  
 Comprehensive installation instructions for multiple operating systems, including system requirements, dependencies, and production deployment considerations.
@@ -58,16 +61,19 @@ Pagination system for efficient browsing of large music libraries.
 ** What's Working Now
 - **Web Application**: Full-featured web interface with authentication
 - **REST API**: JSON API with 15+ endpoints for programmatic access
-- **User Management**: Registration, login, roles, and profiles
-- **Music Library**: Track management with pagination and search
+- **User Management**: Registration, login, roles (Admin/DJ/Listener), and profiles
+- **Music Library**: Track management with pagination, search, and filtering
 - **Playlists**: User playlists with creation and playback
-- **Web Player**: Browser-based audio player with queue management
+- **Multiple Player Modes**: Inline, pop-out, and persistent frameset players
+- **Stream Queue Control**: Admin control over broadcast stream queue
 - **Docker Streaming Infrastructure**: Icecast2 + Liquidsoap containers
 - **Three Quality Streams**: 128kbps MP3, 96kbps AAC, 64kbps MP3  
 - **Admin Interface**: Icecast web admin at http://localhost:8000/admin/
 - **Liquidsoap DJ Controls**: Telnet control via localhost:1234
-- **Professional Features**: Crossfading, normalization, metadata support
-- **PostgreSQL Database**: Persistent data storage with full CRUD operations
+- **Professional Features**: Crossfading, ReplayGain normalization, metadata support
+- **PostgreSQL Database**: Configured and ready for migration
+- **Dynamic Stream URLs**: Automatic host detection for multi-environment support
+- **Responsive Design**: Works on desktop and mobile devices
 
 ** Stream URLs (when running)
 - **High Quality MP3**: http://localhost:8000/asteroid.mp3 (128kbps)
@@ -141,5 +147,5 @@ For detailed technical information, see the **[[file:PROJECT-OVERVIEW.org][Proje
 
 ---
 
-*Last Updated: 2025-10-10*
-*Documentation Version: 2.0*
+*Last Updated: 2025-10-26*
+*Documentation Version: 3.0*

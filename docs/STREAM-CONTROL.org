@@ -1,6 +1,6 @@
 #+TITLE: Stream Queue Control System
-#+AUTHOR: Asteroid Radio Team
-#+DATE: 2025-10-14
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-26
 
 * Overview
 
@@ -140,7 +140,7 @@ If you're working directly in the Lisp REPL:
 
 * File Locations
 
-- *Stream Queue File*: =/home/glenn/Projects/Code/asteroid/stream-queue.m3u=
+- *Stream Queue File*: =stream-queue.m3u= (in project root)
 - *Docker Mount*: =/app/stream-queue.m3u= (inside Liquidsoap container)
 - *Liquidsoap Config*: =docker/asteroid-radio-docker.liq=
 

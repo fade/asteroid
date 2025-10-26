@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Installation Guide
-#+AUTHOR: Installation Team
-#+DATE: 2025-10-03
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2025-10-26
 
 * Installation Overview
 
@@ -18,8 +18,8 @@ docker info
 
 ** One-Command Setup
 #+BEGIN_SRC bash
-# Clone and setup (replace with actual repository URL)
-git clone <repository-url> asteroid-radio
+# Clone and setup
+git clone https://github.com/fade/asteroid asteroid-radio
 cd asteroid-radio/docker
 docker compose up -d
 #+END_SRC
@@ -201,8 +201,8 @@ sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --eval "(ql:a
 
 *** Step 5: Clone and Setup Project
 #+BEGIN_SRC bash
-# Clone repository (replace with actual URL)
-git clone <repository-url> /opt/asteroid-radio
+# Clone repository
+git clone https://github.com/fade/asteroid /opt/asteroid-radio
 cd /opt/asteroid-radio
 
 # Create required directories
