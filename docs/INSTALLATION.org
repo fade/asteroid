@@ -6,6 +6,14 @@
 
 This guide covers the complete installation and deployment of Asteroid Radio. The **recommended approach** is Docker-based installation for easy deployment and consistency. Native installation is also available for development or custom deployments.
 
+#+BEGIN_QUOTE
+*Note on Package Managers*: Examples in this guide use =apt= (Debian/Ubuntu). Replace with your distribution's package manager:
+- Fedora/RHEL: =dnf= or =yum=
+- Arch Linux: =pacman=
+- openSUSE: =zypper=
+- Alpine: =apk=
+#+END_QUOTE
+
 * Quick Start (Docker - Recommended)
 
 ** Prerequisites Check
@@ -19,7 +27,7 @@ docker info
 ** One-Command Setup
 #+BEGIN_SRC bash
 # Clone and setup
-git clone https://github.com/fade/asteroid asteroid-radio
+git clone https://github.com/fade/asteroid.git asteroid-radio
 cd asteroid-radio/docker
 docker compose up -d
 #+END_SRC
@@ -572,7 +580,7 @@ chmod +x ~/asteroid-radio/health-check.sh
 - Test stream connectivity from different networks
 
 ** Getting Support
-- Check project documentation and FAQ
+- Check project documentation
 - Review system logs for error messages
 - Submit issues with detailed system information
 - Join our IRC chat room: **#asteroid.music** on **irc.libera.chat**

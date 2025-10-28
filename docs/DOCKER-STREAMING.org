@@ -6,6 +6,10 @@
 
 This guide covers the complete Docker-based streaming setup for Asteroid Radio using Icecast2 and Liquidsoap containers. This approach provides a containerized, portable streaming infrastructure that's easy to deploy and maintain.
 
+#+BEGIN_QUOTE
+*Note on Package Managers*: Examples use =apt= (Debian/Ubuntu). Replace with your distribution's package manager (=dnf=, =pacman=, =zypper=, =apk=, etc.).
+#+END_QUOTE
+
 * Architecture
 
 ** Container Stack

@@ -1,4 +1,4 @@
-#+TITLE: Asteroid Radio - Interface Reference
+#+TITLE: Asteroid Radio - API Reference
 #+AUTHOR: Asteroid Radio Development Team
 #+DATE: 2025-10-26
 

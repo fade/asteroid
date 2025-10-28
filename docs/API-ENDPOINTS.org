@@ -423,51 +423,6 @@ curl -X POST http://localhost:8080/api/asteroid/playlists/create \
 
 When =browser=true= is passed, endpoints will redirect to appropriate pages instead of returning JSON.
 
-* Integration Examples
-
-** JavaScript/Fetch API
-
-#+BEGIN_SRC javascript
-// Get tracks
-fetch('/api/asteroid/tracks')
-  .then(response => response.json())
-  .then(data => {
-    console.log('Tracks:', data.tracks);
-  });
-
-// Play a track
-fetch('/api/asteroid/player/play', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  },
-  body: 'track-id=123'
-})
-  .then(response => response.json())
-  .then(data => {
-    console.log('Now playing:', data.player.currentTrack);
-  });
-#+END_SRC
-
-** Python
-
-#+BEGIN_SRC python
-import requests
-
-# Get server status
-response = requests.get('http://localhost:8080/api/asteroid/status')
-print(response.json())
-
-# Create playlist (with session)
-session = requests.Session()
-# ... login first ...
-response = session.post(
-    'http://localhost:8080/api/asteroid/playlists/create',
-    data={'name': 'My Playlist', 'description': 'Test'}
-)
-print(response.json())
-#+END_SRC
-
 * Rate Limiting
 
 API endpoints implement rate limiting to prevent abuse. Excessive requests may result in temporary blocking.

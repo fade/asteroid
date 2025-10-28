@@ -4,6 +4,10 @@
 
 * Development Setup
 
+#+BEGIN_QUOTE
+*Note on Package Managers*: Examples use =apt= (Debian/Ubuntu). Replace with your distribution's package manager (=dnf=, =pacman=, =zypper=, =apk=, etc.).
+#+END_QUOTE
+
 ** Prerequisites
 
 *** System Dependencies
@@ -68,7 +72,7 @@ sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --quit
 
 *** Clone Repository
 #+BEGIN_SRC bash
-git clone https://github.com/fade/asteroid
+git clone https://github.com/fade/asteroid.git
 cd asteroid
 #+END_SRC
 
@@ -125,9 +129,9 @@ sbcl --eval "(ql:quickload :asteroid)" --eval "(asteroid:start-server)"
 ** Music Library Management
 
 *** Directory Structure
-The music directory structure is:
+The music directory is located directly under the asteroid root directory:
 #+BEGIN_SRC
-asteroid/docker/music/          # Host directory (mounted to containers)
+asteroid/music/                 # Music directory (can be symlink)
 ├── artist1/
 │   ├── album1/
 │   │   ├── track1.mp3
@@ -137,6 +141,11 @@ asteroid/docker/music/          # Host directory (mounted to containers)
 └── artist2/
     └── single.wav
 #+END_SRC
+
+The =music/= directory can be:
+- A regular directory with music files
+- A symlink to your actual music collection
+- Multiple subdirectories or symlinks within it
 
 *** Recursive Scanning Capabilities
 The Asteroid application includes built-in recursive directory scanning:
@@ -149,15 +158,20 @@ The Asteroid application includes built-in recursive directory scanning:
 *** Adding Music to Development Environment
 #+BEGIN_SRC bash
 # Option 1: Copy music files directly
-cp -r /path/to/your/music/* docker/music/
+cp -r /path/to/your/music/* music/
 
-# Option 2: Mount remote directory (for large collections)
+# Option 2: Symlink entire music directory
+ln -s /path/to/existing/music music
+
+# Option 3: Symlink subdirectories within music/
+mkdir -p music
+ln -s /path/to/collection1 music/collection1
+ln -s /path/to/collection2 music/collection2
+
+# Option 4: Mount remote directory (for large collections)
 # Edit docker-compose.yml to change volume mount:
 # volumes:
 #   - /mnt/remote-music:/app/music:ro
-
-# Option 3: Symlink to existing collection
-ln -s /path/to/existing/music docker/music/collection
 
 # Trigger library scan via API
 curl -X POST http://localhost:8080/api/asteroid/admin/scan-library

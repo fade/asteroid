@@ -6,6 +6,10 @@
 
 This document describes the automated testing system for Asteroid Radio.
 
+#+BEGIN_QUOTE
+*Note on Package Managers*: Examples use =apt= (Debian/Ubuntu). Replace with your distribution's package manager (=dnf=, =pacman=, =zypper=, =apk=, etc.).
+#+END_QUOTE
+
 * Test Script
 
 The =test-server.sh= script provides comprehensive testing of all server endpoints and functionality.
