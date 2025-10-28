@@ -131,15 +131,15 @@ Asteroid Radio uses a modern, containerized architecture:
 ┌─────────────────────────────────────────────────────────────┐
 │                    Asteroid Radio Platform                  │
 ├─────────────────────────────────────────────────────────────┤
-│  Streaming Infrastructure (Docker)                         │
-│  ├── Icecast2 (HTTP Streaming Server)                     │
-│  ├── Liquidsoap (Audio Processing Pipeline)               │
-│  └── Multiple Format Support (AAC, MP3)                   │
+│  Streaming Infrastructure (Docker)                          │
+│  ├── Icecast2 (HTTP Streaming Server)                       │
+│  ├── Liquidsoap (Audio Processing Pipeline)                 │
+│  └── Multiple Format Support (AAC, MP3)                     │
 ├─────────────────────────────────────────────────────────────┤
-│  Control Interfaces                                        │
-│  ├── Icecast Admin Web Interface                          │
-│  ├── Liquidsoap Telnet Control                            │
-│  └── Docker Container Management                          │
+│  Control Interfaces                                         │
+│  ├── Icecast Admin Web Interface                            │
+│  ├── Liquidsoap Telnet Control                              │
+│  └── Docker Container Management                            │
 └─────────────────────────────────────────────────────────────┘
 #+END_EXAMPLE
 
