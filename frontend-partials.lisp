@@ -33,7 +33,7 @@
   "Get Partial HTML with live status from Icecast server"
   (handler-case
     (let ((now-playing-stats (icecast-now-playing *stream-base-url*))
-          (template-path (merge-pathnames "template/partial/now-playing.chtml"
+          (template-path (merge-pathnames "template/partial/now-playing.ctml"
                                           (asdf:system-source-directory :asteroid))))
       (if now-playing-stats
           (progn

@@ -519,7 +519,7 @@
 ;; Front page - regular view by default
 (define-page front-page #@"/" ()
   "Main front page"
-  (let ((template-path (merge-pathnames "template/front-page.chtml" 
+  (let ((template-path (merge-pathnames "template/front-page.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -540,7 +540,7 @@
 ;; Frameset wrapper for persistent player mode
 (define-page frameset-wrapper #@"/frameset" ()
   "Frameset wrapper with persistent audio player"
-  (let ((template-path (merge-pathnames "template/frameset-wrapper.chtml" 
+  (let ((template-path (merge-pathnames "template/frameset-wrapper.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -549,7 +549,7 @@
 ;; Content frame - front page content without player
 (define-page front-page-content #@"/content" ()
   "Front page content (displayed in content frame)"
-  (let ((template-path (merge-pathnames "template/front-page-content.chtml" 
+  (let ((template-path (merge-pathnames "template/front-page-content.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -567,7 +567,7 @@
 ;; Persistent audio player frame (bottom frame)
 (define-page audio-player-frame #@"/audio-player-frame" ()
   "Persistent audio player frame (bottom of page)"
-  (let ((template-path (merge-pathnames "template/audio-player-frame.chtml" 
+  (let ((template-path (merge-pathnames "template/audio-player-frame.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -606,7 +606,7 @@
 (define-page admin #@"/admin" ()
   "Admin dashboard"
   (require-authentication)
-  (let ((template-path (merge-pathnames "template/admin.chtml" 
+  (let ((template-path (merge-pathnames "template/admin.ctml" 
                                        (asdf:system-source-directory :asteroid)))
         (track-count (handler-case 
                        (length (db:select "tracks" (db:query :all)))
@@ -629,7 +629,7 @@
 (define-page users-management #@"/admin/user" ()
   "User Management dashboard"
   (require-authentication)
-  (let ((template-path (merge-pathnames "template/users.chtml"
+  (let ((template-path (merge-pathnames "template/users.ctml"
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -639,7 +639,7 @@
 (define-page user-profile #@"/profile" ()
   "User profile page"
   (require-authentication)
-  (let ((template-path (merge-pathnames "template/profile.chtml"
+  (let ((template-path (merge-pathnames "template/profile.ctml"
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -710,7 +710,7 @@
   (require-authentication)
   (let* ((current-user (auth:current-user))
          (username (gethash "username" current-user))
-         (template-path (merge-pathnames "template/profile.chtml"
+         (template-path (merge-pathnames "template/profile.ctml"
                                         (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -862,7 +862,7 @@
          :success-message ""))))
 
 (define-page player #@"/player" ()
-  (let ((template-path (merge-pathnames "template/player.chtml" 
+  (let ((template-path (merge-pathnames "template/player.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -878,7 +878,7 @@
 ;; Player content frame (for frameset mode)
 (define-page player-content #@"/player-content" ()
   "Player page content (displayed in content frame)"
-  (let ((template-path (merge-pathnames "template/player-content.chtml" 
+  (let ((template-path (merge-pathnames "template/player-content.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
@@ -889,7 +889,7 @@
 
 (define-page popout-player #@"/popout-player" ()
   "Pop-out player window"
-  (let ((template-path (merge-pathnames "template/popout-player.chtml" 
+  (let ((template-path (merge-pathnames "template/popout-player.ctml" 
                                        (asdf:system-source-directory :asteroid))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))

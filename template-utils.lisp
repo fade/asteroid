@@ -11,7 +11,7 @@
   "Load and cache a template file"
   (or (gethash template-name *template-cache*)
       (let* ((template-path (merge-pathnames 
-                             (format nil "template/~a.chtml" template-name)
+                             (format nil "template/~a.ctml" template-name)
                              (asdf:system-source-directory :asteroid)))
              (parsed (plump:parse (alexandria:read-file-into-string template-path))))
         (setf (gethash template-name *template-cache*) parsed)
