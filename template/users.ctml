@@ -11,7 +11,7 @@
   <div class="container">
     <h1>👥 USER MANAGEMENT</h1>
     <div class="nav">
-      <a href="/asteroid/content" target="content-frame">Home</a>
+      <a href="/asteroid" target="content-frame">Home</a>
       <a href="/asteroid/admin" target="content-frame">Admin</a>
       <a href="/asteroid/logout" class="btn-logout">Logout</a>
     </div>

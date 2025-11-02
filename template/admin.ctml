@@ -12,8 +12,8 @@
   <div class="container">
     <h1>🎛️ ADMIN DASHBOARD</h1>
     <div class="nav">
-      <a href="/asteroid/content" target="content-frame">Home</a>
-      <a href="/asteroid/player-content" target="content-frame">Player</a>
+      <a href="/asteroid" target="content-frame">Home</a>
+      <a href="/asteroid/player" target="content-frame">Player</a>
       <a href="/asteroid/profile" target="content-frame">Profile</a>
       <a href="/asteroid/admin/users">👥 Users</a>
       <a href="/asteroid/logout" class="btn-logout">Logout</a>

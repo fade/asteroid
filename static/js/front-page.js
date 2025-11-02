@@ -79,13 +79,14 @@ window.addEventListener('DOMContentLoaded', function() {
     // Set initial quality display to match the selected stream
     const selector = document.getElementById('stream-quality');
     const streamBaseUrl = document.getElementById('stream-base-url');
-    const config = getStreamConfig(streamBaseUrl.value, selector.value);
-    document.getElementById('stream-url').textContent = config.url;
-    document.getElementById('stream-format').textContent = config.format;
-
-    const statusQuality = document.querySelector('[data-text="stream-quality"]');
-    if (statusQuality) {
-        statusQuality.textContent = config.format;
+    if (streamBaseUrl && selector) {
+        const config = getStreamConfig(streamBaseUrl.value, selector.value);
+        document.getElementById('stream-url').textContent = config.url;
+        document.getElementById('stream-format').textContent = config.format;
+        const statusQuality = document.querySelector('[data-text="stream-quality"]');
+        if (statusQuality) {
+            statusQuality.textContent = config.format;
+        }
     }
     // Update playing information right after load
     updateNowPlaying();
@@ -185,14 +186,28 @@ function disableFramesetMode() {
     window.location.href = '/asteroid/';
 }
 
+function redirectWhenFrame() {
+    const path = window.location.pathname;
+    const isFramesetPage = window.parent !== window.self;
+    const isContentFrame = path.includes('asteroid/content');
+
+    if (isFramesetPage && !isContentFrame) {
+        window.location.href = '/asteroid/content';
+    }
+    if (!isFramesetPage && isContentFrame) {
+        window.location.href = '/asteroid';
+    }
+}
+
 // Check if user prefers frameset mode on page load
 window.addEventListener('DOMContentLoaded', function() {
     const path = window.location.pathname;
-    const isFramesetPage = path.includes('/frameset') || path.includes('/content') || 
-                           path.includes('/audio-player-frame') || path.includes('/player-content');
-    
-    if (localStorage.getItem('useFrameset') === 'true' && !isFramesetPage && path === '/asteroid/') {
+    const isFramesetPage = window.parent !== window.self;
+
+    if (localStorage.getItem('useFrameset') === 'true' && !isFramesetPage && path.includes('/asteroid')) {
         // User wants frameset but is on regular front page, redirect
         window.location.href = '/asteroid/frameset';
     }
+
+    redirectWhenFrame();
 });

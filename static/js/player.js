@@ -14,6 +14,7 @@ let filteredLibraryTracks = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     audioPlayer = document.getElementById('audio-player');
+    redirectWhenFrame();
     loadTracks();
     loadPlaylists();
     setupEventListeners();
@@ -27,6 +28,19 @@ document.addEventListener('DOMContentLoaded', function() {
         liveAudio.preload = 'none';
     }
 });
+
+function redirectWhenFrame () {
+    const path = window.location.pathname;
+    const isFramesetPage = window.parent !== window.self;
+    const isContentFrame = path.includes('player-content');
+
+    if (isFramesetPage && !isContentFrame) {
+        window.location.href = '/asteroid/player-content';
+    }
+    if (!isFramesetPage && isContentFrame) {
+        window.location.href = '/asteroid/player';
+    }
+}
 
 function setupEventListeners() {
     // Search
