@@ -7,6 +7,7 @@
 (setf (config :database :connection)
       '(:type :postgres
         :host "localhost"  ; Change to "asteroid-postgres" when running in Docker
+        ;; :host "asteroid-postgres"
         :port 5432
         :database "asteroid"
         :username "asteroid"
