@@ -47,7 +47,6 @@
         
         <!-- Stream Quality Selector -->
         <div class="live-stream-quality">
-          <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
           <label for="stream-quality" ><strong>Quality:</strong></label>
           <select id="stream-quality" onchange="changeStreamQuality()">
             <option value="aac">AAC 96kbps (Recommended)</option>
@@ -56,6 +55,7 @@
           </select>
         </div>
         
+        <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <p><strong>Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
         <p><strong>Format:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
         <p><strong>Status:</strong> <span id="stream-status" style="color: #00ff00;">● BROADCASTING</span></p>

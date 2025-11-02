@@ -35,6 +35,7 @@
       <div class="live-stream">
         <h2 style="color: #00ff00;">🟢 LIVE STREAM</h2>
         <p><em>The live stream player is now in the persistent bar at the bottom of the page.</em></p>
+        <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <p><strong>Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
         <p><strong>Format:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
         <p><strong>Status:</strong> <span id="stream-status" style="color: #00ff00;">● BROADCASTING</span></p>
