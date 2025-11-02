@@ -33,6 +33,7 @@
   :pathname "./"
   :components ((:file "app-utils")
                (:file "module")
+               (:file "conditions")
                (:file "database")
                (:file "template-utils")
                (:file "stream-media")

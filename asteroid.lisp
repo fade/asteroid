@@ -37,258 +37,200 @@
 (define-api asteroid/admin/scan-library () ()
   "API endpoint to scan music library"
   (require-role :admin)
-  (handler-case
-      (let ((tracks-added (scan-music-library)))
-        (api-output `(("status" . "success")
-                      ("message" . "Library scan completed")
-                      ("tracks-added" . ,tracks-added))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Scan failed: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((tracks-added (scan-music-library)))
+      (api-output `(("status" . "success")
+                    ("message" . "Library scan completed")
+                    ("tracks-added" . ,tracks-added))))))
 
 (define-api asteroid/admin/tracks () ()
   "API endpoint to view all tracks in database"
   (require-authentication)
-  (handler-case
-      (let ((tracks (db:select "tracks" (db:query :all))))
-        (api-output `(("status" . "success")
-                      ("tracks" . ,(mapcar (lambda (track)
-                                             `(("id" . ,(gethash "_id" track))
-                                               ("title" . ,(first (gethash "title" track)))
-                                               ("artist" . ,(first (gethash "artist" track)))
-                                               ("album" . ,(first (gethash "album" track)))
-                                               ("duration" . ,(first (gethash "duration" track)))
-                                               ("format" . ,(first (gethash "format" track)))
-                                               ("bitrate" . ,(first (gethash "bitrate" track)))))
-                                           tracks)))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error retrieving tracks: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((tracks (with-db-error-handling "select"
+                    (db:select "tracks" (db:query :all)))))
+      (api-output `(("status" . "success")
+                    ("tracks" . ,(mapcar (lambda (track)
+                                           `(("id" . ,(gethash "_id" track))
+                                             ("title" . ,(first (gethash "title" track)))
+                                             ("artist" . ,(first (gethash "artist" track)))
+                                             ("album" . ,(first (gethash "album" track)))
+                                             ("duration" . ,(first (gethash "duration" track)))
+                                             ("format" . ,(first (gethash "format" track)))
+                                             ("bitrate" . ,(first (gethash "bitrate" track)))))
+                                         tracks)))))))
 
 ;; Playlist API endpoints
 (define-api asteroid/playlists () ()
   "Get all playlists for current user"
   (require-authentication)
-  (handler-case
-      (let* ((user (get-current-user))
-             (user-id-raw (gethash "_id" user))
-             (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw))
-             (playlists (get-user-playlists user-id)))
-        (api-output `(("status" . "success")
-                      ("playlists" . ,(mapcar (lambda (playlist)
-                                                (let ((name-val (gethash "name" playlist))
-                                                      (desc-val (gethash "description" playlist))
-                                                      (track-ids-val (gethash "track-ids" playlist))
-                                                      (created-val (gethash "created-date" playlist))
-                                                      (id-val (gethash "_id" playlist)))
-                                                  ;; Calculate track count from comma-separated string
-                                                  ;; Handle nil, empty string, or list containing empty string
-                                                  (let* ((track-ids-str (if (listp track-ids-val) 
-                                                                           (first track-ids-val) 
-                                                                           track-ids-val))
-                                                         (track-count (if (and track-ids-str 
-                                                                              (stringp track-ids-str)
-                                                                              (not (string= track-ids-str "")))
-                                                                         (length (cl-ppcre:split "," track-ids-str))
-                                                                         0)))
-                                                    `(("id" . ,(if (listp id-val) (first id-val) id-val))
-                                                      ("name" . ,(if (listp name-val) (first name-val) name-val))
-                                                      ("description" . ,(if (listp desc-val) (first desc-val) desc-val))
-                                                      ("track-count" . ,track-count)
-                                                      ("created-date" . ,(if (listp created-val) (first created-val) created-val))))))
-                                              playlists)))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error retrieving playlists: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let* ((user (get-current-user))
+           (user-id-raw (gethash "_id" user))
+           (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw))
+           (playlists (get-user-playlists user-id)))
+      (api-output `(("status" . "success")
+                    ("playlists" . ,(mapcar (lambda (playlist)
+                                              (let ((name-val (gethash "name" playlist))
+                                                    (desc-val (gethash "description" playlist))
+                                                    (track-ids-val (gethash "track-ids" playlist))
+                                                    (created-val (gethash "created-date" playlist))
+                                                    (id-val (gethash "_id" playlist)))
+                                                ;; Calculate track count from comma-separated string
+                                                ;; Handle nil, empty string, or list containing empty string
+                                                (let* ((track-ids-str (if (listp track-ids-val) 
+                                                                         (first track-ids-val) 
+                                                                         track-ids-val))
+                                                       (track-count (if (and track-ids-str 
+                                                                            (stringp track-ids-str)
+                                                                            (not (string= track-ids-str "")))
+                                                                       (length (cl-ppcre:split "," track-ids-str))
+                                                                       0)))
+                                                  `(("id" . ,(if (listp id-val) (first id-val) id-val))
+                                                    ("name" . ,(if (listp name-val) (first name-val) name-val))
+                                                    ("description" . ,(if (listp desc-val) (first desc-val) desc-val))
+                                                    ("track-count" . ,track-count)
+                                                    ("created-date" . ,(if (listp created-val) (first created-val) created-val))))))
+                                            playlists)))))))
 
 (define-api asteroid/playlists/create (name &optional description) ()
   "Create a new playlist"
   (require-authentication)
-  (handler-case
-      (let* ((user (get-current-user))
-             (user-id-raw (gethash "_id" user))
-             (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw)))
-        (create-playlist user-id name description)
-        (if (string= "true" (post/get "browser"))
-            (redirect "/asteroid/")
-            (api-output `(("status" . "success")
-                          ("message" . "Playlist created successfully")))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error creating playlist: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let* ((user (get-current-user))
+           (user-id-raw (gethash "_id" user))
+           (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw)))
+      (create-playlist user-id name description)
+      (if (string= "true" (post/get "browser"))
+          (redirect "/asteroid/")
+          (api-output `(("status" . "success")
+                        ("message" . "Playlist created successfully")))))))
 
 (define-api asteroid/playlists/add-track (playlist-id track-id) ()
   "Add a track to a playlist"
   (require-authentication)
-  (handler-case
-      (let ((pl-id (parse-integer playlist-id :junk-allowed t))
-            (tr-id (parse-integer track-id :junk-allowed t)))
-        (add-track-to-playlist pl-id tr-id)
-        (if (string= "true" (post/get "browser"))
-            (redirect "/asteroid/")
-            (api-output `(("status" . "success")
-                          ("message" . "Track added to playlist")))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error adding track: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((pl-id (parse-integer playlist-id :junk-allowed t))
+          (tr-id (parse-integer track-id :junk-allowed t)))
+      (add-track-to-playlist pl-id tr-id)
+      (api-output `(("status" . "success")
+                    ("message" . "Track added to playlist"))))))
 
 (define-api asteroid/playlists/get (playlist-id) ()
   "Get playlist details with tracks"
   (require-authentication)
-  (handler-case
-      (let* ((id (parse-integer playlist-id :junk-allowed t))
-             (playlist (get-playlist-by-id id)))
-        (if playlist
-            (let* ((track-ids-raw (gethash "tracks" playlist))
-                   (track-ids (if (listp track-ids-raw) track-ids-raw (list track-ids-raw)))
-                   (tracks (mapcar (lambda (track-id)
-                                     (let ((track-list (db:select "tracks" (db:query (:= "_id" track-id)))))
-                                       (when (> (length track-list) 0)
-                                         (first track-list))))
-                                   track-ids))
-                   (valid-tracks (remove nil tracks)))
-              (api-output `(("status" . "success")
-                            ("playlist" . (("id" . ,id)
-                                          ("name" . ,(let ((n (gethash "name" playlist)))
-                                                      (if (listp n) (first n) n)))
-                                          ("tracks" . ,(mapcar (lambda (track)
-                                                                `(("id" . ,(gethash "_id" track))
-                                                                  ("title" . ,(gethash "title" track))
-                                                                  ("artist" . ,(gethash "artist" track))
-                                                                  ("album" . ,(gethash "album" track))))
-                                                              valid-tracks)))))))
-            (api-output `(("status" . "error")
-                          ("message" . "Playlist not found"))
-                        :status 404)))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error retrieving playlist: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let* ((id (parse-integer playlist-id :junk-allowed t))
+           (playlist (get-playlist-by-id id)))
+      (if playlist
+          (let* ((track-ids-raw (gethash "tracks" playlist))
+                 (track-ids (if (listp track-ids-raw) track-ids-raw (list track-ids-raw)))
+                 (tracks (mapcar (lambda (track-id)
+                                   (let ((track-list (db:select "tracks" (db:query (:= "_id" track-id)))))
+                                     (when (> (length track-list) 0)
+                                       (first track-list))))
+                                 track-ids))
+                 (valid-tracks (remove nil tracks)))
+            (api-output `(("status" . "success")
+                          ("playlist" . (("id" . ,id)
+                                        ("name" . ,(let ((n (gethash "name" playlist)))
+                                                    (if (listp n) (first n) n)))
+                                        ("tracks" . ,(mapcar (lambda (track)
+                                                              `(("id" . ,(gethash "_id" track))
+                                                                ("title" . ,(gethash "title" track))
+                                                                ("artist" . ,(gethash "artist" track))
+                                                                ("album" . ,(gethash "album" track))))
+                                                            valid-tracks)))))))
+          (api-output `(("status" . "error")
+                        ("message" . "Playlist not found"))
+                      :status 404)))))
 
 ;; API endpoint to get all tracks (for web player)
 (define-api asteroid/tracks () ()
   "Get all tracks for web player"
   (require-authentication)
-  (handler-case
-      (let ((tracks (db:select "tracks" (db:query :all))))
-        (api-output `(("status" . "success")
-                      ("tracks" . ,(mapcar (lambda (track)
-                                             `(("id" . ,(gethash "_id" track))
-                                               ("title" . ,(gethash "title" track))
-                                               ("artist" . ,(gethash "artist" track))
-                                               ("album" . ,(gethash "album" track))
-                                               ("duration" . ,(gethash "duration" track))
-                                               ("format" . ,(gethash "format" track))))
-                                           tracks)))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error retrieving tracks: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((tracks (with-db-error-handling "select"
+                    (db:select "tracks" (db:query :all)))))
+      (api-output `(("status" . "success")
+                    ("tracks" . ,(mapcar (lambda (track)
+                                           `(("id" . ,(gethash "_id" track))
+                                             ("title" . ,(gethash "title" track))
+                                             ("artist" . ,(gethash "artist" track))
+                                             ("album" . ,(gethash "album" track))
+                                             ("duration" . ,(gethash "duration" track))
+                                             ("format" . ,(gethash "format" track))))
+                                         tracks)))))))
 
 ;; Stream Control API Endpoints
 (define-api asteroid/stream/queue () ()
   "Get the current stream queue"
   (require-role :admin)
-  (handler-case
-      (let ((queue (get-stream-queue)))
-        (api-output `(("status" . "success")
-                      ("queue" . ,(mapcar (lambda (track-id)
-                                           (let ((track (get-track-by-id track-id)))
-                                             (when track
-                                               `(("id" . ,track-id)
-                                                 ("title" . ,(gethash "title" track))
-                                                 ("artist" . ,(gethash "artist" track))
-                                                 ("album" . ,(gethash "album" track))))))
-                                         queue)))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error getting queue: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((queue (get-stream-queue)))
+      (api-output `(("status" . "success")
+                    ("queue" . ,(mapcar (lambda (track-id)
+                                          (let ((track (get-track-by-id track-id)))
+                                            `(("id" . ,track-id)
+                                              ("title" . ,(gethash "title" track))
+                                              ("artist" . ,(gethash "artist" track))
+                                              ("album" . ,(gethash "album" track)))))
+                                        queue)))))))
 
 (define-api asteroid/stream/queue/add (track-id &optional (position "end")) ()
   "Add a track to the stream queue"
   (require-role :admin)
-  (handler-case
-      (let ((tr-id (parse-integer track-id :junk-allowed t))
-            (pos (if (string= position "next") :next :end)))
-        (add-to-stream-queue tr-id pos)
-        (api-output `(("status" . "success")
-                      ("message" . "Track added to stream queue"))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error adding to queue: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((tr-id (parse-integer track-id :junk-allowed t))
+          (pos (if (string= position "next") :next :end)))
+      (add-to-stream-queue tr-id pos)
+      (api-output `(("status" . "success")
+                    ("message" . "Track added to stream queue"))))))
 
 (define-api asteroid/stream/queue/remove (track-id) ()
   "Remove a track from the stream queue"
   (require-role :admin)
-  (handler-case
-      (let ((tr-id (parse-integer track-id :junk-allowed t)))
-        (remove-from-stream-queue tr-id)
-        (api-output `(("status" . "success")
-                      ("message" . "Track removed from stream queue"))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error removing from queue: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((tr-id (parse-integer track-id :junk-allowed t)))
+      (remove-from-stream-queue tr-id)
+      (api-output `(("status" . "success")
+                    ("message" . "Track removed from stream queue"))))))
 
 (define-api asteroid/stream/queue/clear () ()
   "Clear the entire stream queue"
   (require-role :admin)
-  (handler-case
-      (progn
-        (clear-stream-queue)
-        (api-output `(("status" . "success")
-                      ("message" . "Stream queue cleared"))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error clearing queue: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (clear-stream-queue)
+    (api-output `(("status" . "success")
+                  ("message" . "Stream queue cleared")))))
 
 (define-api asteroid/stream/queue/add-playlist (playlist-id) ()
   "Add all tracks from a playlist to the stream queue"
   (require-role :admin)
-  (handler-case
-      (let ((pl-id (parse-integer playlist-id :junk-allowed t)))
-        (add-playlist-to-stream-queue pl-id)
-        (api-output `(("status" . "success")
-                      ("message" . "Playlist added to stream queue"))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error adding playlist to queue: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((pl-id (parse-integer playlist-id :junk-allowed t)))
+      (add-playlist-to-stream-queue pl-id)
+      (api-output `(("status" . "success")
+                    ("message" . "Playlist added to stream queue"))))))
 
 (define-api asteroid/stream/queue/reorder (track-ids) ()
   "Reorder the stream queue (expects comma-separated track IDs)"
   (require-role :admin)
-  (handler-case
-      (let ((ids (mapcar (lambda (id-str) (parse-integer id-str :junk-allowed t))
-                        (cl-ppcre:split "," track-ids))))
-        (reorder-stream-queue ids)
-        (api-output `(("status" . "success")
-                      ("message" . "Stream queue reordered"))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error reordering queue: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((ids (mapcar (lambda (id-str) (parse-integer id-str :junk-allowed t))
+                      (cl-ppcre:split "," track-ids))))
+      (reorder-stream-queue ids)
+      (api-output `(("status" . "success")
+                    ("message" . "Stream queue reordered"))))))
 
 (define-api asteroid/stream/queue/load-m3u () ()
   "Load stream queue from stream-queue.m3u file"
   (require-role :admin)
-  (handler-case
-      (let ((count (load-queue-from-m3u-file)))
-        (api-output `(("status" . "success")
-                      ("message" . "Queue loaded from M3U file")
-                      ("count" . ,count))))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error loading from M3U: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let ((count (load-queue-from-m3u-file)))
+      (api-output `(("status" . "success")
+                    ("message" . "Queue loaded from M3U file")
+                    ("count" . ,count))))))
 
 (defun get-track-by-id (track-id)
   "Get a track by its ID - handles type mismatches"
@@ -315,39 +257,28 @@
 
 (define-page stream-track #@"/tracks/(.*)/stream" (:uri-groups (track-id))
   "Stream audio file by track ID"
-  (handler-case
-      (let* ((id (parse-integer track-id))
-             (track (get-track-by-id id)))
-        (if track
-            (let* ((file-path (first (gethash "file-path" track)))
-                   (format (first (gethash "format" track)))
-                   (file (probe-file file-path)))
-              (if file
-                  (progn
-                    ;; Set appropriate headers for audio streaming
-                    (setf (radiance:header "Content-Type") (get-mime-type-for-format format))
-                    (setf (radiance:header "Accept-Ranges") "bytes")
-                    (setf (radiance:header "Cache-Control") "public, max-age=3600")
-                    ;; Increment play count
-                    (db:update "tracks" (db:query (:= '_id id))
-                               `(("play-count" ,(1+ (first (gethash "play-count" track))))))
-                    ;; Return file contents
-                    (alexandria:read-file-into-byte-vector file))
-                  (progn
-                    (setf (radiance:header "Content-Type") "application/json")
-                    (cl-json:encode-json-to-string
-                     `(("status" . "error")
-                       ("message" . "Audio file not found on disk"))))))
-            (progn
-              (setf (radiance:header "Content-Type") "application/json")
-              (cl-json:encode-json-to-string
-               `(("status" . "error")
-                 ("message" . "Track not found"))))))
-    (error (e)
-      (setf (radiance:header "Content-Type") "application/json")
-      (cl-json:encode-json-to-string
-       `(("status" . "error")
-         ("message" . ,(format nil "Streaming error: ~a" e)))))))
+  (with-error-handling
+    (let* ((id (parse-integer track-id))
+           (track (get-track-by-id id)))
+      (unless track
+        (signal-not-found "track" id))
+      (let* ((file-path (first (gethash "file-path" track)))
+             (format (first (gethash "format" track)))
+             (file (probe-file file-path)))
+        (unless file
+          (error 'not-found-error
+                 :message "Audio file not found on disk"
+                 :resource-type "file"
+                 :resource-id file-path))
+        ;; Set appropriate headers for audio streaming
+        (setf (radiance:header "Content-Type") (get-mime-type-for-format format))
+        (setf (radiance:header "Accept-Ranges") "bytes")
+        (setf (radiance:header "Cache-Control") "public, max-age=3600")
+        ;; Increment play count
+        (db:update "tracks" (db:query (:= '_id id))
+                   `(("play-count" ,(1+ (first (gethash "play-count" track))))))
+        ;; Return file contents
+        (alexandria:read-file-into-byte-vector file)))))
 
 ;; Player state management
 (defvar *current-track* nil "Currently playing track")
@@ -390,27 +321,20 @@
 ;; Player control API endpoints
 (define-api asteroid/player/play (track-id) ()
   "Start playing a track by ID"
-  (handler-case
-      (let* ((id (parse-integer track-id))
-             (track (get-track-by-id id)))
-        (if track
-            (progn
-              (setf *current-track* id)
-              (setf *player-state* :playing)
-              (setf *current-position* 0)
-              (api-output `(("status" . "success")
-                            ("message" . "Playback started")
-                            ("track" . (("id" . ,id)
-                                       ("title" . ,(first (gethash "title" track)))
-                                       ("artist" . ,(first (gethash "artist" track)))))
-                            ("player" . ,(get-player-status)))))
-            (api-output `(("status" . "error")
-                          ("message" . "Track not found"))
-                        :status 404)))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Play error: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let* ((id (parse-integer track-id))
+           (track (get-track-by-id id)))
+      (unless track
+        (signal-not-found "track" id))
+      (setf *current-track* id)
+      (setf *player-state* :playing)
+      (setf *current-position* 0)
+      (api-output `(("status" . "success")
+                    ("message" . "Playback started")
+                    ("track" . (("id" . ,id)
+                               ("title" . ,(first (gethash "title" track)))
+                               ("artist" . ,(first (gethash "artist" track)))))
+                    ("player" . ,(get-player-status)))))))
 
 (define-api asteroid/player/pause () ()
   "Pause current playback"
@@ -519,72 +443,64 @@
 ;; Front page - regular view by default
 (define-page front-page #@"/" ()
   "Main front page"
-  (let ((template-path (merge-pathnames "template/front-page.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "🎵 ASTEROID RADIO 🎵"
-     :station-name "🎵 ASTEROID RADIO 🎵"
-     :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
-     :listeners "0"
-     :stream-quality "128kbps MP3"
-     :stream-base-url *stream-base-url*
-     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
-     :default-stream-encoding "audio/aac"
-     :default-stream-encoding-desc "AAC 96kbps Stereo"
-     :now-playing-artist "The Void"
-     :now-playing-track "Silence"
-     :now-playing-album "Startup Sounds"
-     :now-playing-duration "∞")))
+  (clip:process-to-string 
+   (load-template "front-page")
+   :title "🎵 ASTEROID RADIO 🎵"
+   :station-name "🎵 ASTEROID RADIO 🎵"
+   :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
+   :listeners "0"
+   :stream-quality "128kbps MP3"
+   :stream-base-url *stream-base-url*
+   :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
+   :default-stream-encoding "audio/aac"
+   :default-stream-encoding-desc "AAC 96kbps Stereo"
+   :now-playing-artist "The Void"
+   :now-playing-track "Silence"
+   :now-playing-album "Startup Sounds"
+   :now-playing-duration "∞"))
 
 ;; Frameset wrapper for persistent player mode
 (define-page frameset-wrapper #@"/frameset" ()
   "Frameset wrapper with persistent audio player"
-  (let ((template-path (merge-pathnames "template/frameset-wrapper.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "🎵 ASTEROID RADIO 🎵")))
+  (clip:process-to-string 
+   (load-template "frameset-wrapper")
+   :title "🎵 ASTEROID RADIO 🎵"))
 
 ;; Content frame - front page content without player
 (define-page front-page-content #@"/content" ()
   "Front page content (displayed in content frame)"
-  (let ((template-path (merge-pathnames "template/front-page-content.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "🎵 ASTEROID RADIO 🎵"
-     :station-name "🎵 ASTEROID RADIO 🎵"
-     :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
-     :listeners "0"
-     :stream-quality "128kbps MP3"
-     :stream-base-url *stream-base-url*
-     :now-playing-artist "The Void"
-     :now-playing-track "Silence"
-     :now-playing-album "Startup Sounds"
-     :now-playing-duration "∞")))
+  (clip:process-to-string 
+   (load-template "front-page-content")
+   :title "🎵 ASTEROID RADIO 🎵"
+   :station-name "🎵 ASTEROID RADIO 🎵"
+   :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
+   :listeners "0"
+   :stream-quality "128kbps MP3"
+   :stream-base-url *stream-base-url*
+   :now-playing-artist "The Void"
+   :now-playing-track "Silence"
+   :now-playing-album "Startup Sounds"
+   :now-playing-duration "∞"))
 
 ;; Persistent audio player frame (bottom frame)
 (define-page audio-player-frame #@"/audio-player-frame" ()
   "Persistent audio player frame (bottom of page)"
-  (let ((template-path (merge-pathnames "template/audio-player-frame.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :stream-base-url *stream-base-url*
-     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
-     :default-stream-encoding "audio/aac")))
+  (clip:process-to-string 
+   (load-template "audio-player-frame")
+   :stream-base-url *stream-base-url*
+   :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
+   :default-stream-encoding "audio/aac"))
 
 ;; Configure static file serving for other files
 (define-page static #@"/static/(.*)" (:uri-groups (path))
-  (serve-file (merge-pathnames (concatenate 'string "static/" path) 
+  (serve-file (merge-pathnames (format nil "static/~a" path) 
                                (asdf:system-source-directory :asteroid))))
 
 ;; Status check functions
 (defun check-icecast-status ()
   "Check if Icecast server is running and accessible"
   (handler-case
-      (let ((response (drakma:http-request (concatenate 'string *stream-base-url* "/status-json.xsl")
+      (let ((response (drakma:http-request (format nil "~a/status-json.xsl" *stream-base-url*)
                                           :want-stream nil
                                           :connection-timeout 2)))
         (if response "🟢 Running" "🔴 Not Running"))
@@ -606,13 +522,11 @@
 (define-page admin #@"/admin" ()
   "Admin dashboard"
   (require-authentication)
-  (let ((template-path (merge-pathnames "template/admin.ctml" 
-                                       (asdf:system-source-directory :asteroid)))
-        (track-count (handler-case 
+  (let ((track-count (handler-case 
                        (length (db:select "tracks" (db:query :all)))
                        (error () 0))))
     (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
+     (load-template "admin")
      :title "🎵 ASTEROID RADIO - Admin Dashboard"
      :server-status "🟢 Running"
      :database-status (handler-case 
@@ -623,57 +537,53 @@
      :track-count (format nil "~d" track-count)
      :library-path "/home/glenn/Projects/Code/asteroid/music/library/"
      :stream-base-url *stream-base-url*
-     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac"))))
+     :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*))))
 
 ;; User Management page (requires authentication)
 (define-page users-management #@"/admin/user" ()
   "User Management dashboard"
   (require-authentication)
-  (let ((template-path (merge-pathnames "template/users.ctml"
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "🎵 ASTEROID RADIO - User Management")))
+  (clip:process-to-string 
+   (load-template "users")
+   :title "🎵 ASTEROID RADIO - User Management"))
 
 ;; User Profile page (requires authentication)
 (define-page user-profile #@"/profile" ()
   "User profile page"
   (require-authentication)
-  (let ((template-path (merge-pathnames "template/profile.ctml"
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "🎧 admin - Profile | Asteroid Radio"
-     :username "admin"
-     :user-role "admin"
-     :join-date "Unknown"
-     :last-active "Unknown"
-     :total-listen-time "0h 0m"
-     :tracks-played "0"
-     :session-count "0"
-     :favorite-genre "Unknown"
-     :recent-track-1-title ""
-     :recent-track-1-artist ""
-     :recent-track-1-duration ""
-     :recent-track-1-played-at ""
-     :recent-track-2-title ""
-     :recent-track-2-artist ""
-     :recent-track-2-duration ""
-     :recent-track-2-played-at ""
-     :recent-track-3-title ""
-     :recent-track-3-artist ""
-     :recent-track-3-duration ""
-     :recent-track-3-played-at ""
-     :top-artist-1 ""
-     :top-artist-1-plays ""
-     :top-artist-2 ""
-     :top-artist-2-plays ""
-     :top-artist-3 ""
-     :top-artist-3-plays ""
-     :top-artist-4 ""
-     :top-artist-4-plays ""
-     :top-artist-5 ""
-     :top-artist-5-plays "")))
+  (clip:process-to-string 
+   (load-template "profile")
+   :title "🎧 admin - Profile | Asteroid Radio"
+   :username "admin"
+   :user-role "admin"
+   :join-date "Unknown"
+   :last-active "Unknown"
+   :total-listen-time "0h 0m"
+   :tracks-played "0"
+   :session-count "0"
+   :favorite-genre "Unknown"
+   :recent-track-1-title ""
+   :recent-track-1-artist ""
+   :recent-track-1-duration ""
+   :recent-track-1-played-at ""
+   :recent-track-2-title ""
+   :recent-track-2-artist ""
+   :recent-track-2-duration ""
+   :recent-track-2-played-at ""
+   :recent-track-3-title ""
+   :recent-track-3-artist ""
+   :recent-track-3-duration ""
+   :recent-track-3-played-at ""
+   :top-artist-1 ""
+   :top-artist-1-plays ""
+   :top-artist-2 ""
+   :top-artist-2-plays ""
+   :top-artist-3 ""
+   :top-artist-3-plays ""
+   :top-artist-4 ""
+   :top-artist-4-plays ""
+   :top-artist-5 ""
+   :top-artist-5-plays ""))
 
 ;; Helper functions for profile page - TEMPORARILY COMMENTED OUT
 #|
@@ -750,42 +660,31 @@
 ;; Auth status API endpoint
 (define-api asteroid/auth-status () ()
   "Check if user is logged in and their role"
-  (handler-case
-      (let* ((user-id (session:field "user-id"))
-             (user (when user-id (find-user-by-id user-id))))
-        (api-output `(("loggedIn" . ,(if user t nil))
-                      ("isAdmin" . ,(if (and user (user-has-role-p user :admin)) t nil))
-                      ("username" . ,(if user 
-                                        (let ((username (gethash "username" user)))
-                                          (if (listp username) (first username) username))
-                                        nil)))))
-    (error (e)
-      (api-output `(("loggedIn" . nil)
-                    ("isAdmin" . nil)
-                    ("error" . ,(format nil "~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let* ((user-id (session:field "user-id"))
+           (user (when user-id (find-user-by-id user-id))))
+      (api-output `(("loggedIn" . ,(if user t nil))
+                    ("isAdmin" . ,(if (and user (user-has-role-p user :admin)) t nil))
+                    ("username" . ,(if user 
+                                      (let ((username (gethash "username" user)))
+                                        (if (listp username) (first username) username))
+                                      nil)))))))
 
 ;; User profile API endpoints
 (define-api asteroid/user/profile () ()
   "Get current user profile information"
   (require-authentication)
-  (handler-case
-      (let* ((user-id (session:field "user-id"))
-             (user (find-user-by-id user-id)))
-        (if user
-            (api-output `(("status" . "success")
-                          ("user" . (("username" . ,(first (gethash "username" user)))
-                                     ("email" . ,(first (gethash "email" user)))
-                                     ("role" . ,(first (gethash "role" user)))
-                                     ("created_at" . ,(first (gethash "created-date" user)))
-                                     ("last_active" . ,(first (gethash "last-login" user)))))))
-            (api-output `(("status" . "error")
-                          ("message" . "User not found"))
-                        :status 404)))
-    (error (e)
-      (api-output `(("status" . "error")
-                    ("message" . ,(format nil "Error loading profile: ~a" e)))
-                  :status 500))))
+  (with-error-handling
+    (let* ((user-id (session:field "user-id"))
+           (user (find-user-by-id user-id)))
+      (if user
+          (api-output `(("status" . "success")
+                        ("user" . (("username" . ,(first (gethash "username" user)))
+                                   ("email" . ,(first (gethash "email" user)))
+                                   ("role" . ,(first (gethash "role" user)))
+                                   ("created_at" . ,(first (gethash "created-date" user)))
+                                   ("last_active" . ,(first (gethash "last-login" user)))))))
+          (signal-not-found "user" user-id)))))
 
 (define-api asteroid/user/listening-stats () ()
   "Get user listening statistics"
@@ -862,40 +761,34 @@
          :success-message ""))))
 
 (define-page player #@"/player" ()
-  (let ((template-path (merge-pathnames "template/player.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "Asteroid Radio - Web Player"
-     :stream-base-url *stream-base-url*
-     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
-     :bitrate "128kbps MP3"
-     :now-playing-artist "The Void"
-     :now-playing-track "Silence"
-     :now-playing-album "Startup Sounds"
-     :player-status "Stopped")))
+  (clip:process-to-string 
+   (load-template "player")
+   :title "Asteroid Radio - Web Player"
+   :stream-base-url *stream-base-url*
+   :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
+   :bitrate "128kbps MP3"
+   :now-playing-artist "The Void"
+   :now-playing-track "Silence"
+   :now-playing-album "Startup Sounds"
+   :player-status "Stopped"))
 
 ;; Player content frame (for frameset mode)
 (define-page player-content #@"/player-content" ()
   "Player page content (displayed in content frame)"
-  (let ((template-path (merge-pathnames "template/player-content.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :title "Asteroid Radio - Web Player"
-     :stream-base-url *stream-base-url*
-     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
-     :default-stream-encoding "audio/aac")))
+  (clip:process-to-string 
+   (load-template "player-content")
+   :title "Asteroid Radio - Web Player"
+   :stream-base-url *stream-base-url*
+   :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
+   :default-stream-encoding "audio/aac"))
 
 (define-page popout-player #@"/popout-player" ()
   "Pop-out player window"
-  (let ((template-path (merge-pathnames "template/popout-player.ctml" 
-                                       (asdf:system-source-directory :asteroid))))
-    (clip:process-to-string 
-     (plump:parse (alexandria:read-file-into-string template-path))
-     :stream-base-url *stream-base-url*
-     :default-stream-url (concatenate 'string *stream-base-url* "/asteroid.aac")
-     :default-stream-encoding "audio/aac")))
+  (clip:process-to-string 
+   (load-template "popout-player")
+   :stream-base-url *stream-base-url*
+   :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
+   :default-stream-encoding "audio/aac"))
 
 (define-api asteroid/status () ()
   "Get server status"
@@ -907,14 +800,14 @@
                                   ("artist" . "The Void")
                                   ("album" . "Startup Sounds")))
                 ("listeners" . 0)
-                ("stream-url" . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
+                ("stream-url" . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
                 ("stream-status" . "live"))))
 
 ;; Live stream status from Icecast
 (define-api asteroid/icecast-status () ()
   "Get live status from Icecast server"
-  (handler-case
-    (let* ((icecast-url (concatenate 'string *stream-base-url* "/admin/stats.xml"))
+  (with-error-handling
+    (let* ((icecast-url (format nil "~a/admin/stats.xml" *stream-base-url*))
            (response (drakma:http-request icecast-url 
                                          :want-stream nil
                                          :basic-authorization '("admin" "asteroid_admin_2024"))))
@@ -936,7 +829,7 @@
                          (listeners (if listenersp (cl-ppcre:regex-replace-all ".*<listeners>(.*?)</listeners>.*" source-section "\\1") "0")))
                     ;; Return JSON in format expected by frontend
                     (api-output
-                     `(("icestats" . (("source" . (("listenurl" . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
+                     `(("icestats" . (("source" . (("listenurl" . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
                                                    ("title" . ,title)
                                                    ("listeners" . ,(parse-integer listeners :junk-allowed t)))))))))
                   ;; No source found, return empty
@@ -944,11 +837,7 @@
                    `(("icestats" . (("source" . nil))))))))
           (api-output
            `(("error" . "Could not connect to Icecast server"))
-           :status 503)))
-    (error (e)
-      (api-output
-       `(("error" . ,(format nil "Icecast connection failed: ~a" e)))
-       :status 500))))
+           :status 503)))))
 
 
 ;; RADIANCE server management functions

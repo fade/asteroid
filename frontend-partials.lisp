@@ -1,7 +1,7 @@
 (in-package :asteroid)
 
 (defun icecast-now-playing (icecast-base-url)
-    (let* ((icecast-url (concatenate 'string icecast-base-url "/admin/stats.xml"))
+    (let* ((icecast-url (format nil "~a/admin/stats.xml" icecast-base-url))
            (response (drakma:http-request icecast-url
                                          :want-stream nil
                                          :basic-authorization '("admin" "asteroid_admin_2024"))))
@@ -22,31 +22,29 @@
                          (listenersp (cl-ppcre:all-matches "<listeners>" source-section))
                          (title (if titlep (cl-ppcre:regex-replace-all ".*<title>(.*?)</title>.*" source-section "\\1") "Unknown"))
                          (listeners (if listenersp (cl-ppcre:regex-replace-all ".*<listeners>(.*?)</listeners>.*" source-section "\\1") "0")))
-                    `((:listenurl . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
+                    `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
                       (:title . ,title)
                       (:listeners . ,(parse-integer listeners :junk-allowed t))))
-                  `((:listenurl . ,(concatenate 'string *stream-base-url* "/asteroid.mp3"))
+                  `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
                     (:title . "Unknown")
                     (:listeners . "Unknown"))))))))
 
 (define-api asteroid/partial/now-playing () ()
   "Get Partial HTML with live status from Icecast server"
   (handler-case
-    (let ((now-playing-stats (icecast-now-playing *stream-base-url*))
-          (template-path (merge-pathnames "template/partial/now-playing.ctml"
-                                          (asdf:system-source-directory :asteroid))))
+    (let ((now-playing-stats (icecast-now-playing *stream-base-url*)))
       (if now-playing-stats
           (progn
             ;; TODO: it should be able to define a custom api-output for this
             ;; (api-output <clip-parser> :format "html"))
             (setf (header "Content-Type") "text/html")
             (clip:process-to-string
-             (plump:parse (alexandria:read-file-into-string template-path))
+             (load-template "partial/now-playing")
              :stats now-playing-stats))
           (progn
             (setf (header "Content-Type") "text/html")
             (clip:process-to-string
-             (plump:parse (alexandria:read-file-into-string template-path))
+             (load-template "partial/now-playing")
              :connection-error t
              :stats nil))))
     (error (e)
