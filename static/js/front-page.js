@@ -30,6 +30,9 @@ function changeStreamQuality() {
     const streamBaseUrl = document.getElementById('stream-base-url');
     const config = getStreamConfig(streamBaseUrl.value, selector.value);
 
+    // Save preference
+    localStorage.setItem('stream-quality', selector.value);
+
     // Update UI elements
     document.getElementById('stream-url').textContent = config.url;
     document.getElementById('stream-format').textContent = config.format;
@@ -79,6 +82,11 @@ window.addEventListener('DOMContentLoaded', function() {
     // Set initial quality display to match the selected stream
     const selector = document.getElementById('stream-quality');
     const streamBaseUrl = document.getElementById('stream-base-url');
+    const streamQuality = localStorage.getItem('stream-quality') || 'aac';
+    if (selector && selector.value !== streamQuality) {
+        selector.value = streamQuality;
+        selector.dispatchEvent(new Event('change'));
+    }
     if (streamBaseUrl && selector) {
         const config = getStreamConfig(streamBaseUrl.value, selector.value);
         document.getElementById('stream-url').textContent = config.url;

@@ -27,6 +27,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reduce buffer to minimize delay
         liveAudio.preload = 'none';
     }
+    // Restore user quality preference
+    const selector = document.getElementById('live-stream-quality');
+    const streamQuality = localStorage.getItem('stream-quality') || 'aac';
+    if (selector && selector.value !== streamQuality) {
+        selector.value = streamQuality;
+        selector.dispatchEvent(new Event('change'));
+    }
 });
 
 function redirectWhenFrame () {
