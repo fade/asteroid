@@ -36,6 +36,7 @@
                (:file "module")
                (:module :config
                 :components ((:file radiance-postgres)))
+               (:file "conditions")
                (:file "database")
                (:file "template-utils")
                (:file "stream-media")
