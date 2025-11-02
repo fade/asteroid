@@ -33,7 +33,9 @@
 6) the administrative interface should be beefed up.
    5.1) Deactivate users
    5.2) Change user access permissions
-7) The "Scan Library" feature is not working in the main branch
+7) User profile pages should probably be fleshed out.
+8) the stream management features aren't there for Admins or DJs.
+9) The "Scan Library" feature is not working in the main branch
 
 * Server runtime configuration [0/1]
 - [ ] parameterize all configuration for runtime loading [0/2]
