@@ -11,7 +11,7 @@
 
 ;; Ensure RADIANCE environment is set before loading
 (unless (radiance:environment)
-  (setf (radiance:environment) "default"))
+  (setf (radiance:environment) "asteroid"))
 
 ;; Load the system with RADIANCE environment handling
 (handler-bind ((radiance-core:environment-not-set 

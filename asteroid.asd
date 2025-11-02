@@ -29,10 +29,13 @@
                :drakma
                (:interface :auth)
                (:interface :database)
+               (:interface :relational-database)
                (:interface :user))
   :pathname "./"
   :components ((:file "app-utils")
                (:file "module")
+               (:module :config
+                :components ((:file radiance-postgres)))
                (:file "database")
                (:file "template-utils")
                (:file "stream-media")

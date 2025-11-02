@@ -988,11 +988,12 @@
     (setf (radiance:environment) "asteroid"))
   
   ;; Ensure the database directory exists
-  (let ((db-dir (merge-pathnames ".config/radiance/default/i-lambdalite/radiance.db/"
-                                 (user-homedir-pathname))))
-    (ensure-directories-exist db-dir)
-    (setf (radiance:environment) "asteroid")
-    (format t "Database directory: ~a~%" db-dir)))
+  ;; (let ((db-dir (merge-pathnames ".config/radiance/default/i-lambdalite/radiance.db/"
+  ;;                                (user-homedir-pathname))))
+  ;;   (ensure-directories-exist db-dir)
+  ;;   (setf (radiance:environment) "asteroid")
+  ;;   (format t "Database directory: ~a~%" db-dir))
+  )
 
 (defun -main (&optional args (debug t))
   (declare (ignorable args))
