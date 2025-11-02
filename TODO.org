@@ -9,6 +9,32 @@
 - [X] Set up DNS
 - [X] Create user accounts
 
+* Deploy the system
+- [X] Install and configure HAproxy
+- [X] Create a user to contain asteroid
+- [X] Checkout asteroid in ~asteroid on b612
+- [X] Build the docker containers
+- [X] Build asteroid from the sources
+- [X] Configure HAproxy to front http://asteroid.radio/ -> http://localhost:8080/
+- [X] Set ASTEROID_STREAM_URL in ~asteroid/.bashrc
+- [X] Start the docker containers for liquidsoap, icecast, and postgresql
+- [X] Start asteroid, check the stream (Underworld:Juanita/Kiteless)
+- [X] Announce that the system is live in #asteroid.radio
+
+** PROBLEMS
+1) Liquidsoap is exposing its management console via telnet on the exterior network interface of b612.asteroid.radio
+2) icecast is also binding the external interface on b612, which it
+   should not be. HAproxy is there to mediate this interaction.
+3) We're still on the built in i-lambdalite database
+4) The templates still advertise the default administrator password,
+   which is no bueno.
+5) We need to work out the TLS situation with letsencrypt, and
+   integrate it into HAproxy.
+6) the administrative interface should be beefed up.
+   5.1) Deactivate users
+   5.2) Change user access permissions
+7) The "Scan Library" feature is not working in the main branch
+
 * Server runtime configuration [0/1]
 - [ ] parameterize all configuration for runtime loading [0/2]
   - [ ] strip hard coded configurations out of the system
@@ -19,6 +45,7 @@
   - [X] Add a postgresql docker image to our docker-compose file.
   - [ ] Configure radiance for postres.
   - [ ] Migrate all schema to new database.
+
 
 ** [X] Page Flow [2/2] ✅ COMPLETE
 - [X] When a user logs in, their user profile page should become the
