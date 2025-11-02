@@ -30,6 +30,20 @@
                          (active :integer)
                          (created-date :integer)
                          (last-login :integer))))
+
+  (unless (db:collection-exists-p "playlist_tracks")
+    (db:create "playlist_tracks" '((track_id :integer)
+                                   (position :ingeger)
+                                   (added_date :timestamp))))
+
+  ;; TODO: the radiance db interface is too basic to contain anything
+  ;; but strings, integers, booleans, and maybe timestamps... we will
+  ;; need to rethink this. currently track/playlist relationships are
+  ;; defined in the SQL file 'init-db.sql' referenced in the docker
+  ;; config for postgresql, but our lisp code doesn't leverage it.
   
-  (format t "Database collections initialized~%"))
+  ;; (unless (db:collection-exists-p "sessions")
+  ;;   (db:create "sessions" '(())))
+  
+  (l:info "~2&Database collections initialized~%"))
 
