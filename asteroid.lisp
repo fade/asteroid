@@ -8,9 +8,9 @@
 (in-package :asteroid)
 
 ;; Define as RADIANCE module
-(define-module asteroid
-  (:use #:cl #:radiance #:lass #:r-clip)
-  (:domain "asteroid"))
+;; (define-module asteroid
+;;   (:use #:cl #:radiance #:lass #:r-clip)
+;;   (:domain "asteroid"))
 
 ;; Configuration -- this will be refactored to a dedicated
 ;; configuration logic. Probably using 'ubiquity
