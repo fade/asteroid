@@ -3,17 +3,32 @@
 
 (in-package :asteroid)
 
+;; Template directory configuration
+(defparameter *template-directory*
+  (merge-pathnames "template/" (asdf:system-source-directory :asteroid))
+  "Base directory for all CLIP templates")
+
 ;; Template cache for parsed templates
 (defvar *template-cache* (make-hash-table :test 'equal)
   "Cache for parsed template DOMs")
 
+(defun template-path (name)
+  "Build full path to template file.
+   NAME can be either:
+   - Simple name: 'front-page' -> 'template/front-page.ctml'
+   - Path with subdirs: 'partial/now-playing' -> 'template/partial/now-playing.ctml'"
+  (merge-pathnames (format nil "~a.ctml" name) *template-directory*))
+
+(defun load-template (name)
+  "Load and parse a template by name without caching.
+   Use this for templates that change frequently during development."
+  (plump:parse (alexandria:read-file-into-string (template-path name))))
+
 (defun get-template (template-name)
-  "Load and cache a template file"
+  "Load and cache a template file.
+   Use this for production - templates are cached after first load."
   (or (gethash template-name *template-cache*)
-      (let* ((template-path (merge-pathnames 
-                             (format nil "template/~a.ctml" template-name)
-                             (asdf:system-source-directory :asteroid)))
-             (parsed (plump:parse (alexandria:read-file-into-string template-path))))
+      (let ((parsed (load-template template-name)))
         (setf (gethash template-name *template-cache*) parsed)
         parsed)))
 
