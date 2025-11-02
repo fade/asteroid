@@ -24,7 +24,7 @@
 ** PROBLEMS
 1) Liquidsoap is exposing its management console via telnet on the exterior network interface of b612.asteroid.radio
 2) icecast is also binding the external interface on b612, which it
-   should not be. HAproxy is there to mediate this interaction.
+   should not be. HAproxy is there to mediate this flow.
 3) We're still on the built in i-lambdalite database
 4) The templates still advertise the default administrator password,
    which is no bueno.
