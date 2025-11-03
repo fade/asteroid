@@ -33,15 +33,8 @@ function changeStreamQuality() {
     // Save preference
     localStorage.setItem('stream-quality', selector.value);
 
-    // Update UI elements
-    document.getElementById('stream-url').textContent = config.url;
-    document.getElementById('stream-format').textContent = config.format;
-
-    // Update Station Status stream quality display
-    const statusQuality = document.querySelector('[data-text="stream-quality"]');
-    if (statusQuality) {
-        statusQuality.textContent = config.format;
-    }
+    // Update stream information with new selection
+    updateStreamInformation()
 
     // Update audio player
     const audioElement = document.getElementById('live-audio');
@@ -77,8 +70,8 @@ async function updateNowPlaying() {
     }
 }
 
-// Initialize stream quality display on page load
-window.addEventListener('DOMContentLoaded', function() {
+// Update stream information
+function updateStreamInformation() {
     // Set initial quality display to match the selected stream
     const selector = document.getElementById('stream-quality');
     const streamBaseUrl = document.getElementById('stream-base-url');
@@ -87,8 +80,8 @@ window.addEventListener('DOMContentLoaded', function() {
         selector.value = streamQuality;
         selector.dispatchEvent(new Event('change'));
     }
-    if (streamBaseUrl && selector) {
-        const config = getStreamConfig(streamBaseUrl.value, selector.value);
+    if (streamBaseUrl) {
+        const config = getStreamConfig(streamBaseUrl.value, streamQuality);
         document.getElementById('stream-url').textContent = config.url;
         document.getElementById('stream-format').textContent = config.format;
         const statusQuality = document.querySelector('[data-text="stream-quality"]');
@@ -96,6 +89,16 @@ window.addEventListener('DOMContentLoaded', function() {
             statusQuality.textContent = config.format;
         }
     }
+}
+
+// Initialize stream quality display on page load
+window.addEventListener('DOMContentLoaded', function() {
+    // Set initial quality display to match the selected stream
+    updateStreamInformation()
+    // Periodicaly updates stream information if on frameset.
+    // This handles changes from the player frame
+    const isFramesetPage = window.parent !== window.self;
+    if (isFramesetPage) setInterval(updateStreamInformation, 1000);
     // Update playing information right after load
     updateNowPlaying();
 
