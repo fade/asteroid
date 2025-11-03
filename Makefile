@@ -6,7 +6,7 @@ ENTRY=-main
 
 .PHONY: $(OUT)
 $(OUT): clean
-	sbcl --load build-executable.lisp
+	sbcl --load build-asteroid.lisp
 
 quicklisp-manifest.txt: *.asd
 	sbcl --non-interactive \

@@ -1,5 +1,15 @@
 ;; -*-lisp-*-
 
+(unless *load-pathname*
+  (error "Please LOAD this file."))
+
+(when (find-package :quicklisp)
+  (error "Please run this file as a script or from the Makefile."))
+
+(defpackage #:asteroid-bootstrap
+  (:use #:cl)
+  (:export #:*root* #:path))
+
 ;; we require quicklisp to load our transitive dependencies.
 (load "~/quicklisp/setup.lisp")
 
