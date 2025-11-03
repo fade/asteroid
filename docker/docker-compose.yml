@@ -3,7 +3,7 @@ services:
     image: infiniteproject/icecast:latest
     container_name: asteroid-icecast
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./icecast.xml:/etc/icecast.xml
     environment:
@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile.liquidsoap
     container_name: asteroid-liquidsoap
     ports:
-      - "1234:1234"
+      - "127.0.0.1:1234:1234"
     depends_on:
       - icecast
     volumes:
