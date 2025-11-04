@@ -105,3 +105,53 @@
       (api-output `(("status" . "error")
                     ("message" . ,(format nil "Error creating user: ~a" e)))
                   :status 500))))
+
+;; API: Change user's own password
+(define-api asteroid/user/change-password (current-password new-password) ()
+  "API endpoint for users to change their own password"
+  (with-error-handling
+    (unless (and current-password new-password)
+      (error 'validation-error :message "Missing required fields"))
+    
+    (unless (>= (length new-password) 8)
+      (error 'validation-error :message "New password must be at least 8 characters"))
+    
+    (let* ((user-id (session-field 'user-id))
+           (username (when user-id
+                      (let ((user (find-user-by-id user-id)))
+                        (when user (gethash "username" user))))))
+      
+      (unless username
+        (error 'authentication-error :message "Not authenticated"))
+      
+      ;; Verify current password
+      (unless (verify-user-credentials username current-password)
+        (error 'authentication-error :message "Current password is incorrect"))
+      
+      ;; Update password
+      (unless (reset-user-password username new-password)
+        (error 'database-error :message "Failed to update password"))
+      
+      (api-output `(("status" . "success")
+                    ("message" . "Password changed successfully"))))))
+
+;; API: Reset user password (admin only)
+(define-api asteroid/admin/reset-password (username new-password) ()
+  "API endpoint for admins to reset any user's password"
+  (require-role :admin)
+  (with-error-handling
+    (unless (and username new-password)
+      (error 'validation-error :message "Missing required fields"))
+    
+    (unless (>= (length new-password) 8)
+      (error 'validation-error :message "New password must be at least 8 characters"))
+    
+    (let ((user (find-user-by-username username)))
+      (unless user
+        (error 'not-found-error :message (format nil "User not found: ~a" username)))
+      
+      (unless (reset-user-password username new-password)
+        (error 'database-error :message "Failed to reset password"))
+      
+      (api-output `(("status" . "success")
+                    ("message" . ,(format nil "Password reset for user: ~a" username)))))))

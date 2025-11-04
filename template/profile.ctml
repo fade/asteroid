@@ -153,6 +153,28 @@
     <!-- Profile Actions -->
     <div class="admin-section">
         <h2>⚙️ Profile Settings</h2>
+        
+        <!-- Change Password Form -->
+        <div class="form-section">
+          <h3>🔒 Change Password</h3>
+          <form id="change-password-form" onsubmit="return changePassword(event)">
+            <div class="form-group">
+              <label for="current-password">Current Password:</label>
+              <input type="password" id="current-password" name="current-password" required minlength="8">
+            </div>
+            <div class="form-group">
+              <label for="new-password">New Password:</label>
+              <input type="password" id="new-password" name="new-password" required minlength="8">
+            </div>
+            <div class="form-group">
+              <label for="confirm-password">Confirm New Password:</label>
+              <input type="password" id="confirm-password" name="confirm-password" required minlength="8">
+            </div>
+            <div id="password-message" class="message"></div>
+            <button type="submit" class="btn btn-primary">Change Password</button>
+          </form>
+        </div>
+        
         <div class="profile-actions">
           <button class="btn btn-primary" onclick="editProfile()">✏️ Edit Profile</button>
           <button class="btn btn-secondary" onclick="exportListeningData()">📊 Export Data</button>

@@ -166,11 +166,82 @@
         <div class="controls">
           <a href="/asteroid/admin/users" class="btn btn-primary">👥 Manage Users</a>
         </div>
+        
+        <!-- Admin Password Reset Form -->
+        <div class="form-section" style="margin-top: 20px;">
+          <h4>🔒 Reset User Password</h4>
+          <form id="admin-reset-password-form" onsubmit="return resetUserPassword(event)">
+            <div class="form-group">
+              <label for="reset-username">Username:</label>
+              <input type="text" id="reset-username" name="username" required>
+            </div>
+            <div class="form-group">
+              <label for="reset-new-password">New Password:</label>
+              <input type="password" id="reset-new-password" name="new-password" required minlength="8">
+            </div>
+            <div class="form-group">
+              <label for="reset-confirm-password">Confirm Password:</label>
+              <input type="password" id="reset-confirm-password" name="confirm-password" required minlength="8">
+            </div>
+            <div id="reset-password-message" class="message"></div>
+            <button type="submit" class="btn btn-primary">Reset Password</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
+    // Admin password reset handler
+    function resetUserPassword(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('reset-username').value;
+      const newPassword = document.getElementById('reset-new-password').value;
+      const confirmPassword = document.getElementById('reset-confirm-password').value;
+      const messageDiv = document.getElementById('reset-password-message');
+      
+      // Client-side validation
+      if (newPassword.length < 8) {
+        messageDiv.textContent = 'New password must be at least 8 characters';
+        messageDiv.className = 'message error';
+        return false;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        messageDiv.textContent = 'Passwords do not match';
+        messageDiv.className = 'message error';
+        return false;
+      }
+      
+      // Send request to API
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('new-password', newPassword);
+      
+      fetch('/api/asteroid/admin/reset-password', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success' || (data.data && data.data.status === 'success')) {
+          messageDiv.textContent = 'Password reset successfully for user: ' + username;
+          messageDiv.className = 'message success';
+          document.getElementById('admin-reset-password-form').reset();
+        } else {
+          messageDiv.textContent = data.message || data.data?.message || 'Failed to reset password';
+          messageDiv.className = 'message error';
+        }
+      })
+      .catch(error => {
+        console.error('Error resetting password:', error);
+        messageDiv.textContent = 'Error resetting password';
+        messageDiv.className = 'message error';
+      });
+      
+      return false;
+    }
   </script>
 </body>
 </html>

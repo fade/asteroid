@@ -296,3 +296,54 @@ function showMessage(message, type = 'info') {
 function showError(message) {
     showMessage(message, 'error');
 }
+
+// Password change handler
+function changePassword(event) {
+    event.preventDefault();
+    
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const messageDiv = document.getElementById('password-message');
+    
+    // Client-side validation
+    if (newPassword.length < 8) {
+        messageDiv.textContent = 'New password must be at least 8 characters';
+        messageDiv.className = 'message error';
+        return false;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        messageDiv.textContent = 'New passwords do not match';
+        messageDiv.className = 'message error';
+        return false;
+    }
+    
+    // Send request to API
+    const formData = new FormData();
+    formData.append('current-password', currentPassword);
+    formData.append('new-password', newPassword);
+    
+    fetch('/api/asteroid/user/change-password', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' || (data.data && data.data.status === 'success')) {
+            messageDiv.textContent = 'Password changed successfully!';
+            messageDiv.className = 'message success';
+            document.getElementById('change-password-form').reset();
+        } else {
+            messageDiv.textContent = data.message || data.data?.message || 'Failed to change password';
+            messageDiv.className = 'message error';
+        }
+    })
+    .catch(error => {
+        console.error('Error changing password:', error);
+        messageDiv.textContent = 'Error changing password';
+        messageDiv.className = 'message error';
+    });
+    
+    return false;
+}

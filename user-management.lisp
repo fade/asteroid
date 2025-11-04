@@ -104,14 +104,46 @@
 (defun reset-user-password (username new-password)
   "Reset a user's password"
   (let ((user (find-user-by-username username)))
-    (when user
-      (let ((new-hash (hash-password new-password))
-            (user-id (gethash "_id" user)))
-        (db:update "USERS"
-                   (db:query (:= "_id" user-id))
-                   `(("password-hash" ,new-hash)))
-        (format t "Password reset for user: ~a~%" username)
-        t))))
+    (if user
+        (handler-case
+            (let ((new-hash (hash-password new-password))
+                  (user-id (gethash "_id" user)))
+              (format t "Resetting password for user: ~a (ID: ~a, type: ~a)~%" username user-id (type-of user-id))
+              (format t "New hash: ~a~%" new-hash)
+              (format t "User hash table keys: ")
+              (maphash (lambda (k v) (format t "~a " k)) user)
+              (format t "~%")
+              (format t "Query: ~a~%" (db:query (:= "_id" user-id)))
+              (format t "Update data: ~a~%" `(("password-hash" ,new-hash)))
+              ;; Try direct update with uppercase field name to match stored case
+              (format t "Attempting direct update with uppercase field name...~%")
+              (db:update "USERS"
+                         (db:query (:= "_id" user-id))
+                         `(("PASSWORD-HASH" ,new-hash)))
+              (format t "Update complete, verifying...~%")
+              ;; Verify the update worked
+              (let ((updated-user (find-user-by-username username)))
+                (format t "Verification - fetching user again...~%")
+                (let ((updated-hash (gethash "PASSWORD-HASH" updated-user)))
+                  (format t "Updated password hash in DB: ~a~%" updated-hash)
+                  (format t "Expected hash: ~a~%" new-hash)
+                  (let ((match (if (listp updated-hash)
+                                  (string= (first updated-hash) new-hash)
+                                  (string= updated-hash new-hash))))
+                    (format t "Match: ~a~%" match)
+                    (if match
+                        (progn
+                          (format t "Password reset successful for user: ~a~%" username)
+                          t)
+                        (progn
+                          (format t "Password reset FAILED - hash didn't update~%")
+                          nil))))))
+          (error (e)
+            (format t "Error resetting password for ~a: ~a~%" username e)
+            nil))
+        (progn
+          (format t "User not found: ~a~%" username)
+          nil))))
 
 (defun user-has-role-p (user role)
   "Check if user has the specified role"

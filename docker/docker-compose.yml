@@ -3,7 +3,7 @@ services:
     image: infiniteproject/icecast:latest
     container_name: asteroid-icecast
     ports:
-      - "127.0.0.1:8000:8000"
+      - "${ICECAST_BIND:-127.0.0.1}:8000:8000"
     volumes:
       - ./icecast.xml:/etc/icecast.xml
     environment:

@@ -77,8 +77,7 @@
     (if (and (stringp host-path) 
              (>= (length host-path) (length library-prefix))
              (string= host-path library-prefix :end1 (length library-prefix)))
-        (concatenate 'string "/app/music/" 
-                    (subseq host-path (length library-prefix)))
+        (format nil "/app/music/~a" (subseq host-path (length library-prefix)))
         host-path)))
 
 (defun generate-m3u-playlist (track-ids output-path)
@@ -183,9 +182,9 @@
   (if (and (stringp docker-path)
            (>= (length docker-path) 11)
            (string= docker-path "/app/music/" :end1 11))
-      (concatenate 'string 
-                   (namestring *music-library-path*)
-                   (subseq docker-path 11))
+      (format nil "~a~a" 
+              (namestring *music-library-path*)
+              (subseq docker-path 11))
       docker-path))
 
 (defun load-queue-from-m3u-file ()
