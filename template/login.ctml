@@ -37,11 +37,6 @@
             <button type="submit" class="btn btn-primary" style="width: 100%;">LOGIN</button>
           </div>
         </form>
-        <div class="panel" style="margin-top: 20px; text-align: center;">
-          <strong style="color: #ff6600;">Default Admin Credentials:</strong><br>
-          Username: <br><code style="color: #00ff00;">admin</code><br>
-          Password: <br><code style="color: #00ff00;">asteroid123</code>
-        </div>
       </div>
     </div>
   </div>
