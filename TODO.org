@@ -21,21 +21,23 @@
 - [X] Start asteroid, check the stream (Underworld:Juanita/Kiteless)
 - [X] Announce that the system is live in #asteroid.radio
 
-** PROBLEMS
-1) Liquidsoap is exposing its management console via telnet on the exterior network interface of b612.asteroid.radio
-2) icecast is also binding the external interface on b612, which it
+** PROBLEMS 0/0
+1) [X] Liquidsoap is exposing its management console via telnet on the exterior network interface of b612.asteroid.radio
+2) [X] icecast is also binding the external interface on b612, which it
    should not be. HAproxy is there to mediate this flow.
-3) We're still on the built in i-lambdalite database
-4) The templates still advertise the default administrator password,
+3) [ ] We're still on the built in i-lambdalite database
+4) [X] The templates still advertise the default administrator password,
    which is no bueno.
-5) We need to work out the TLS situation with letsencrypt, and
+5) [ ] We need to work out the TLS situation with letsencrypt, and
    integrate it into HAproxy.
-6) the administrative interface should be beefed up.
-   5.1) Deactivate users
-   5.2) Change user access permissions
-7) User profile pages should probably be fleshed out.
-8) the stream management features aren't there for Admins or DJs.
-9) The "Scan Library" feature is not working in the main branch
+6) [ ] 0/0 the administrative interface should be beefed up.
+   5.1) [ ] Deactivate users
+   5.2) [ ] Change user access permissions
+7) [ ] User profile pages should probably be fleshed out.
+8) [ ] the stream management features aren't there for Admins or DJs.
+9) [ ] The "Scan Library" feature is not working in the main branch
+10) [ ] The player widget should be styled so it fits the site theme on systems running 'light' thmes.
+11) [ ] ensure each info field 'Listeners: ..' &c has only one instance per page.
 
 * Server runtime configuration [0/1]
 - [ ] parameterize all configuration for runtime loading [0/2]
