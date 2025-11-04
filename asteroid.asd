@@ -34,8 +34,6 @@
   :pathname "./"
   :components ((:file "app-utils")
                (:file "module")
-               (:module :config
-                :components ((:file radiance-postgres)))
                (:file "conditions")
                (:file "database")
                (:file "template-utils")
