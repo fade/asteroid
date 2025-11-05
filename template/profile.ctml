@@ -12,9 +12,9 @@
   <div class="container">
     <h1>👤 USER PROFILE</h1>
     <div class="nav">
-      <a href="/asteroid" target="content-frame">Home</a>
-      <a href="/asteroid/player" target="content-frame">Player</a>
-      <a href="/asteroid/admin" target="content-frame" data-show-if-admin>Admin</a>
+      <a href="/asteroid">Home</a>
+      <a href="/asteroid/player">Player</a>
+      <a href="/asteroid/admin">Admin</a>
       <a href="/asteroid/logout" class="btn-logout">Logout</a>
     </div>
 

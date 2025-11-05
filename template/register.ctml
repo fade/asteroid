@@ -11,9 +11,9 @@
     <header>
         <h1>🎵 ASTEROID RADIO - REGISTER</h1>
         <nav class="nav">
-            <a href="/asteroid/content" target="content-frame">Home</a>
-            <a href="/asteroid/player-content" target="content-frame">Player</a>
-            <a href="/asteroid/status" target="content-frame">Status</a>
+            <a href="/asteroid">Home</a>
+            <a href="/asteroid/player">Player</a>
+            <a href="/asteroid/status">Status</a>
             <a href="/asteroid/login">Login</a>
         </nav>
     </header>
