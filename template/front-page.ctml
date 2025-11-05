@@ -25,24 +25,9 @@
     </header>
 
     <main>
-      <div class="status">
-        <h2>Station Status</h2>
-        <p data-text="status-message">🟢 LIVE - Broadcasting asteroid music for hackers</p>
-        <p>Current listeners: <span data-text="listeners">0</span></p>
-        <p>Stream quality: <span data-text="stream-quality">AAC 96kbps Stereo</span></p>
-      </div>
-      
       <div class="live-stream">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h2 style="color: #00ff00; margin: 0;">🟢 LIVE STREAM</h2>
-          <div style="display: flex; gap: 10px;">
-            <button id="popout-btn" class="btn btn-info" onclick="openPopoutPlayer()" style="font-size: 0.9em;">
-              🗗 Pop Out Player
-            </button>
-            <button id="frameset-btn" class="btn btn-secondary" onclick="enableFramesetMode()" style="font-size: 0.9em;">
-              🖼️ Enable Persistent Player
-            </button>
-          </div>
         </div>
         
         <!-- Stream Quality Selector -->
@@ -57,8 +42,17 @@
         
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <p><strong>Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
-        <p><strong>Format:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
-        <p><strong>Status:</strong> <span id="stream-status" style="color: #00ff00;">● BROADCASTING</span></p>
+        <p><strong>Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
+        <p><strong>BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers on The Station at the End of Time.</span></p>
+
+        <div style="display: flex; gap: 10px; justify-content: end; margin-bottom: 20px;">
+            <button id="popout-btn" class="btn btn-info" onclick="openPopoutPlayer()" style="font-size: 0.9em;">
+                🗗 Pop Out Player
+            </button>
+            <button id="frameset-btn" class="btn btn-secondary" onclick="enableFramesetMode()" style="font-size: 0.9em;">
+                🖼️ Enable Persistent Player
+            </button>
+        </div>
         
         <audio id="live-audio" controls style="width: 100%; margin: 10px 0;">
           <source id="audio-source" lquery="(attr :src default-stream-url :type default-stream-encoding)">

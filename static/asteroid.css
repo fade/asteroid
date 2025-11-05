@@ -16,6 +16,10 @@ body .container{
     margin: 0 auto;
 }
 
+body strong{
+    letter-spacing: 0.08rem;
+}
+
 body h1{
     color: #4488ff;
     text-align: center;
@@ -180,11 +184,17 @@ body .player-section .live-stream{
 
 
 
+body .live-stream p,
+body .live-stream label{
+    font-size: 1.5rem;
+}
 
+body .live-stream code{
+    font-size: 1rem;
+}
 
-body .live-stream .live-stream-quality label,
-body .live-stream .live-stream-quality select{
-    margin: 10px 0;
+body .live-stream .live-stream-quality{
+    display: flex;
 }
 
 body .live-stream .live-stream-quality label{

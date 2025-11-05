@@ -18,6 +18,8 @@
      :max-width "1200px"
      :margin "0 auto")
 
+    (strong :letter-spacing "0.08rem")
+
     (h1
      :color "#4488ff"
      :text-align center
@@ -153,9 +155,13 @@
       :overflow auto) )
 
     (.live-stream
+     ((:or p label) :font-size "1.5rem")
+
+     (code :font-size "1rem")
+
      (.live-stream-quality
 
-      ((:or label select) :margin "10px 0")
+      :display "flex"
 
       (label
        :margin-right "10px")

@@ -35,7 +35,7 @@
           </select>
         </div>
         
-        <audio id="live-stream-audio" controls style="width: 100%; margin: 10px 0;">
+        <audio id="live-stream-audio" controls style="width: 100%; margin-top: 20px;">
           <source id="live-stream-source" lquery="(attr :src default-stream-url)" type="audio/aac">
           Your browser does not support the audio element.
         </audio>

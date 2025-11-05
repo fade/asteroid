@@ -25,20 +25,13 @@
     </header>
 
     <main>
-      <div class="status">
-        <h2>Station Status</h2>
-        <p data-text="status-message">🟢 LIVE - Broadcasting asteroid music for hackers</p>
-        <p>Current listeners: <span data-text="listeners">0</span></p>
-        <p>Stream quality: <span data-text="stream-quality">AAC 96kbps Stereo</span></p>
-      </div>
-      
       <div class="live-stream">
         <h2 style="color: #00ff00;">🟢 LIVE STREAM</h2>
-        <p><em>The live stream player is now in the persistent bar at the bottom of the page.</em></p>
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <p><strong>Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
-        <p><strong>Format:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
-        <p><strong>Status:</strong> <span id="stream-status" style="color: #00ff00;">● BROADCASTING</span></p>
+        <p><strong>Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
+        <p><strong>BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers on The Station at the End of Time.</span></p>
+        <p><em>The live stream player is now in the persistent bar at the bottom of the page.</em></p>
       </div>
       
       <div id="now-playing" class="now-playing"></div>
