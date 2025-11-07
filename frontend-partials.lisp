@@ -1,6 +1,11 @@
-^(in-package :asteroid)
+(in-package :asteroid)
 
 (defun icecast-now-playing (icecast-base-url)
+  "Fetch now-playing information from Icecast server.
+  
+  ICECAST-BASE-URL - Base URL of the Icecast server (e.g. http://localhost:8000)
+  
+  Returns a plist with :listenurl, :title, and :listeners, or NIL on error."
     (let* ((icecast-url (format nil "~a/admin/stats.xml" icecast-base-url))
            (response (drakma:http-request icecast-url
                                          :want-stream nil
@@ -9,29 +14,32 @@
           (let ((xml-string (if (stringp response)
                                 response
                                 (babel:octets-to-string response :encoding :utf-8))))
-            ;; Simple XML parsing to extract source information
-            ;; Look for <source mount="/asteroid.mp3"> sections and extract title, listeners, etc.
-            (multiple-value-bind (match-start match-end)
-                (cl-ppcre:scan "<source mount=\"/asteroid\\.mp3\">" xml-string)
-
-              (if match-start
-                  (let* ((source-section (subseq xml-string match-start
-                                                 (or (cl-ppcre:scan "</source>" xml-string :start match-start)
-                                                     (length xml-string))))
-                         (titlep (cl-ppcre:all-matches "<title>" source-section))
-                         (listenersp (cl-ppcre:all-matches "<listeners>" source-section))
-                         (title (if titlep (cl-ppcre:regex-replace-all ".*<title>(.*?)</title>.*" source-section "\\1") "Unknown"))
-                         (listeners (if listenersp (cl-ppcre:regex-replace-all ".*<listeners>(.*?)</listeners>.*" source-section "\\1") "0")))
-                    `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
-                      (:title . ,title)
-                      (:listeners . ,(parse-integer listeners :junk-allowed t))))
-                  `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
-                    (:title . "Unknown")
-                    (:listeners . "Unknown"))))))))
+            ;; Extract total listener count from root <listeners> tag (sums all mount points)
+            ;; Extract title from asteroid.mp3 mount point
+            (let* ((total-listeners (multiple-value-bind (match groups)
+                                        (cl-ppcre:scan-to-strings "<listeners>(\\d+)</listeners>" xml-string)
+                                      (if (and match groups)
+                                          (parse-integer (aref groups 0) :junk-allowed t)
+                                          0)))
+                   ;; Get title from asteroid.mp3 mount point
+                   (mount-start (cl-ppcre:scan "<source mount=\"/asteroid\\.mp3\">" xml-string))
+                   (title (if mount-start
+                             (let* ((source-section (subseq xml-string mount-start
+                                                           (or (cl-ppcre:scan "</source>" xml-string :start mount-start)
+                                                               (length xml-string)))))
+                               (multiple-value-bind (match groups)
+                                   (cl-ppcre:scan-to-strings "<title>(.*?)</title>" source-section)
+                                 (if (and match groups)
+                                     (aref groups 0)
+                                     "Unknown")))
+                             "Unknown")))
+              `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
+                (:title . ,title)
+                (:listeners . ,total-listeners)))))))
 
 (define-api asteroid/partial/now-playing () ()
   "Get Partial HTML with live status from Icecast server"
-  (handler-case
+  (with-error-handling
     (let ((now-playing-stats (icecast-now-playing *stream-base-url*)))
       (if now-playing-stats
           (progn
