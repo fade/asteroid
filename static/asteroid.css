@@ -270,6 +270,34 @@ body .audio-player{
     text-align: center;
 }
 
+body audio::-webkit-media-controls-panel{
+    background-color: #1a1a1a;
+}
+
+body audio::-webkit-media-controls-current-time-display,
+body audio::-webkit-media-controls-time-remaining-display{
+    color: #fff;
+}
+
+body audio::-webkit-media-controls-enclosure{
+    border-radius: 0;
+}
+
+body audio::-webkit-media-controls-mute-button,
+body audio::-webkit-media-controls-play-button,
+body audio::-webkit-media-controls-volume-slider,
+body audio::-webkit-media-controls-timeline,
+body audio::-webkit-media-controls-toggle-closed-captions-button,
+body audio::-webkit-media-controls-fullscreen-button,
+body audio::-webkit-media-controls-timeline,
+body audio::-webkit-media-controls-overlay-enclosure{
+    -moz-filter: invert(1);
+    -o-filter: invert(1);
+    -webkit-filter: invert(1);
+    -ms-filter: invert(1);
+    filter: invert(1);
+}
+
 body .track-art{
     font-size: 3em;
     margin-right: 20px;

@@ -218,6 +218,34 @@
     (.audio-player
      :text-align center)
 
+    ((:and audio |::-webkit-media-controls-panel|)
+     :background-color "#1a1a1a")
+
+    ;; ((:and audio (:or |::-webkit-media-controls-mute-button|
+    ;;                   |::-webkit-media-controls-play-button|
+    ;;                   |::-webkit-media-controls-current-time-display|
+    ;;                   |::-webkit-media-controls-time-remaining-display|
+    ;;                   ))
+    ;;  :height "20px"
+    ;;  :line-height "20px")
+
+    ((:and audio (:or |::-webkit-media-controls-current-time-display|
+                      |::-webkit-media-controls-time-remaining-display|))
+     :color "#fff")
+
+    ((:and audio |::-webkit-media-controls-enclosure|)
+     :border-radius 0)
+
+    ((:and audio (:or |::-webkit-media-controls-mute-button|
+                      |::-webkit-media-controls-play-button|
+                      |::-webkit-media-controls-volume-slider|
+                      |::-webkit-media-controls-timeline|
+                      |::-webkit-media-controls-toggle-closed-captions-button|
+                      |::-webkit-media-controls-fullscreen-button|
+                      |::-webkit-media-controls-timeline|
+                      |::-webkit-media-controls-overlay-enclosure|))
+     :filter "invert(1)")
+
     (.track-art
      :font-size "3em"
      :margin-right "20px"
