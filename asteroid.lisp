@@ -719,7 +719,9 @@
         (cond
           ;; Validate passwords match
           ((not (string= password confirm-password))
-           (render-template-with-plist "register"
+           (format t "Failed to register new user '~a': passwords do not match.~%" username)
+           (clip:process-to-string
+            (load-template "register")
             :title "Asteroid Radio - Register"
             :display-error "display: block;"
             :display-success "display: none;"
@@ -728,7 +730,9 @@
           
           ;; Check if username already exists
           ((find-user-by-username username)
-           (render-template-with-plist "register"
+           (format t "Failed to register new user '~a': Username already exists.~%" username)
+           (clip:process-to-string
+            (load-template "register")
             :title "Asteroid Radio - Register"
             :display-error "display: block;"
             :display-success "display: none;"
@@ -746,14 +750,16 @@
                        (setf (session:field "user-id") (if (listp user-id) (first user-id) user-id)))))
                  ;; Redirect new users to their profile page
                  (radiance:redirect "/asteroid/profile"))
-               (render-template-with-plist "register"
+               (clip:process-to-string
+                (load-template "register")
                 :title "Asteroid Radio - Register"
                 :display-error "display: block;"
                 :display-success "display: none;"
                 :error-message "Registration failed. Please try again."
                 :success-message ""))))
         ;; Show registration form (no POST data)
-        (render-template-with-plist "register"
+        (clip:process-to-string
+         (load-template "register")
          :title "Asteroid Radio - Register"
          :display-error "display: none;"
          :display-success "display: none;"

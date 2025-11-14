@@ -21,11 +21,11 @@
     <div class="auth-container">
       <div class="auth-form">
         <h2>Create Account</h2>
-        <div class="message error" data-attr="style" data-attr-value="display-error" style="display: none;">
-          <span data-text="error-message">Registration failed</span>
+        <div class="message error" lquery="(attr :style display-error)" style="display: none;">
+          <span lquery="(text error-message)">Registration failed</span>
         </div>
-        <div class="message success" data-attr="style" data-attr-value="display-success" style="display: none;">
-          <span data-text="success-message">Registration successful!</span>
+        <div class="message success" lquery="(attr :style display-success)" style="display: none;">
+          <span lquery="(text success-message)">Registration successful!</span>
         </div>
         <form method="post" action="/asteroid/register">
           <div class="form-group">
