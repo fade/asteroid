@@ -33,12 +33,16 @@
                     (format t "Session error: ~a~%" e)
                     "Login successful but session error occurred")))
               ;; Login failed - show form with error
-              (render-template-with-plist "login"
-               :title "Asteroid Radio - Login"
-               :error-message "Invalid username or password"
-               :display-error "display: block;")))
+              (progn
+                (format t "Login unsuccessful for user: ~a~%" username)
+                (clip:process-to-string
+                 (load-template "login")
+                 :title "Asteroid Radio - Login"
+                 :error-message "Invalid username or password"
+                 :display-error "display: block;"))))
         ;; Show login form (no POST data)
-        (render-template-with-plist "login"
+        (clip:process-to-string
+         (load-template "login")
          :title "Asteroid Radio - Login"
          :error-message ""
          :display-error "display: none;"))))

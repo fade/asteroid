@@ -21,8 +21,8 @@
     <div class="auth-container">
       <div class="auth-form">
         <h2>System Access</h2>
-        <div class="message error" data-attr="style" data-attr-value="display-error" style="display: none;">
-          <span data-text="error-message">Invalid username or password</span>
+        <div class="message error" lquery="(attr :style display-error)" style="display: none;">
+          <span data-text="error-message" lquery="(text error-message)">Invalid username or password</span>
         </div>
         <form method="post" action="/asteroid/login">
           <div class="form-group">
