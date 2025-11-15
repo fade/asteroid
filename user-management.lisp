@@ -9,18 +9,19 @@
 ;; User management functions
 (defun create-user (username email password &key (role :listener) (active t))
   "Create a new user account"
-  (let* ((password-hash (hash-password password))
-         (user-data `(("username" ,username)
-                      ("email" ,email)
-                      ("password-hash" ,password-hash)
-                      ("role" ,(string-downcase (symbol-name role)))
-                      ("active" ,(if active 1 0))
-                      ("created-date" ,(local-time:timestamp-to-unix (local-time:now)))
-                      ("last-login" nil))))
+  (let ((user (dm:hull "USERS"))
+        (password-hash (hash-password password)))
+    (setf (dm:field user "username") username
+          (dm:field user "email") email
+          (dm:field user "password-hash") password-hash
+          (dm:field user "role") (string-downcase (symbol-name role))
+          (dm:field user "active") (if active 1 0)
+          (dm:field user "created-date") (local-time:timestamp-to-unix (local-time:now))
+          (dm:field user "last-login") nil)
     (handler-case
         (db:with-transaction ()
-          (format t "Inserting user data: ~a~%" user-data)
-          (let ((result (db:insert "USERS" user-data)))
+          (format t "Inserting user data: ~a~%" user)
+          (let ((result (dm:insert user)))
             (format t "Insert result: ~a~%" result)
             (format t "User created: ~a (~a)~%" username role)
             t))
@@ -31,38 +32,21 @@
 (defun find-user-by-username (username)
   "Find a user by username"
   (format t "Searching for user: ~a~%" username)
-  (format t "Available collections: ~a~%" (db:collections))
-  (format t "Trying to select from USERS collection...~%")
-  (let ((all-users-test (db:select "USERS" (db:query :all))))
-    (format t "Total users in USERS collection: ~a~%" (length all-users-test))
-    (dolist (user all-users-test)
-      (format t "User data: ~a~%" user)
-      (format t "Username field: ~a~%" (gethash "username" user))))
-  (let ((all-users (db:select "USERS" (db:query :all)))
-        (users nil))
-    (dolist (user all-users)
-      (format t "Comparing ~a with ~a~%" (gethash "username" user) username)
-      (let ((stored-username (gethash "username" user)))
-        (when (equal (if (listp stored-username) (first stored-username) stored-username) username)
-          (push user users))))
-    (format t "Query returned ~a users~%" (length users))
-    (when users 
-      (format t "First user: ~a~%" (first users))
-      (first users))))
+  (let ((user (dm:get-one "USERS" (db:query (:= 'username username)))))
+    (when user
+      (format t "Found user '~a' with id #~a~%" username (dm:id user))
+      user)))
 
 (defun find-user-by-id (user-id)
   "Find a user by ID"
   (format t "Looking for user with ID: ~a (type: ~a)~%" user-id (type-of user-id))
-  ;; Handle both integer and BIT types by iterating through all users
-  (let ((all-users (db:select "USERS" (db:query :all)))
-        (target-id (if (numberp user-id) user-id (parse-integer (format nil "~a" user-id)))))
-    (format t "Searching through ~a users for ID ~a~%" (length all-users) target-id)
-    (dolist (user all-users)
-      (let ((db-id (gethash "_id" user)))
-        (format t "Checking user with _id: ~a (type: ~a)~%" db-id (type-of db-id))
-        (when (equal db-id target-id)
-          (format t "Found matching user!~%")
-          (return user))))))
+  (let ((user (dm:get-one "USERS" (db:query (:= '_id user-id)))))
+    (when user
+      (format t "Found user '~a' with id #~a~%"
+              (dm:field user "username")
+              (dm:id user))
+      user)))
+
 
 (defun authenticate-user (username password)
   "Authenticate a user with username and password"
@@ -70,22 +54,22 @@
   (let ((user (find-user-by-username username)))
     (format t "User found: ~a~%" (if user "YES" "NO"))
     (when user
-      (handler-case
-          (progn
-            (format t "User active: ~a~%" (gethash "active" user))
-            (format t "Password hash from DB: ~a~%" (gethash "password-hash" user))
-            (format t "Password verification: ~a~%" 
-                    (verify-password password (first (gethash "password-hash" user)))))
-        (error (e)
-          (format t "Error during user data access: ~a~%" e))))
-    (when (and user
-               (= (first (gethash "active" user)) 1)
-               (verify-password password (first (gethash "password-hash" user))))
-      ;; Update last login
-      (db:update "USERS" 
-                 (db:query (:= "_id" (gethash "_id" user)))
-                 `(("last-login" ,(local-time:timestamp-to-unix (local-time:now)))))
-      user)))
+      (let ((user-active (dm:field user "active"))
+            (user-password (dm:field user "password-hash")))
+        (handler-case
+            (progn
+              (format t "User active: ~a~%" user-active)
+              (format t "Password hash from DB: ~a~%" user-password)
+              (format t "Password verification: ~a~%"
+                      (verify-password password user-password)))
+          (error (e)
+            (format t "Error during user data access: ~a~%" e)))
+        (when (and (= 1 user-active)
+                   (verify-password password user-password))
+          ;; Update last login
+          (setf (dm:field user "last-login") (local-time:timestamp-to-unix (local-time:now)))
+          (dm:save user)
+          user)))))
 
 (defun hash-password (password)
   "Hash a password using ironclad"
@@ -107,30 +91,21 @@
     (if user
         (handler-case
             (let ((new-hash (hash-password new-password))
-                  (user-id (gethash "_id" user)))
+                  (user-id (dm:id user)))
               (format t "Resetting password for user: ~a (ID: ~a, type: ~a)~%" username user-id (type-of user-id))
+              (format t "Old hash: ~a~%" (dm:field user "password-hash"))
               (format t "New hash: ~a~%" new-hash)
-              (format t "User hash table keys: ")
-              (maphash (lambda (k v) (format t "~a " k)) user)
-              (format t "~%")
-              (format t "Query: ~a~%" (db:query (:= "_id" user-id)))
-              (format t "Update data: ~a~%" `(("password-hash" ,new-hash)))
               ;; Try direct update with uppercase field name to match stored case
-              (format t "Attempting direct update with uppercase field name...~%")
-              (db:update "USERS"
-                         (db:query (:= "_id" user-id))
-                         `(("PASSWORD-HASH" ,new-hash)))
-              (format t "Update complete, verifying...~%")
+              (setf (dm:field user "password-hash") new-hash)
+              (dm:save user)
               ;; Verify the update worked
               (let ((updated-user (find-user-by-username username)))
                 (format t "Verification - fetching user again...~%")
-                (let ((updated-hash (gethash "PASSWORD-HASH" updated-user)))
+                (let ((updated-hash (dm:field updated-user "password-hash")))
                   (format t "Updated password hash in DB: ~a~%" updated-hash)
                   (format t "Expected hash: ~a~%" new-hash)
-                  (let ((match (if (listp updated-hash)
-                                  (string= (first updated-hash) new-hash)
-                                  (string= updated-hash new-hash))))
-                    (format t "Match: ~a~%" match)
+                  (let ((match (string= updated-hash new-hash)))
+                    (format t "Password update match: ~a~%" match)
                     (if match
                         (progn
                           (format t "Password reset successful for user: ~a~%" username)
@@ -148,9 +123,8 @@
 (defun user-has-role-p (user role)
   "Check if user has the specified role"
   (when user
-    (let* ((role-field (gethash "role" user))
-           (role-string (if (listp role-field) (first role-field) role-field))
-           (user-role (intern (string-upcase role-string) :keyword)))
+    (let* ((role-value (dm:field user "role"))
+           (user-role (intern (string-upcase role-value) :keyword)))
       (format t "User role: ~a, checking against: ~a~%" user-role role)
       (or (eq user-role role)
           (and (eq role :listener) (member user-role '(:dj :admin)))
@@ -225,12 +199,13 @@
 (defun update-user-role (user-id new-role)
   "Update a user's role"
   (handler-case
-      (progn
-        (db:update "USERS"
-                   (db:query (:= "_id" user-id))
-                   `(("role" ,(string-downcase (symbol-name new-role)))))
-        (format t "Updated user ~a role to ~a~%" user-id new-role)
-        t)
+      (let ((user (find-user-by-id user-id)))
+        (if user
+            (progn
+              (setf (dm:field user "role") (string-downcase (symbol-name new-role)))
+              (dm:save user)
+              t)
+            (format t "Could not find user with id #~a~%" user-id)))
     (error (e)
       (format t "Error updating user role: ~a~%" e)
       nil)))
@@ -238,10 +213,9 @@
 (defun deactivate-user (user-id)
   "Deactivate a user account"
   (handler-case
-      (progn
-        (db:update "USERS"
-                   (db:query (:= "_id" user-id))
-                   `(("active" 0)))
+      (let ((user (find-user-by-id user-id)))
+        (setf (dm:field user "active") 0)
+        (dm:save user)
         (format t "Deactivated user ~a~%" user-id)
         t)
     (error (e)
@@ -251,10 +225,9 @@
 (defun activate-user (user-id)
   "Activate a user account"
   (handler-case
-      (progn
-        (db:update "USERS"
-                   (db:query (:= "_id" user-id))
-                   `(("active" 1)))
+      (let ((user (find-user-by-id user-id)))
+        (setf (dm:field user "active") 1)
+        (dm:save user)
         (format t "Activated user ~a~%" user-id)
         t)
     (error (e)
@@ -264,34 +237,34 @@
 (defun get-all-users ()
   "Get all users from database"
   (format t "Getting all users from database...~%")
-  (let ((users (db:select "USERS" (db:query :all))))
+  (let ((users (dm:get "USERS" (db:query :all))))
     (format t "Total users in database: ~a~%" (length users))
     (dolist (user users)
-      (format t "User: ~a~%" user)
-      (format t "User _id field: ~a (type: ~a)~%" (gethash "_id" user) (type-of (gethash "_id" user))))
+      (format t "User: ~a~%" (dm:field user "username"))
+      (format t "User _id field: ~a (type: ~a)~%" (dm:id user) (type-of (dm:id user))))
     users))
 
 (defun get-user-stats ()
   "Get user statistics"
   (let ((all-users (get-all-users)))
     `(("total-users" . ,(length all-users))
-      ("active-users" . ,(count-if (lambda (user) (gethash "active" user)) all-users))
+      ("active-users" . ,(count-if (lambda (user) (= 1 (dm:field user "active"))) all-users))
       ("listeners" . ,(count-if (lambda (user) 
-                                  (let ((role (gethash "role" user)))
-                                    (string= (if (listp role) (first role) role) "listener"))) all-users))
+                                  (let ((role (dm:field user "role")))
+                                    (string= role "listener"))) all-users))
       ("djs" . ,(count-if (lambda (user) 
-                            (let ((role (gethash "role" user)))
-                              (string= (if (listp role) (first role) role) "dj"))) all-users))
+                            (let ((role (dm:field user "role")))
+                              (string= role "dj"))) all-users))
       ("admins" . ,(count-if (lambda (user) 
-                               (let ((role (gethash "role" user)))
-                                 (string= (if (listp role) (first role) role) "admin"))) all-users)))))
+                               (let ((role (dm:field user "role")))
+                                 (string= role "admin"))) all-users)))))
 
 (defun create-default-admin ()
   "Create default admin user if no admin exists"
   (let ((existing-admins (remove-if-not 
                           (lambda (user) 
-                            (let ((role (gethash "role" user)))
-                              (string= (if (listp role) (first role) role) "admin")))
+                            (let ((role (dm:field user "role")))
+                              (string= role "admin")))
                           (get-all-users))))
     (unless existing-admins
       (format t "~%Creating default admin user...~%")
