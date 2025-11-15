@@ -66,8 +66,7 @@
   (require-authentication)
   (with-error-handling
     (let* ((user (get-current-user))
-           (user-id-raw (gethash "_id" user))
-           (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw))
+           (user-id (dm:id user))
            (playlists (get-user-playlists user-id)))
       (api-output `(("status" . "success")
                     ("playlists" . ,(mapcar (lambda (playlist)
@@ -98,8 +97,7 @@
   (require-authentication)
   (with-error-handling
     (let* ((user (get-current-user))
-           (user-id-raw (gethash "_id" user))
-           (user-id (if (listp user-id-raw) (first user-id-raw) user-id-raw)))
+           (user-id (dm:id user)))
       (create-playlist user-id name description)
       (if (string= "true" (post/get "browser"))
           (redirect "/asteroid/")
@@ -666,8 +664,7 @@
       (api-output `(("loggedIn" . ,(if user t nil))
                     ("isAdmin" . ,(if (and user (user-has-role-p user :admin)) t nil))
                     ("username" . ,(if user 
-                                      (let ((username (gethash "username" user)))
-                                        (if (listp username) (first username) username))
+                                       (dm:field user "username")
                                       nil)))))))
 
 ;; User profile API endpoints
@@ -679,11 +676,11 @@
            (user (find-user-by-id user-id)))
       (if user
           (api-output `(("status" . "success")
-                        ("user" . (("username" . ,(first (gethash "username" user)))
-                                   ("email" . ,(first (gethash "email" user)))
-                                   ("role" . ,(first (gethash "role" user)))
-                                   ("created_at" . ,(first (gethash "created-date" user)))
-                                   ("last_active" . ,(first (gethash "last-login" user)))))))
+                        ("user" . (("username" . ,(dm:field user "username"))
+                                   ("email" . ,(dm:field user "email"))
+                                   ("role" . ,(dm:field user "role"))
+                                   ("created_at" . ,(dm:field user "created-at"))
+                                   ("last_active" . ,(dm:field user "last-active"))))))
           (signal-not-found "user" user-id)))))
 
 (define-api asteroid/user/listening-stats () ()
@@ -746,8 +743,8 @@
                  ;; Auto-login after successful registration
                  (let ((user (find-user-by-username username)))
                    (when user
-                     (let ((user-id (gethash "_id" user)))
-                       (setf (session:field "user-id") (if (listp user-id) (first user-id) user-id)))))
+                     (let ((user-id (dm:id user)))
+                       (setf (session:field "user-id") user-id))))
                  ;; Redirect new users to their profile page
                  (radiance:redirect "/asteroid/profile"))
                (clip:process-to-string

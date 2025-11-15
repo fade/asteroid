@@ -14,12 +14,11 @@
           (if user
               (progn
                 ;; Login successful - store user ID in session
-                (format t "Login successful for user: ~a~%" (gethash "username" user))
+                (format t "Login successful for user: ~a~%" (dm:field user "username"))
                 (handler-case
                     (progn
-                      (let* ((user-id (gethash "_id" user))
-                             (user-role-raw (gethash "role" user))
-                             (user-role (if (listp user-role-raw) (first user-role-raw) user-role-raw))
+                      (let* ((user-id (dm:id user))
+                             (user-role (dm:field user "role"))
                              (redirect-path (cond
                                               ;; Admin users go to admin dashboard
                                               ((string-equal user-role "admin") "/admin")
@@ -27,7 +26,8 @@
                                               (t "/profile"))))
                         (format t "User ID from DB: ~a~%" user-id)
                         (format t "User role: ~a, redirecting to: ~a~%" user-role redirect-path)
-                        (setf (session:field "user-id") (if (listp user-id) (first user-id) user-id))
+                        (setf (session:field "user-id") user-id)
+                        (format t "User ID #~a persisted in session.~%" (session:field "user-id"))
                         (radiance:redirect redirect-path)))
                   (error (e)
                     (format t "Session error: ~a~%" e)
@@ -61,15 +61,13 @@
       (let ((users (get-all-users)))
         (api-output `(("status" . "success")
                       ("users" . ,(mapcar (lambda (user)
-                                            `(("id" . ,(if (listp (gethash "_id" user)) 
-                                                          (first (gethash "_id" user)) 
-                                                          (gethash "_id" user)))
-                                              ("username" . ,(first (gethash "username" user)))
-                                              ("email" . ,(first (gethash "email" user)))
-                                              ("role" . ,(first (gethash "role" user)))
-                                              ("active" . ,(= (first (gethash "active" user)) 1))
-                                              ("created-date" . ,(first (gethash "created-date" user)))
-                                              ("last-login" . ,(first (gethash "last-login" user)))))
+                                            `(("id" . ,(dm:id user))
+                                              ("username" . ,(dm:field user "username"))
+                                              ("email" . ,(dm:field user "email"))
+                                              ("role" . ,(dm:field user "role"))
+                                              ("active" . ,(= (dm:field user "active") 1))
+                                              ("created-date" . ,(dm:field user "created-date"))
+                                              ("last-login" . ,(dm:field user "last-login"))))
                                           users)))))
     (error (e)
       (api-output `(("status" . "error")
@@ -120,10 +118,10 @@
     (unless (>= (length new-password) 8)
       (error 'validation-error :message "New password must be at least 8 characters"))
     
-    (let* ((user-id (session-field 'user-id))
+    (let* ((user-id (session:field "user-id"))
            (username (when user-id
                       (let ((user (find-user-by-id user-id)))
-                        (when user (gethash "username" user))))))
+                        (when user (dm:field user "username"))))))
       
       (unless username
         (error 'authentication-error :message "Not authenticated"))
