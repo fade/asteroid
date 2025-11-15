@@ -1012,8 +1012,11 @@
 
 (defun ensure-radiance-environment ()
   "Ensure RADIANCE environment is properly configured for persistence"
-  (unless (radiance:environment)
-    (setf (radiance:environment) "asteroid"))
+  (if (radiance:environment)
+      (format t "~2&Looks like default environment: ~A~2%" (radiance:environment))
+      (progn
+        (setf (radiance:environment) "asteroid")
+        (format t "~2&Set environment to: ~A~2%" (radiance:environment))))
 
   (log:info "~2&~15A - ~A~%~15A - ~A~%~15A - ~A~%~15A - ~A~%~15A - ~A~2%"
             ":configuration"
@@ -1049,4 +1052,3 @@
   ;; For now, use the "Scan Library" button in the admin interface
   
   (run-server))
-
