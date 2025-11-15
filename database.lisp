@@ -47,3 +47,8 @@
   
   (format t "~2&Database collections initialized~%"))
 
+(defun data-model-as-alist (model)
+  "Converts a radiance data-model instance into a alist"
+  (unless (dm:hull-p model)
+    (loop for field in (dm:fields model)
+          collect (cons field (dm:field model field)))))
