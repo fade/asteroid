@@ -14,7 +14,7 @@
     <div class="nav">
       <a href="/asteroid">Home</a>
       <a href="/asteroid/profile">Profile</a>
-      <a href="/asteroid/admin">Admin</a>
+      <a href="/asteroid/admin" data-show-if-admin>Admin</a>
       <a href="/asteroid/login" data-show-if-logged-out>Login</a>
       <a href="/asteroid/register" data-show-if-logged-out>Register</a>
       <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
