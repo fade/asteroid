@@ -68,7 +68,8 @@
                    (verify-password password user-password))
           ;; Update last login
           (setf (dm:field user "last-login") (local-time:timestamp-to-unix (local-time:now)))
-          (dm:save user)
+          ;; (dm:save user)
+          (data-model-save user)
           user)))))
 
 (defun hash-password (password)
@@ -97,7 +98,8 @@
               (format t "New hash: ~a~%" new-hash)
               ;; Try direct update with uppercase field name to match stored case
               (setf (dm:field user "password-hash") new-hash)
-              (dm:save user)
+              ;; (dm:save user)
+              (data-model-save user)
               ;; Verify the update worked
               (let ((updated-user (find-user-by-username username)))
                 (format t "Verification - fetching user again...~%")
@@ -203,7 +205,8 @@
         (if user
             (progn
               (setf (dm:field user "role") (string-downcase (symbol-name new-role)))
-              (dm:save user)
+              ;; (dm:save user)
+              (data-model-save user)
               t)
             (format t "Could not find user with id #~a~%" user-id)))
     (error (e)
@@ -215,7 +218,8 @@
   (handler-case
       (let ((user (find-user-by-id user-id)))
         (setf (dm:field user "active") 0)
-        (dm:save user)
+        ;; (dm:save user)
+        (data-model-save user)
         (format t "Deactivated user ~a~%" user-id)
         t)
     (error (e)
@@ -227,7 +231,8 @@
   (handler-case
       (let ((user (find-user-by-id user-id)))
         (setf (dm:field user "active") 1)
-        (dm:save user)
+        ;; (dm:save user)
+        (data-model-save user)
         (format t "Activated user ~a~%" user-id)
         t)
     (error (e)
