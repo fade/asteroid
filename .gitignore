@@ -28,6 +28,16 @@ docker/music/*.m4a
 docker/music/*.aac
 docker/music/*.wma
 
+music/library
+# music/library/*/*.mp3
+# music/library/*/*.flac
+# music/library/*/*.ogg
+# music/library/*/*.wav
+# music/library/*/*.m4a
+# music/library/*/*.aac
+# music/library/*/*.wma
+
+
 # Docker build artifacts
 docker/.env
 docker/.dockerignore
