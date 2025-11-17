@@ -73,7 +73,6 @@
   (let ((query (format nil "~a ~a" artist song)))
     (format nil "https://musicbrainz.org/search?query=~a&type=recording"
             (drakma:url-encode query :utf-8))))
-
 ;; API Routes using Radiance's define-api
 ;; API endpoints are accessed at /api/<name> automatically
 ;; They use lambda-lists for parameters and api-output for responses
