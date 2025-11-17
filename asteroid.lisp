@@ -17,7 +17,10 @@
 (defparameter *server-port* 8080)
 (defparameter *music-library-path* 
   (or (uiop:getenv "MUSIC_LIBRARY_PATH")
-      "/app/music/"))
+      ;; Default to /app/music/ for production Docker, but check if music/library/ exists for local dev
+      (if (probe-file (merge-pathnames "music/library/" (asdf:system-source-directory :asteroid)))
+          (merge-pathnames "music/library/" (asdf:system-source-directory :asteroid))
+          "/app/music/")))
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 (defparameter *stream-base-url* "http://localhost:8000")
 
