@@ -16,8 +16,8 @@
 ;; configuration logic. Probably using 'ubiquity
 (defparameter *server-port* 8080)
 (defparameter *music-library-path* 
-  (merge-pathnames "music/library/" 
-                   (asdf:system-source-directory :asteroid)))
+  (or (uiop:getenv "MUSIC_LIBRARY_PATH")
+      "/app/music/"))
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 (defparameter *stream-base-url* "http://localhost:8000")
 
