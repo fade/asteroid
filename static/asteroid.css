@@ -185,7 +185,7 @@ body .recently-played-panel .recently-played-list.track-list{
 }
 
 body .recently-played-panel .recently-played-list.track-item{
-    padding: 12px;
+    padding: 6px 12px;
     border-bottom: 1px solid #2a3441;
     -moz-transition: background-color 0.2s;
     -o-transition: background-color 0.2s;
@@ -199,58 +199,71 @@ body .recently-played-panel .recently-played-list.track-item LAST-CHILD{
 }
 
 body .recently-played-panel .recently-played-list.track-item HOVER{
-    background-color: #252525;
+    background-color: #2a3441;
 }
 
 body .recently-played-panel .recently-played-list.track-info{
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 2px 20px;
+    align-items: center;
 }
 
 body .recently-played-panel .recently-played-list.track-title{
-    color: #fff;
+    color: #4488ff;
     font-weight: 500;
     font-size: 1em;
+    grid-column: 1;
+    grid-row: 1;
 }
 
 body .recently-played-panel .recently-played-list.track-artist{
-    color: #aaa;
+    color: #4488ff;
     font-size: 0.9em;
-}
-
-body .recently-played-panel .recently-played-list.track-meta{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 4px;
+    grid-column: 1;
+    grid-row: 2;
 }
 
 body .recently-played-panel .recently-played-list.track-time{
-    color: #666;
+    color: #888;
     font-size: 0.85em;
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
 }
 
-body .recently-played-panel .recently-played-list.allmusic-link{
+body .recently-played-panel .recently-played-list.track-meta{
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+}
+
+
+
+body .recently-played-list .allmusic-link{
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: #00ff00;
+    color: #4488ff;
     text-decoration: none;
     font-size: 0.85em;
-    -moz-transition: color 0.2s;
-    -o-transition: color 0.2s;
-    -webkit-transition: color 0.2s;
-    -ms-transition: color 0.2s;
-    transition: color 0.2s;
+    letter-spacing: 0.08rem;
+    -moz-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    -webkit-transition: all 0.2s;
+    -ms-transition: all 0.2s;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-body .recently-played-panel .recently-played-list.allmusic-link HOVER{
-    color: #00cc00;
+body .recently-played-list .allmusic-link HOVER{
+    color: #00ff00;
     text-decoration: underline;
+    text-underline-offset: 5px;
 }
 
-body .recently-played-panel .recently-played-list.allmusic-link svg{
+body .recently-played-list .allmusic-link svg{
     width: 14px;
     height: 14px;
 }

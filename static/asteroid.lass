@@ -156,52 +156,64 @@
       :overflow-y visible)
      
      ((:and .recently-played-list .track-item)
-      :padding "12px"
+      :padding "6px 12px"
       :border-bottom "1px solid #2a3441"
       :transition "background-color 0.2s"
       
       ((:and :last-child) :border-bottom none)
-      ((:and :hover) :background-color "#252525"))
+      ((:and :hover) :background-color "#2a3441"))
      
      ((:and .recently-played-list .track-info)
-      :display flex
-      :flex-direction column
-      :gap "4px")
+      :display grid
+      :grid-template-columns "1fr auto"
+      :grid-template-rows "auto auto"
+      :gap "2px 20px"
+      :align-items center)
      
      ((:and .recently-played-list .track-title)
-      :color "#fff"
+      :color "#4488ff"
       :font-weight 500
-      :font-size "1em")
+      :font-size "1em"
+      :grid-column 1
+      :grid-row 1)
      
      ((:and .recently-played-list .track-artist)
-      :color "#aaa"
-      :font-size "0.9em")
-     
-     ((:and .recently-played-list .track-meta)
-      :display flex
-      :align-items center
-      :gap "12px"
-      :margin-top "4px")
+      :color "#4488ff"
+      :font-size "0.9em"
+      :grid-column 1
+      :grid-row 2)
      
      ((:and .recently-played-list .track-time)
-      :color "#666"
-      :font-size "0.85em")
-     
-     ((:and .recently-played-list .allmusic-link)
-      :display inline-flex
-      :align-items center
-      :gap "4px"
-      :color "#00ff00"
-      :text-decoration none
+      :color "#888"
       :font-size "0.85em"
-      :transition "color 0.2s"
-      
-      ((:and :hover)
-       :color "#00cc00"
-       :text-decoration underline)
-      
-      (svg :width "14px"
-           :height "14px")))
+      :grid-column 2
+      :grid-row 1
+      :text-align right)
+     
+     ((:and .recently-played-list .track-meta)
+      :grid-column 2
+      :grid-row 2
+      :text-align right))
+     
+     (.recently-played-list
+      (.allmusic-link
+       :display inline-flex
+       :align-items center
+       :gap "4px"
+       :color "#4488ff"
+       :text-decoration none
+       :font-size "0.85em"
+       :letter-spacing "0.08rem"
+       :transition "all 0.2s"
+       :white-space nowrap
+       
+       ((:and :hover)
+        :color "#00ff00"
+        :text-decoration underline
+        :text-underline-offset "5px")
+       
+       (svg :width "14px"
+            :height "14px")))
 
     (.back
      :color "#00ffff"

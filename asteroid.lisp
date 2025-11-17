@@ -69,9 +69,9 @@
 
 (defun generate-music-search-url (artist song)
   "Generate MusicBrainz search URL for artist and song"
-  ;; MusicBrainz uses 'artist:' and 'recording:' prefixes for better search
-  (let ((query (format nil "artist:\"~a\" recording:\"~a\"" artist song)))
-    (format nil "https://musicbrainz.org/search?query=~a&type=recording&method=indexed"
+  ;; Simple search without field prefixes works better with URL encoding
+  (let ((query (format nil "~a ~a" artist song)))
+    (format nil "https://musicbrainz.org/search?query=~a&type=recording"
             (drakma:url-encode query :utf-8))))
 
 ;; API Routes using Radiance's define-api

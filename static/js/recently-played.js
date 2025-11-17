@@ -21,8 +21,8 @@ async function updateRecentlyPlayed() {
                         <div class="track-info">
                             <div class="track-title">${escapeHtml(track.song)}</div>
                             <div class="track-artist">${escapeHtml(track.artist)}</div>
+                            <span class="track-time">${timeAgo}</span>
                             <div class="track-meta">
-                                <span class="track-time">${timeAgo}</span>
                                 <a href="${track.search_url}" target="_blank" rel="noopener noreferrer" class="allmusic-link">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
