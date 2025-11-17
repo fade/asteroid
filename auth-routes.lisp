@@ -127,7 +127,7 @@
         (error 'authentication-error :message "Not authenticated"))
       
       ;; Verify current password
-      (unless (verify-user-credentials username current-password)
+      (unless (authenticate-user username current-password)
         (error 'authentication-error :message "Current password is incorrect"))
       
       ;; Update password
