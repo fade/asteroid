@@ -24,6 +24,13 @@
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 (defparameter *stream-base-url* "http://localhost:8000")
 
+;; Recently played tracks storage (in-memory)
+(defparameter *recently-played* nil
+  "List of recently played tracks (max 3), newest first")
+(defparameter *recently-played-lock* (bt:make-lock "recently-played-lock"))
+(defparameter *last-known-track* nil
+  "Last known track title to detect changes")
+
 ;; Configure JSON as the default API format
 (define-api-format json (data)
   "JSON API format for Radiance"
@@ -32,6 +39,40 @@
 
 ;; Set JSON as the default API format
 (setf *default-api-format* "json")
+
+;; Recently played tracks management
+(defun add-recently-played (track-info)
+  "Add a track to the recently played list (max 3 tracks)"
+  (bt:with-lock-held (*recently-played-lock*)
+    (push track-info *recently-played*)
+    (when (> (length *recently-played*) 3)
+      (setf *recently-played* (subseq *recently-played* 0 3)))))
+
+(defun universal-time-to-unix (universal-time)
+  "Convert Common Lisp universal time to Unix timestamp"
+  ;; Universal time is seconds since 1900-01-01, Unix is since 1970-01-01
+  ;; Difference is 2208988800 seconds (70 years)
+  (- universal-time 2208988800))
+
+(defun get-recently-played ()
+  "Get the list of recently played tracks"
+  (bt:with-lock-held (*recently-played-lock*)
+    (copy-list *recently-played*)))
+
+(defun parse-track-title (title)
+  "Parse track title into artist and song name. Expected format: 'Artist - Song'"
+  (let ((pos (search " - " title)))
+    (if pos
+        (list :artist (string-trim " " (subseq title 0 pos))
+              :song (string-trim " " (subseq title (+ pos 3))))
+        (list :artist "Unknown" :song title))))
+
+(defun generate-music-search-url (artist song)
+  "Generate MusicBrainz search URL for artist and song"
+  ;; MusicBrainz uses 'artist:' and 'recording:' prefixes for better search
+  (let ((query (format nil "artist:\"~a\" recording:\"~a\"" artist song)))
+    (format nil "https://musicbrainz.org/search?query=~a&type=recording&method=indexed"
+            (drakma:url-encode query :utf-8))))
 
 ;; API Routes using Radiance's define-api
 ;; API endpoints are accessed at /api/<name> automatically
@@ -134,6 +175,27 @@
           (api-output `(("status" . "error")
                         ("message" . "Playlist not found"))
                       :status 404)))))
+
+;; Recently played tracks API endpoint
+(define-api asteroid/recently-played () ()
+  "Get the last 3 played tracks with AllMusic links"
+  (with-error-handling
+    (let ((tracks (get-recently-played)))
+      (api-output `(("status" . "success")
+                    ("tracks" . ,(mapcar (lambda (track)
+                                           (let* ((title (getf track :title))
+                                                  (timestamp (getf track :timestamp))
+                                                  (unix-timestamp (universal-time-to-unix timestamp))
+                                                  (parsed (parse-track-title title))
+                                                  (artist (getf parsed :artist))
+                                                  (song (getf parsed :song))
+                                                  (search-url (generate-music-search-url artist song)))
+                                             `(("title" . ,title)
+                                               ("artist" . ,artist)
+                                               ("song" . ,song)
+                                               ("timestamp" . ,unix-timestamp)
+                                               ("search_url" . ,search-url))))
+                                         tracks)))))))
 
 ;; API endpoint to get all tracks (for web player)
 (define-api asteroid/tracks () ()
