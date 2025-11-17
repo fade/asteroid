@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
   <script src="/asteroid/static/js/auth-ui.js"></script>
   <script src="/asteroid/static/js/front-page.js"></script>
+  <script src="/asteroid/static/js/recently-played.js"></script>
 </head>
 <body>
   <div class="container">
@@ -35,6 +36,14 @@
       </div>
       
       <div id="now-playing" class="now-playing"></div>
+      
+      <!-- Recently Played Tracks -->
+      <div class="recently-played-panel">
+        <h3>Recently Played</h3>
+        <div id="recently-played-list" class="recently-played-list">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
     </main>
   </div>
 </body>

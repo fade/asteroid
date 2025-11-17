@@ -143,6 +143,118 @@ body .now-playing{
     overflow: auto;
 }
 
+body .recently-played-panel{
+    background: #1a2332;
+    border: 1px solid #2a3441;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+body .recently-played-panel h3{
+    margin: 0 0 15px 0;
+    color: #00ff00;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+body .recently-played-panel .recently-played-list{
+    min-height: 100px;
+}
+
+body .recently-played-panel .recently-played-list .loading,
+body .recently-played-panel .recently-played-list .no-tracks,
+body .recently-played-panel .recently-played-list .error{
+    text-align: center;
+    color: #888;
+    padding: 20px;
+    font-style: italic;
+}
+
+body .recently-played-panel .recently-played-list .error{
+    color: #ff4444;
+}
+
+body .recently-played-panel .recently-played-list.track-list{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: none;
+    max-height: none;
+    overflow-y: visible;
+}
+
+body .recently-played-panel .recently-played-list.track-item{
+    padding: 12px;
+    border-bottom: 1px solid #2a3441;
+    -moz-transition: background-color 0.2s;
+    -o-transition: background-color 0.2s;
+    -webkit-transition: background-color 0.2s;
+    -ms-transition: background-color 0.2s;
+    transition: background-color 0.2s;
+}
+
+body .recently-played-panel .recently-played-list.track-item LAST-CHILD{
+    border-bottom: none;
+}
+
+body .recently-played-panel .recently-played-list.track-item HOVER{
+    background-color: #252525;
+}
+
+body .recently-played-panel .recently-played-list.track-info{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+body .recently-played-panel .recently-played-list.track-title{
+    color: #fff;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+body .recently-played-panel .recently-played-list.track-artist{
+    color: #aaa;
+    font-size: 0.9em;
+}
+
+body .recently-played-panel .recently-played-list.track-meta{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+body .recently-played-panel .recently-played-list.track-time{
+    color: #666;
+    font-size: 0.85em;
+}
+
+body .recently-played-panel .recently-played-list.allmusic-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #00ff00;
+    text-decoration: none;
+    font-size: 0.85em;
+    -moz-transition: color 0.2s;
+    -o-transition: color 0.2s;
+    -webkit-transition: color 0.2s;
+    -ms-transition: color 0.2s;
+    transition: color 0.2s;
+}
+
+body .recently-played-panel .recently-played-list.allmusic-link HOVER{
+    color: #00cc00;
+    text-decoration: underline;
+}
+
+body .recently-played-panel .recently-played-list.allmusic-link svg{
+    width: 14px;
+    height: 14px;
+}
+
 body .back{
     color: #00ffff;
     text-decoration: none;

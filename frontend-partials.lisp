@@ -33,6 +33,13 @@
                                      (aref groups 0)
                                      "Unknown")))
                              "Unknown")))
+              ;; Track recently played if title changed
+              (when (and title 
+                        (not (string= title "Unknown"))
+                        (not (equal title *last-known-track*)))
+                (setf *last-known-track* title)
+                (add-recently-played (list :title title
+                                          :timestamp (get-universal-time))))
               `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
                 (:title . ,title)
                 (:listeners . ,total-listeners)))))))

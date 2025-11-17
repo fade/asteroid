@@ -123,6 +123,86 @@
      :color "#4488ff"
      :overflow auto)
 
+    ;; Recently Played Panel
+    (.recently-played-panel
+     :background "#1a2332"
+     :border "1px solid #2a3441"
+     :border-radius "8px"
+     :padding "20px"
+     :margin "20px 0"
+     
+     (h3 :margin "0 0 15px 0"
+         :color "#00ff00"
+         :font-size "1.2em"
+         :font-weight 600)
+     
+     (.recently-played-list
+      :min-height "100px"
+      
+      ((:or .loading .no-tracks .error)
+       :text-align center
+       :color "#888"
+       :padding "20px"
+       :font-style italic)
+      
+      (.error :color "#ff4444"))
+     
+     ((:and .recently-played-list .track-list)
+      :list-style none
+      :padding 0
+      :margin 0
+      :border none
+      :max-height none
+      :overflow-y visible)
+     
+     ((:and .recently-played-list .track-item)
+      :padding "12px"
+      :border-bottom "1px solid #2a3441"
+      :transition "background-color 0.2s"
+      
+      ((:and :last-child) :border-bottom none)
+      ((:and :hover) :background-color "#252525"))
+     
+     ((:and .recently-played-list .track-info)
+      :display flex
+      :flex-direction column
+      :gap "4px")
+     
+     ((:and .recently-played-list .track-title)
+      :color "#fff"
+      :font-weight 500
+      :font-size "1em")
+     
+     ((:and .recently-played-list .track-artist)
+      :color "#aaa"
+      :font-size "0.9em")
+     
+     ((:and .recently-played-list .track-meta)
+      :display flex
+      :align-items center
+      :gap "12px"
+      :margin-top "4px")
+     
+     ((:and .recently-played-list .track-time)
+      :color "#666"
+      :font-size "0.85em")
+     
+     ((:and .recently-played-list .allmusic-link)
+      :display inline-flex
+      :align-items center
+      :gap "4px"
+      :color "#00ff00"
+      :text-decoration none
+      :font-size "0.85em"
+      :transition "color 0.2s"
+      
+      ((:and :hover)
+       :color "#00cc00"
+       :text-decoration underline)
+      
+      (svg :width "14px"
+           :height "14px")))
+
     (.back
      :color "#00ffff"
      :text-decoration none
