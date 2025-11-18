@@ -157,3 +157,35 @@
       
       (api-output `(("status" . "success")
                     ("message" . ,(format nil "Password reset for user: ~a" username)))))))
+
+(define-api asteroid/user/activate (user-id active) ()
+  "API endpoint for setting the active state of an user account"
+  (format t "Activation of user: #~a set to ~a~%" user-id active)
+  (require-role :admin)
+  (with-error-handling
+    (let ((user (when user-id
+                   (find-user-by-id user-id)))
+          (active (if (stringp active)
+                      (parse-integer active)
+                      active)))
+
+      (unless user
+        (error 'not-found-error :message "User not found"))
+
+      ;; Change user active state
+      (let ((result (if (= 0 active)
+                        (deactivate-user user-id)
+                        (activate-user user-id))))
+        (if result
+            (api-output `(("status" . "success")
+                          ("message" . ,(format nil "User '~a' ~a."
+                                                (dm:field user "username")
+                                                (if (= 0 active)
+                                                    "deactivated"
+                                                    "activated")))))
+            (api-output `(("status" . "error")
+                          ("message" . ,(format nil "Could not ~a user '~a'."
+                                                (if (= 0 active)
+                                                    "deactivated"
+                                                    "activated")
+                                                (dm:field user "username"))))))))))

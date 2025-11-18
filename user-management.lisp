@@ -40,7 +40,10 @@
 (defun find-user-by-id (user-id)
   "Find a user by ID"
   (format t "Looking for user with ID: ~a (type: ~a)~%" user-id (type-of user-id))
-  (let ((user (dm:get-one "USERS" (db:query (:= '_id user-id)))))
+  (let* ((user-id (if (stringp user-id)
+                      (parse-integer user-id)
+                      user-id))
+         (user (dm:get-one "USERS" (db:query (:= '_id user-id)))))
     (when user
       (format t "Found user '~a' with id #~a~%"
               (dm:field user "username")

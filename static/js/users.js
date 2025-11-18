@@ -117,18 +117,25 @@ async function deactivateUser(userId) {
     }
 
     try {
-        const response = await fetch(`/api/asteroid/users/${userId}/deactivate`, {
-            method: 'POST'
+        const formData = new FormData();
+        formData.append('user-id', userId);
+        formData.append('active', 0);
+
+        const response = await fetch('/api/asteroid/user/activate', {
+            method: 'POST',
+            body: formData
         });
 
         const result = await response.json();
+        // Handle Radiance API data wrapping
+        const data = result.data || result;
 
-        if (result.status === 'success') {
+        if (data.status === 'success') {
             loadUsers();
             loadUserStats();
-            alert('User deactivated successfully');
+            alert(data.message);
         } else {
-            alert('Error deactivating user: ' + result.message);
+            alert('Error deactivating user: ' + data.message);
         }
     } catch (error) {
         console.error('Error deactivating user:', error);
@@ -137,19 +144,31 @@ async function deactivateUser(userId) {
 }
 
 async function activateUser(userId) {
+    if (!confirm('Are you sure you want to activate this user?')) {
+        return;
+    }
+
     try {
-        const response = await fetch(`/api/asteroid/users/${userId}/activate`, {
-            method: 'POST'
+
+        const formData = new FormData();
+        formData.append('user-id', userId);
+        formData.append('active', 1);
+
+        const response = await fetch('/api/asteroid/user/activate', {
+            method: 'POST',
+            body: formData
         });
 
         const result = await response.json();
+        // Handle Radiance API data wrapping
+        const data = result.data || result;
 
-        if (result.status === 'success') {
+        if (data.status === 'success') {
             loadUsers();
             loadUserStats();
-            alert('User activated successfully');
+            alert(data.message);
         } else {
-            alert('Error activating user: ' + result.message);
+            alert('Error activating user: ' + data.message);
         }
     } catch (error) {
         console.error('Error activating user:', error);
