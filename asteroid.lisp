@@ -51,16 +51,16 @@
   (require-authentication)
   (with-error-handling
     (let ((tracks (with-db-error-handling "select"
-                    (db:select "tracks" (db:query :all)))))
+                    (dm:get "tracks" (db:query :all)))))
       (api-output `(("status" . "success")
                     ("tracks" . ,(mapcar (lambda (track)
-                                           `(("id" . ,(gethash "_id" track))
-                                             ("title" . ,(first (gethash "title" track)))
-                                             ("artist" . ,(first (gethash "artist" track)))
-                                             ("album" . ,(first (gethash "album" track)))
-                                             ("duration" . ,(first (gethash "duration" track)))
-                                             ("format" . ,(first (gethash "format" track)))
-                                             ("bitrate" . ,(first (gethash "bitrate" track)))))
+                                           `(("id" . ,(dm:id track))
+                                             ("title" . ,(dm:field track "title"))
+                                             ("artist" . ,(dm:field track "artist"))
+                                             ("album" . ,(dm:field track "album"))
+                                             ("duration" . ,(dm:field track "duration"))
+                                             ("format" . ,(dm:field track "format"))
+                                             ("bitrate" . ,(dm:field track "bitrate"))))
                                          tracks)))))))
 
 ;; Playlist API endpoints
@@ -73,26 +73,19 @@
            (playlists (get-user-playlists user-id)))
       (api-output `(("status" . "success")
                     ("playlists" . ,(mapcar (lambda (playlist)
-                                              (let ((name-val (gethash "name" playlist))
-                                                    (desc-val (gethash "description" playlist))
-                                                    (track-ids-val (gethash "track-ids" playlist))
-                                                    (created-val (gethash "created-date" playlist))
-                                                    (id-val (gethash "_id" playlist)))
-                                                ;; Calculate track count from comma-separated string
-                                                ;; Handle nil, empty string, or list containing empty string
-                                                (let* ((track-ids-str (if (listp track-ids-val) 
-                                                                         (first track-ids-val) 
-                                                                         track-ids-val))
-                                                       (track-count (if (and track-ids-str 
-                                                                            (stringp track-ids-str)
-                                                                            (not (string= track-ids-str "")))
-                                                                       (length (cl-ppcre:split "," track-ids-str))
-                                                                       0)))
-                                                  `(("id" . ,(if (listp id-val) (first id-val) id-val))
-                                                    ("name" . ,(if (listp name-val) (first name-val) name-val))
-                                                    ("description" . ,(if (listp desc-val) (first desc-val) desc-val))
-                                                    ("track-count" . ,track-count)
-                                                    ("created-date" . ,(if (listp created-val) (first created-val) created-val))))))
+                                              (let* ((track-ids (dm:field playlist "track-ids"))
+                                                     ;; Calculate track count from comma-separated string
+                                                     ;; Handle nil, empty string, or list containing empty string
+                                                     (track-count (if (and track-ids
+                                                                           (stringp track-ids)
+                                                                           (not (string= track-ids "")))
+                                                                      (length (cl-ppcre:split "," track-ids))
+                                                                      0)))
+                                                `(("id" . ,(dm:id playlist))
+                                                  ("name" . ,(dm:field playlist "name"))
+                                                  ("description" . ,(dm:field playlist "description"))
+                                                  ("track-count" . ,track-count)
+                                                  ("created-date" . ,(dm:field playlist "created-date")))))
                                             playlists)))))))
 
 (define-api asteroid/playlists/create (name &optional description) ()
@@ -124,23 +117,19 @@
     (let* ((id (parse-integer playlist-id :junk-allowed t))
            (playlist (get-playlist-by-id id)))
       (if playlist
-          (let* ((track-ids-raw (gethash "tracks" playlist))
-                 (track-ids (if (listp track-ids-raw) track-ids-raw (list track-ids-raw)))
+          (let* ((track-ids (dm:field playlist "tracks"))
                  (tracks (mapcar (lambda (track-id)
-                                   (let ((track-list (db:select "tracks" (db:query (:= "_id" track-id)))))
-                                     (when (> (length track-list) 0)
-                                       (first track-list))))
+                                   (dm:get-one "tracks" (db:query (:= '_id track-id))))
                                  track-ids))
                  (valid-tracks (remove nil tracks)))
             (api-output `(("status" . "success")
                           ("playlist" . (("id" . ,id)
-                                        ("name" . ,(let ((n (gethash "name" playlist)))
-                                                    (if (listp n) (first n) n)))
+                                        ("name" . ,(dm:field playlist "name"))
                                         ("tracks" . ,(mapcar (lambda (track)
-                                                              `(("id" . ,(gethash "_id" track))
-                                                                ("title" . ,(gethash "title" track))
-                                                                ("artist" . ,(gethash "artist" track))
-                                                                ("album" . ,(gethash "album" track))))
+                                                              `(("id" . ,(dm:id track))
+                                                                ("title" . ,(dm:field track "title"))
+                                                                ("artist" . ,(dm:field track "artist"))
+                                                                ("album" . ,(dm:field track "album"))))
                                                             valid-tracks)))))))
           (api-output `(("status" . "error")
                         ("message" . "Playlist not found"))
@@ -152,15 +141,15 @@
   (require-authentication)
   (with-error-handling
     (let ((tracks (with-db-error-handling "select"
-                    (db:select "tracks" (db:query :all)))))
+                    (dm:get "tracks" (db:query :all)))))
       (api-output `(("status" . "success")
                     ("tracks" . ,(mapcar (lambda (track)
-                                           `(("id" . ,(gethash "_id" track))
-                                             ("title" . ,(gethash "title" track))
-                                             ("artist" . ,(gethash "artist" track))
-                                             ("album" . ,(gethash "album" track))
-                                             ("duration" . ,(gethash "duration" track))
-                                             ("format" . ,(gethash "format" track))))
+                                           `(("id" . ,(dm:id track))
+                                             ("title" . ,(dm:field track "title"))
+                                             ("artist" . ,(dm:field track "artist"))
+                                             ("album" . ,(dm:field track "album"))
+                                             ("duration" . ,(dm:field track "duration"))
+                                             ("format" . ,(dm:field track "format"))))
                                          tracks)))))))
 
 ;; Stream Control API Endpoints
@@ -173,9 +162,9 @@
                     ("queue" . ,(mapcar (lambda (track-id)
                                           (let ((track (get-track-by-id track-id)))
                                             `(("id" . ,track-id)
-                                              ("title" . ,(gethash "title" track))
-                                              ("artist" . ,(gethash "artist" track))
-                                              ("album" . ,(gethash "album" track)))))
+                                              ("title" . ,(dm:field track "title"))
+                                              ("artist" . ,(dm:field track "artist"))
+                                              ("album" . ,(dm:field track "album")))))
                                         queue)))))))
 
 (define-api asteroid/stream/queue/add (track-id &optional (position "end")) ()
@@ -235,17 +224,7 @@
 
 (defun get-track-by-id (track-id)
   "Get a track by its ID - handles type mismatches"
-  ;; Try direct query first
-  (let ((tracks (db:select "tracks" (db:query (:= "_id" track-id)))))
-    (if (> (length tracks) 0)
-        (first tracks)
-        ;; If not found, search manually (ID might be stored as list)
-        (let ((all-tracks (db:select "tracks" (db:query :all))))
-          (find-if (lambda (track)
-                     (let ((stored-id (gethash "_id" track)))
-                       (or (equal stored-id track-id)
-                           (and (listp stored-id) (equal (first stored-id) track-id)))))
-                   all-tracks)))))
+  (dm:get-one "tracks" (db:query (:= '_id track-id))))
 
 (defun get-mime-type-for-format (format)
   "Get MIME type for audio format"
@@ -263,8 +242,8 @@
            (track (get-track-by-id id)))
       (unless track
         (signal-not-found "track" id))
-      (let* ((file-path (first (gethash "file-path" track)))
-             (format (first (gethash "format" track)))
+      (let* ((file-path (dm:field track "file-path"))
+             (format (dm:field track "format"))
              (file (probe-file file-path)))
         (unless file
           (error 'not-found-error
@@ -276,8 +255,8 @@
         (setf (radiance:header "Accept-Ranges") "bytes")
         (setf (radiance:header "Cache-Control") "public, max-age=3600")
         ;; Increment play count
-        (db:update "tracks" (db:query (:= '_id id))
-                   `(("play-count" ,(1+ (first (gethash "play-count" track))))))
+        (setf (dm:field track "play-count") (1+ (dm:field track "play-count")))
+        (data-model-save track)
         ;; Return file contents
         (alexandria:read-file-into-byte-vector file)))))
 
@@ -333,8 +312,8 @@
       (api-output `(("status" . "success")
                     ("message" . "Playback started")
                     ("track" . (("id" . ,id)
-                               ("title" . ,(first (gethash "title" track)))
-                               ("artist" . ,(first (gethash "artist" track)))))
+                               ("title" . ,(dm:field track "title"))
+                               ("artist" . ,(dm:field track "artist"))))
                     ("player" . ,(get-player-status)))))))
 
 (define-api asteroid/player/pause () ()
@@ -524,7 +503,7 @@
   "Admin dashboard"
   (require-authentication)
   (let ((track-count (handler-case 
-                       (length (db:select "tracks" (db:query :all)))
+                       (length (dm:get "tracks" (db:query :all)))
                        (error () 0))))
     (clip:process-to-string 
      (load-template "admin")
