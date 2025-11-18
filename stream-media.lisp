@@ -62,16 +62,17 @@
 (defun track-exists-p (file-path)
   "Check if a track with the given file path already exists in the database"
   ;; Try direct query first
-  (let ((existing (db:select "tracks" (db:query (:= "file-path" file-path)))))
+  (let ((existing (dm:get "tracks" (db:query (:= "file-path" file-path)))))
     (if (> (length existing) 0)
         t
         ;; If not found, search manually (file-path might be stored as list)
-        (let ((all-tracks (db:select "tracks" (db:query :all))))
+        (let ((all-tracks (dm:get "tracks" (db:query :all))))
           (some (lambda (track)
-                  (let ((stored-path (gethash "file-path" track)))
+                  (let ((stored-path (dm:field track "file-path")))
                     (or (equal stored-path file-path)
                         (and (listp stored-path) (equal (first stored-path) file-path)))))
-                all-tracks)))))
+                all-tracks)
+          ))))
 
 (defun insert-track-to-database (metadata)
   "Insert track metadata into database if it doesn't already exist"
@@ -83,17 +84,17 @@
   (let ((file-path (getf metadata :file-path)))
     (if (track-exists-p file-path)
         nil
-        (progn
-          (db:insert "tracks" 
-                     (list (list "title" (getf metadata :title))
-                           (list "artist" (getf metadata :artist))
-                           (list "album" (getf metadata :album))
-                           (list "duration" (getf metadata :duration))
-                           (list "file-path" file-path)
-                           (list "format" (getf metadata :format))
-                           (list "bitrate" (getf metadata :bitrate))
-                           (list "added-date" (local-time:timestamp-to-unix (local-time:now)))
-                           (list "play-count" 0)))
+        (let ((track (dm:hull "tracks")))
+          (setf (dm:field track "title") (getf metadata :title))
+          (setf (dm:field track "artist") (getf metadata :artist))
+          (setf (dm:field track "album") (getf metadata :album))
+          (setf (dm:field track "duration") (getf metadata :duration))
+          (setf (dm:field track "file-path") file-path)
+          (setf (dm:field track "format") (getf metadata :format))
+          (setf (dm:field track "bitrate") (getf metadata :bitrate))
+          (setf (dm:field track "added-date") (local-time:timestamp-to-unix (local-time:now)))
+          (setf (dm:field track "play-count") 0)
+          (dm:insert track)
           t))))
 
 (defun scan-music-library (&optional (directory *music-library-path*))

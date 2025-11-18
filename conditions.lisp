@@ -157,7 +157,7 @@
    
    Usage:
    (with-db-error-handling \"select\"
-     (db:select 'tracks (db:query :all)))"
+     (dm:get 'tracks (db:query :all)))"
   `(handler-case
        (progn ,@body)
      (error (e)

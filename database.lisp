@@ -20,6 +20,7 @@
     (db:create "playlists" '((name :text)
                              (description :text)
                              (created-date :integer)
+                             (user-id :integer)
                              (track-ids :text))))
   
   (unless (db:collection-exists-p "USERS")
