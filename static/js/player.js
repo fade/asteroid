@@ -130,8 +130,8 @@ function renderLibraryPage() {
         return `
             <div class="track-item" data-track-id="${track.id}" data-index="${actualIndex}">
                 <div class="track-info">
-                    <div class="track-title">${track.title[0] || 'Unknown Title'}</div>
-                    <div class="track-meta">${track.artist[0] || 'Unknown Artist'} • ${track.album[0] || 'Unknown Album'}</div>
+                    <div class="track-title">${track.title || 'Unknown Title'}</div>
+                    <div class="track-meta">${track.artist || 'Unknown Artist'} • ${track.album || 'Unknown Album'}</div>
                 </div>
                 <div class="track-actions">
                     <button onclick="playTrack(${actualIndex})" class="btn btn-sm btn-success">▶️</button>
@@ -186,9 +186,9 @@ function changeLibraryTracksPerPage() {
 function filterTracks() {
     const query = document.getElementById('search-tracks').value.toLowerCase();
     const filtered = tracks.filter(track => 
-        (track.title[0] || '').toLowerCase().includes(query) ||
-        (track.artist[0] || '').toLowerCase().includes(query) ||
-        (track.album[0] || '').toLowerCase().includes(query)
+        (track.title || '').toLowerCase().includes(query) ||
+        (track.artist || '').toLowerCase().includes(query) ||
+        (track.album || '').toLowerCase().includes(query)
     );
     displayTracks(filtered);
 }
@@ -304,9 +304,9 @@ function updatePlayButton(text) {
 
 function updatePlayerDisplay() {
     if (currentTrack) {
-        document.getElementById('current-title').textContent = currentTrack.title[0] || 'Unknown Title';
-        document.getElementById('current-artist').textContent = currentTrack.artist[0] || 'Unknown Artist';
-        document.getElementById('current-album').textContent = currentTrack.album[0] || 'Unknown Album';
+        document.getElementById('current-title').textContent = currentTrack.title || 'Unknown Title';
+        document.getElementById('current-artist').textContent = currentTrack.artist || 'Unknown Artist';
+        document.getElementById('current-album').textContent = currentTrack.album || 'Unknown Album';
     }
 }
 
@@ -328,8 +328,8 @@ function updateQueueDisplay() {
     const queueHtml = playQueue.map((track, index) => `
         <div class="queue-item">
         <div class="track-info">
-        <div class="track-title">${track.title[0] || 'Unknown Title'}</div>
-        <div class="track-meta">${track.artist[0] || 'Unknown Artist'}</div>
+        <div class="track-title">${track.title || 'Unknown Title'}</div>
+        <div class="track-meta">${track.artist || 'Unknown Artist'}</div>
         </div>
         <button onclick="removeFromQueue(${index})" class="btn btn-sm btn-danger">✖️</button>
         </div>
@@ -366,8 +366,10 @@ async function createPlaylist() {
         });
 
         const result = await response.json();
+        // Handle RADIANCE API wrapper format
+        const data = result.data || result;
 
-        if (result.status === 'success') {
+        if (data.status === 'success') {
             alert(`Playlist "${name}" created successfully!`);
             document.getElementById('new-playlist-name').value = '';
 
@@ -375,7 +377,7 @@ async function createPlaylist() {
             await new Promise(resolve => setTimeout(resolve, 500));
             loadPlaylists();
         } else {
-            alert('Error creating playlist: ' + result.message);
+            alert('Error creating playlist: ' + data.message);
         }
     } catch (error) {
         console.error('Error creating playlist:', error);
@@ -404,24 +406,28 @@ async function saveQueueAsPlaylist() {
         });
 
         const createResult = await createResponse.json();
+        // Handle RADIANCE API wrapper format
+        const createData = createResult.data || createResult;
 
-        if (createResult.status === 'success') {
+        if (createData.status === 'success') {
             // Wait a moment for database to update
             await new Promise(resolve => setTimeout(resolve, 500));
 
             // Get the new playlist ID by fetching playlists
             const playlistsResponse = await fetch('/api/asteroid/playlists');
             const playlistsResult = await playlistsResponse.json();
+            // Handle RADIANCE API wrapper format
+            const playlistResultData = playlistsResult.data || playlistsResult;
 
-            if (playlistsResult.status === 'success' && playlistsResult.playlists.length > 0) {
+            if (playlistResultData.status === 'success' && playlistResultData.playlists.length > 0) {
                 // Find the playlist with matching name (most recent)
-                const newPlaylist = playlistsResult.playlists.find(p => p.name === name) || 
-                    playlistsResult.playlists[playlistsResult.playlists.length - 1];
+                const newPlaylist = playlistResultData.playlists.find(p => p.name === name) ||
+                    playlistResultData.playlists[playlistResultData.playlists.length - 1];
 
                 // Add all tracks from queue to playlist
                 let addedCount = 0;
                 for (const track of playQueue) {
-                    const trackId = track.id || (Array.isArray(track.id) ? track.id[0] : null);
+                    const trackId = track.id;
 
                     if (trackId) {
                         const addFormData = new FormData();
@@ -435,7 +441,7 @@ async function saveQueueAsPlaylist() {
 
                         const addResult = await addResponse.json();
 
-                        if (addResult.status === 'success') {
+                        if (addResult.data?.status === 'success') {
                             addedCount++;
                         }
                     } else {
@@ -446,10 +452,11 @@ async function saveQueueAsPlaylist() {
                 alert(`Playlist "${name}" created with ${addedCount} tracks!`);
                 loadPlaylists();
             } else {
-                alert('Playlist created but could not add tracks. Error: ' + (playlistsResult.message || 'Unknown'));
+                alert('Playlist created but could not add tracks. Error: ' + (playlistResultData.message || 'Unknown'));
+                loadPlaylists();
             }
         } else {
-            alert('Error creating playlist: ' + createResult.message);
+            alert('Error creating playlist: ' + createData.message);
         }
     } catch (error) {
         console.error('Error saving queue as playlist:', error);
@@ -461,11 +468,11 @@ async function loadPlaylists() {
     try {
         const response = await fetch('/api/asteroid/playlists');
         const result = await response.json();
+        // Handle RADIANCE API wrapper format
+        const data = result.data || result;
 
-        if (result.data && result.data.status === 'success') {
-            displayPlaylists(result.data.playlists || []);
-        } else if (result.status === 'success') {
-            displayPlaylists(result.playlists || []);
+        if (data && data.status === 'success') {
+            displayPlaylists(data.playlists || []);
         } else {
             displayPlaylists([]);
         }
@@ -502,9 +509,11 @@ async function loadPlaylist(playlistId) {
     try {
         const response = await fetch(`/api/asteroid/playlists/get?playlist-id=${playlistId}`);
         const result = await response.json();
+        // Handle RADIANCE API wrapper format
+        const data = result.data || result;
 
-        if (result.status === 'success' && result.playlist) {
-            const playlist = result.playlist;
+        if (data.status === 'success' && data.playlist) {
+            const playlist = data.playlist;
 
             // Clear current queue
             playQueue = [];
@@ -534,7 +543,7 @@ async function loadPlaylist(playlistId) {
                 alert(`Playlist "${playlist.name}" is empty`);
             }
         } else {
-            alert('Error loading playlist: ' + (result.message || 'Unknown error'));
+            alert('Error loading playlist: ' + (data.message || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error loading playlist:', error);
