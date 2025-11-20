@@ -1,0 +1,6 @@
+<div id="recently-played-panel" class="recently-played-panel">
+    <h3>Recently Played</h3>
+    <div id="recently-played-list" class="recently-played-list">
+        <p class="loading">Loading...</p>
+    </div>
+</div>
