@@ -4,6 +4,9 @@
     <title data-text="title">🎵 ASTEROID RADIO 🎵</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="/asteroid/static/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/asteroid/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/asteroid/static/favicon-16x16.png">
     <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
   <script src="/asteroid/static/js/auth-ui.js"></script>
   <script src="/asteroid/static/js/front-page.js"></script>
@@ -12,7 +15,11 @@
 <body>
   <div class="container">
     <header>
-      <h1 data-text="station-name">🎵 ASTEROID RADIO 🎵</h1>
+      <h1 style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 60px; width: auto;">
+        <span data-text="station-name">ASTEROID RADIO</span>
+        <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 60px; width: auto;">
+      </h1>
       <nav class="nav">
         <a href="/asteroid/content" target="content-frame">Home</a>
         <a href="/asteroid/player-content" target="content-frame">Player</a>
