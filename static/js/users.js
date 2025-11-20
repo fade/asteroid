@@ -90,20 +90,23 @@ function hideUsersTable() {
 async function updateUserRole(userId, newRole) {
     try {
         const formData = new FormData();
+        formData.append('user-id', userId);
         formData.append('role', newRole);
 
-        const response = await fetch(`/api/asteroid/users/${userId}/role`, {
+        const response = await fetch('/api/asteroid/user/role', {
             method: 'POST',
             body: formData
         });
 
         const result = await response.json();
+        // Handle Radiance API data wrapping
+        const data = result.data || result;
 
-        if (result.status === 'success') {
+        if (data.status === 'success') {
             loadUserStats();
-            alert('User role updated successfully');
+            alert(data.message);
         } else {
-            alert('Error updating user role: ' + result.message);
+            alert('Error updating user role: ' + data.message);
         }
     } catch (error) {
         console.error('Error updating user role:', error);

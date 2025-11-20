@@ -189,3 +189,27 @@
                                                     "deactivated"
                                                     "activated")
                                                 (dm:field user "username"))))))))))
+
+(define-api asteroid/user/role (user-id role) ()
+  "API endpoint for setting the access role of an user account"
+  (format t "Role of user: #~a set to ~a~%" user-id role)
+  (require-role :admin)
+  (with-error-handling
+    (let ((user (when user-id
+                   (find-user-by-id user-id)))
+          (user-role (intern (string-upcase role) :keyword)))
+
+      (unless user
+        (error 'not-found-error :message "User not found"))
+
+      ;; Change user role
+      (let ((result (update-user-role user-id user-role)))
+        (if result
+            (api-output `(("status" . "success")
+                          ("message" . ,(format nil "User '~a' is now a ~a."
+                                                (dm:field user "username")
+                                                role))))
+            (api-output `(("status" . "error")
+                          ("message" . ,(format nil "Could not set user '~a' as ~a."
+                                                (dm:field user "username")
+                                                role)))))))))
