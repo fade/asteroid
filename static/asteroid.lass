@@ -171,9 +171,6 @@
       :align-items center)
      
      ((:and .recently-played-list .track-title)
-      :color "#4488ff"
-      :font-weight 500
-      :font-size "1em"
       :grid-column 1
       :grid-row 1)
      
@@ -190,30 +187,26 @@
       :grid-row 1
       :text-align right)
      
-     ((:and .recently-played-list .track-meta)
-      :grid-column 2
-      :grid-row 2
-      :text-align right))
-     
-     (.recently-played-list
-      (.allmusic-link
-       :display inline-flex
-       :align-items center
-       :gap "4px"
-       :color "#4488ff"
-       :text-decoration none
-       :font-size "0.85em"
-       :letter-spacing "0.08rem"
-       :transition "all 0.2s"
-       :white-space nowrap
-       
-       ((:and :hover)
-        :color "#00ff00"
-        :text-decoration underline
-        :text-underline-offset "5px")
-       
-       (svg :width "14px"
-            :height "14px")))
+     ((:and .recently-played-list .track-link)
+      :display inline-flex
+      :align-items center
+      :gap "4px"
+      :color "#4488ff"
+      :text-decoration none
+      :font-weight 500
+      :font-size "1em"
+      :transition "all 0.2s"
+      
+      ((:and :hover)
+       :color "#00ff00"
+       :text-decoration underline
+       :text-underline-offset "3px")
+      
+      (.external-icon
+       :width "14px"
+       :height "14px"
+       :margin-left "2px"
+       :vertical-align middle)))
 
     (.back
      :color "#00ffff"
