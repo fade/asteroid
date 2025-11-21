@@ -145,7 +145,28 @@
        :padding "20px"
        :font-style italic)
       
-      (.error :color "#ff4444"))
+      (.error :color "#ff4444")
+      
+      (.track-link
+       :display inline-flex
+       :align-items center
+       :gap "4px"
+       :color "#4488ff"
+       :text-decoration none
+       :font-weight 500
+       :font-size "1em"
+       :transition "all 0.2s"
+       
+       (.external-icon
+        :width "14px"
+        :height "14px"
+        :margin-left "2px"
+        :vertical-align middle))
+      
+      ((:and .track-link :hover)
+       :color "#00ff00"
+       :text-decoration underline
+       :text-underline-offset "3px"))
      
      ((:and .recently-played-list .track-list)
       :list-style none
@@ -185,28 +206,7 @@
       :font-size "0.85em"
       :grid-column 2
       :grid-row 1
-      :text-align right)
-     
-     ((:and .recently-played-list .track-link)
-      :display inline-flex
-      :align-items center
-      :gap "4px"
-      :color "#4488ff"
-      :text-decoration none
-      :font-weight 500
-      :font-size "1em"
-      :transition "all 0.2s"
-      
-      ((:and :hover)
-       :color "#00ff00"
-       :text-decoration underline
-       :text-underline-offset "3px")
-      
-      (.external-icon
-       :width "14px"
-       :height "14px"
-       :margin-left "2px"
-       :vertical-align middle)))
+      :text-align right))
 
     (.back
      :color "#00ffff"
