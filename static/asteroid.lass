@@ -151,7 +151,7 @@
        :display inline-flex
        :align-items center
        :gap "4px"
-       :color "#4488ff"
+       :color "#00ffff"
        :text-decoration none
        :font-weight 500
        :font-size "1em"
@@ -166,23 +166,26 @@
       ((:and .track-link :hover)
        :color "#00ff00"
        :text-decoration underline
-       :text-underline-offset "3px"))
-     
-     ((:and .recently-played-list .track-list)
-      :list-style none
-      :padding 0
-      :margin 0
-      :border none
-      :max-height none
-      :overflow-y visible)
-     
-     ((:and .recently-played-list .track-item)
-      :padding "6px 12px"
-      :border-bottom "1px solid #2a3441"
-      :transition "background-color 0.2s"
+       :text-underline-offset "3px")
       
-      ((:and :last-child) :border-bottom none)
-      ((:and :hover) :background-color "#2a3441"))
+      ((:and .track-link :visited)
+       :color "#4488ff")
+      
+      (.track-list
+       :list-style none
+       :padding "0 12px"
+       :margin 0
+       :border none
+       :max-height none
+       :overflow-y visible)
+      
+      (.track-item
+       :padding "10px 0"
+       :border-bottom "1px solid #2a3441"
+       :transition "background-color 0.2s"
+       
+       ((:and :last-child) :border-bottom none)
+       ((:and :hover) :background-color "#2a3441")))
      
      ((:and .recently-played-list .track-info)
       :display grid
