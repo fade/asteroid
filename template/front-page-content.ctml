@@ -51,25 +51,25 @@
       </div>
       
       <nav class="nav">
-        <a href="/asteroid/content" target="content-frame">Home</a>
-        <a href="/asteroid/player-content" target="content-frame">Player</a>
-        <a href="/asteroid/status" target="content-frame">Status</a>
-        <a href="/asteroid/profile" target="content-frame" data-show-if-logged-in>Profile</a>
-        <a href="/asteroid/admin" target="content-frame" data-show-if-admin>Admin</a>
-        <a href="/asteroid/login" target="content-frame" data-show-if-logged-out>Login</a>
-        <a href="/asteroid/register" target="content-frame" data-show-if-logged-out>Register</a>
-        <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
+          <a href="/asteroid/content" target="content-frame">Home</a>
+          <a href="/asteroid/player-content" target="content-frame">Player</a>
+          <a href="/asteroid/status" target="content-frame">Status</a>
+          <a href="/asteroid/profile" target="content-frame" data-show-if-logged-in>Profile</a>
+          <a href="/asteroid/admin" target="content-frame" data-show-if-admin>Admin</a>
+          <a href="/asteroid/login" target="content-frame" data-show-if-logged-out>Login</a>
+          <a href="/asteroid/register" target="content-frame" data-show-if-logged-out>Register</a>
+          <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
       </nav>
     </header>
 
     <main>
       <div class="live-stream">
           <h2 style="color: #00ff00; margin: 0;"><span class="live-stream-indicator" style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
-        <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
-        <p><strong class="live-stream-label">Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
-        <p><strong class="live-stream-label">Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
-        <p><strong class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers</span></p>
-        <p class="frame-enable-message"><em>The live stream player is now in the persistent bar at the bottom of the page</em></p>
+          <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
+          <p><strong class="live-stream-label">Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
+          <p><strong class="live-stream-label">Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
+          <p><strong class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers</span></p>
+          <p class="frame-enable-message"><em>The live stream player is now in the persistent bar at the bottom of the page</em></p>
       </div>
       
       <div id="now-playing" class="now-playing"></div>
