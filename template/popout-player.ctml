@@ -5,95 +5,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 10px;
-            background: #0a0a0a;
-            overflow: hidden;
-        }
-        .popout-container {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        .popout-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #2a3441;
-        }
-        .popout-title {
-            font-size: 1.2em;
-            color: #00ff00;
-        }
-        .close-btn {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 3px;
-            font-size: 0.9em;
-        }
-        .close-btn:hover {
-            background: #ff6666;
-        }
-        .now-playing-mini {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border: 1px solid #2a3441;
-        }
-        .track-info-mini {
-            font-size: 0.9em;
-        }
-        .track-title-mini {
-            color: #00ff00;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        .track-artist-mini {
-            color: #4488ff;
-            font-size: 0.85em;
-        }
-        .quality-selector {
-            margin: 10px 0;
-            padding: 10px;
-            background: #1a1a1a;
-            border-radius: 5px;
-            border: 1px solid #2a3441;
-        }
-        .quality-selector label {
-            color: #00ff00;
-            margin-right: 10px;
-        }
-        .quality-selector select {
-            background: #0a0a0a;
-            color: #00ff00;
-            border: 1px solid #2a3441;
-            padding: 5px;
-            border-radius: 3px;
-        }
-        audio {
-            width: 100%;
-            margin: 10px 0;
-        }
-        .status-mini {
-            text-align: center;
-            color: #888;
-            font-size: 0.85em;
-            margin-top: 10px;
-        }
-    </style>
     <script src="/asteroid/static/js/front-page.js"></script>
 </head>
-<body>
+<body class="popout-body">
     <div class="popout-container">
         <div class="popout-header">
-            <div class="popout-title">🎵 Asteroid Radio</div>
+            <div class="popout-title">
+              🎵 Asteroid Radio
+              <br/>
+              <span class="popout-subtitle">The Station at the End of Time</span>
+            </div>
             <button class="close-btn" onclick="window.close()">✖ Close</button>
         </div>
 

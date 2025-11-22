@@ -15,11 +15,12 @@
 <body>
   <div class="container">
     <header>
-      <h1 style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+      <h1 class="page-title">
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 60px; width: auto;">
         <span data-text="station-name">ASTEROID RADIO</span>
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 60px; width: auto;">
       </h1>
+      <h3 class="page-subtitle">The Station at the End of Time</h3>
       <nav class="nav">
         <a href="/asteroid/">Home</a>
         <a href="/asteroid/player">Player</a>
@@ -34,13 +35,13 @@
 
     <main>
       <div class="live-stream">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h2 style="color: #00ff00; margin: 0;">🟢 LIVE STREAM</h2>
+        <div style="margin-bottom: 20px;">
+          <h2 style="color: #00ff00; margin: 0;"><span style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
         </div>
         
         <!-- Stream Quality Selector -->
         <div class="live-stream-quality">
-          <label for="stream-quality" ><strong>Quality:</strong></label>
+          <label for="stream-quality" class="live-stream-label" ><strong>Quality:</strong></label>
           <select id="stream-quality" onchange="changeStreamQuality()">
             <option value="aac">AAC 96kbps (Recommended)</option>
             <option value="mp3">MP3 128kbps (Compatible)</option>
@@ -49,9 +50,9 @@
         </div>
         
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
-        <p><strong>Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
-        <p><strong>Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
-        <p><strong>BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers on The Station at the End of Time.</span></p>
+        <p><strong class="live-stream-label">Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
+        <p><strong class="live-stream-label">Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
+        <p><strong class="live-stream-label" class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers</span></p>
 
         <div style="display: flex; gap: 10px; justify-content: end; margin-bottom: 20px;">
             <button id="popout-btn" class="btn btn-info" onclick="openPopoutPlayer()" style="font-size: 0.9em;">
