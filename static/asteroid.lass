@@ -307,7 +307,7 @@
      :text-align center)
 
     ((:and audio |::-webkit-media-controls-panel|)
-     :background-color "#1a1a1a")
+     :background-color "#1a2332")
 
     ;; ((:and audio (:or |::-webkit-media-controls-mute-button|
     ;;                   |::-webkit-media-controls-play-button|
