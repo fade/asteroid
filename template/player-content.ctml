@@ -65,7 +65,7 @@
           </div>
         </div>
         
-        <audio id="audio-player" controls preload="none" style="width: 100%; margin: 20px 0;">
+        <audio id="audio-player" controls preload="none" style="width: 100%; margin: 20px 0; display: none;">
           Your browser does not support the audio element.
         </audio>
         

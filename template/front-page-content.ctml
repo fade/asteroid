@@ -15,11 +15,12 @@
 <body>
   <div class="container">
     <header>
-      <h1 style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+      <h1 class="page-title">
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 60px; width: auto;">
         <span data-text="station-name">ASTEROID RADIO</span>
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 60px; width: auto;">
       </h1>
+      <h3 class="page-subtitle">The Station at the End of Time</h3>
       <nav class="nav">
         <a href="/asteroid/content" target="content-frame">Home</a>
         <a href="/asteroid/player-content" target="content-frame">Player</a>
@@ -34,12 +35,12 @@
 
     <main>
       <div class="live-stream">
-        <h2 style="color: #00ff00;">🟢 LIVE STREAM</h2>
+          <h2 style="color: #00ff00; margin: 0;"><span style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
-        <p><strong>Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
-        <p><strong>Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
-        <p><strong>BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers on The Station at the End of Time.</span></p>
-        <p><em>The live stream player is now in the persistent bar at the bottom of the page.</em></p>
+        <p><strong class="live-stream-label">Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
+        <p><strong class="live-stream-label">Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
+        <p><strong class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers.</span></p>
+        <p class="frame-enable-message"><em>The live stream player is now in the persistent bar at the bottom of the page</em></p>
       </div>
       
       <div id="now-playing" class="now-playing"></div>

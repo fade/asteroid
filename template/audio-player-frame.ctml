@@ -4,56 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
-  <style>
-    body {
-      margin: 0;
-      padding: 10px;
-      background: #1a1a1a;
-      font-family: 'VT323', monospace;
-    }
-    .persistent-player {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      max-width: 100%;
-    }
-    .player-label {
-      color: #00ff00;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-    .quality-selector {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .quality-selector label {
-      color: #00ff00;
-      font-size: 0.9em;
-    }
-    .quality-selector select {
-      background: #2a2a2a;
-      color: #00ff00;
-      border: 1px solid #00ff00;
-      padding: 3px 8px;
-      font-family: 'VT323', monospace;
-    }
-    audio {
-      flex: 1;
-      min-width: 200px;
-    }
-    .now-playing-mini {
-      color: #00ff00;
-      font-size: 0.9em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-      min-width: 300px;
-    }
-  </style>
 </head>
-<body>
+<body class="persistent-player-container">
   <div class="persistent-player">
     <span class="player-label">🟢 LIVE:</span>
     
@@ -73,7 +25,7 @@
     
     <span class="now-playing-mini" id="mini-now-playing">Loading...</span>
     
-    <button onclick="disableFramesetMode()" style="background: #2a2a2a; color: #00ff00; border: 1px solid #00ff00; padding: 5px 10px; cursor: pointer; font-family: 'VT323', monospace; font-size: 0.85em; white-space: nowrap;">
+    <button onclick="disableFramesetMode()" class="persistent-disable-btn">
       ✕ Disable
     </button>
   </div>
