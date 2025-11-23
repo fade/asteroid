@@ -36,7 +36,7 @@
     <main>
       <div class="live-stream">
         <div style="margin-bottom: 20px;">
-          <h2 style="color: #00ff00; margin: 0;"><span style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
+          <h2 style="color: #00ff00; margin: 0;"><span class="live-stream-indicator" style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
         </div>
         
         <!-- Stream Quality Selector -->

@@ -22,7 +22,10 @@
     
     <!-- Live Stream Section -->
     <div class="player-section">
-      <h2 style="color: #00ff00;">🟢 Live Radio Stream</h2>
+      <h2 style="color: #00ff00;">
+        <span class="live-stream-indicator" style="font-size: 1rem;">🟢 </span>
+        Live Radio Stream
+      </h2>
       <div class="live-stream">
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <!-- Stream Quality Selector -->

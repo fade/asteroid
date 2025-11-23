@@ -41,7 +41,9 @@
         </audio>
 
         <div class="status-mini">
-            <span style="color: #00ff00;">● LIVE</span>
+            <span style="color: #00ff00;">
+              <span class="live-stream-indicator">●</span>
+              LIVE</span>
         </div>
     </div>
 
