@@ -7,7 +7,10 @@
 </head>
 <body class="persistent-player-container">
   <div class="persistent-player">
-    <span class="player-label">🟢 LIVE:</span>
+    <span class="player-label">
+      <span class="live-stream-indicator">🟢 </span>
+      LIVE:
+    </span>
     
     <div class="quality-selector">
       <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">

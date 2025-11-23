@@ -22,7 +22,10 @@
     
     <!-- Live Stream Section - Note about persistent player -->
     <div class="player-section">
-      <h2 style="color: #00ff00;">🟢 Live Radio Stream</h2>
+      <h2 style="color: #00ff00;">
+        <span class="live-stream-indicator" style="font-size: 1rem;">🟢 </span>
+        Live Radio Stream
+      </h2>
       <p><em>The live stream player is now in the persistent bar at the bottom of the page. It will continue playing as you navigate between pages!</em></p>
     </div>
 

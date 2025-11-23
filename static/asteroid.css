@@ -1428,3 +1428,13 @@ body.popout-body .status-mini{
         background-color: #1a2332;
     }
 }
+
+.live-stream-indicator{
+    animation: asteroid-blink 1s steps(5, start) infinite;
+}
+
+@keyframes asteroid-blink{
+    to{
+        visibility: hidden;
+    }
+}

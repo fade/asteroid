@@ -1160,4 +1160,11 @@
                   (audio
                    :opacity 1
                    :background-color #(color-accented-black)))
+
+  ;; Live stream blink animation
+  (.live-stream-indicator
+   :animation "asteroid-blink 1s steps(5, start) infinite")
+
+  (:keyframes asteroid-blink
+              (to :visibility "hidden"))
 ) ;; End of let block

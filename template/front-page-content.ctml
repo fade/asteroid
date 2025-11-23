@@ -35,11 +35,11 @@
 
     <main>
       <div class="live-stream">
-          <h2 style="color: #00ff00; margin: 0;"><span style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
+          <h2 style="color: #00ff00; margin: 0;"><span class="live-stream-indicator" style="font-size: 1rem;">🟢</span> LIVE STREAM</h2>
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <p><strong class="live-stream-label">Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
         <p><strong class="live-stream-label">Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
-        <p><strong class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers.</span></p>
+        <p><strong class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers</span></p>
         <p class="frame-enable-message"><em>The live stream player is now in the persistent bar at the bottom of the page</em></p>
       </div>
       
