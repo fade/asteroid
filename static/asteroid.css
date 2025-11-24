@@ -441,6 +441,8 @@ body @-moz-documenturl-prefix() audio{
 }
 
 body audio::-webkit-media-controls-panel{
+    border: 1px solid;
+    border-color: #1a2332;
     background-color: #1a2332;
 }
 
@@ -1424,5 +1426,15 @@ body.popout-body .status-mini{
     audio{
         opacity: 1;
         background-color: #1a2332;
+    }
+}
+
+.live-stream-indicator{
+    animation: asteroid-blink 1s steps(5, start) infinite;
+}
+
+@keyframes asteroid-blink{
+    to{
+        visibility: hidden;
     }
 }

@@ -934,7 +934,8 @@
             ":template"
             (radiance:environment-directory (radiance-core:environment) :template)
             ":static"
-            (radiance:environment-directory (radiance-core:environment) :static)))
+            (radiance:environment-directory (radiance-core:environment) :static))
+  (db:connect :main))
 
 (defun start-slynk-server-in-new-thread (&optional (port 4009))
   "Starts a Slynk server in a new thread on the specified port."
@@ -960,7 +961,7 @@
   (ensure-radiance-environment)
   
   ;; Initialize user management before server starts
-  (initialize-user-system)
+  ;; (initialize-user-system)
   
   ;; TODO: Add auto-scan on startup once database timing issues are resolved
   ;; For now, use the "Scan Library" button in the admin interface
