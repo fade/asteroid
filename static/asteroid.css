@@ -175,17 +175,49 @@ body .recently-played-panel .recently-played-list .error{
     color: #ff4444;
 }
 
-body .recently-played-panel .recently-played-list.track-list{
+body .recently-played-panel .recently-played-list .track-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1em;
+    -moz-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    -webkit-transition: all 0.2s;
+    -ms-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+body .recently-played-panel .recently-played-list .track-link .external-icon{
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    vertical-align: middle;
+}
+
+body .recently-played-panel .recently-played-list .track-link:hover{
+    color: #00ff00;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+body .recently-played-panel .recently-played-list .track-link:visited{
+    color: #4488ff;
+}
+
+body .recently-played-panel .recently-played-list .track-list{
     list-style: none;
-    padding: 0;
+    padding: 0 12px;
     margin: 0;
     border: none;
     max-height: none;
     overflow-y: visible;
 }
 
-body .recently-played-panel .recently-played-list.track-item{
-    padding: 6px 12px;
+body .recently-played-panel .recently-played-list .track-item{
+    padding: 10px 0;
     border-bottom: 1px solid #2a3441;
     -moz-transition: background-color 0.2s;
     -o-transition: background-color 0.2s;
@@ -194,11 +226,11 @@ body .recently-played-panel .recently-played-list.track-item{
     transition: background-color 0.2s;
 }
 
-body .recently-played-panel .recently-played-list.track-item LAST-CHILD{
+body .recently-played-panel .recently-played-list .track-item LAST-CHILD{
     border-bottom: none;
 }
 
-body .recently-played-panel .recently-played-list.track-item HOVER{
+body .recently-played-panel .recently-played-list .track-item HOVER{
     background-color: #2a3441;
 }
 
@@ -211,9 +243,6 @@ body .recently-played-panel .recently-played-list.track-info{
 }
 
 body .recently-played-panel .recently-played-list.track-title{
-    color: #4488ff;
-    font-weight: 500;
-    font-size: 1em;
     grid-column: 1;
     grid-row: 1;
 }
@@ -231,41 +260,6 @@ body .recently-played-panel .recently-played-list.track-time{
     grid-column: 2;
     grid-row: 1;
     text-align: right;
-}
-
-body .recently-played-panel .recently-played-list.track-meta{
-    grid-column: 2;
-    grid-row: 2;
-    text-align: right;
-}
-
-
-
-body .recently-played-list .allmusic-link{
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: #4488ff;
-    text-decoration: none;
-    font-size: 0.85em;
-    letter-spacing: 0.08rem;
-    -moz-transition: all 0.2s;
-    -o-transition: all 0.2s;
-    -webkit-transition: all 0.2s;
-    -ms-transition: all 0.2s;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-body .recently-played-list .allmusic-link HOVER{
-    color: #00ff00;
-    text-decoration: underline;
-    text-underline-offset: 5px;
-}
-
-body .recently-played-list .allmusic-link svg{
-    width: 14px;
-    height: 14px;
 }
 
 body .back{
@@ -396,7 +390,7 @@ body .audio-player{
 }
 
 body audio::-webkit-media-controls-panel{
-    background-color: #1a1a1a;
+    background-color: #1a2332;
 }
 
 body audio::-webkit-media-controls-current-time-display,
