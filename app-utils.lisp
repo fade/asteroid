@@ -3,16 +3,20 @@
 (defpackage :asteroid.app-utils
   (:use :cl)
   (:export :internal-disable-debugger)
-  (:export :internal-quit))
+  (:export :internal-quit
+   :pht))
 
 (in-package :asteroid.app-utils)
-  
+
+(defun pht (ht)
+  (alexandria:hash-table-alist ht))
+
 (defun internal-disable-debugger ()
   (labels
       ((internal-exit (c h)
-             (declare (ignore h))
-             (format t "~a~%" c)
-             (internal-quit)))
+         (declare (ignore h))
+         (format t "~a~%" c)
+         (internal-quit)))
     (setf *debugger-hook* #'internal-exit)))
 
 (defun internal-quit (&optional code)

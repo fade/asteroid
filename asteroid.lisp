@@ -1013,7 +1013,7 @@
 (defun ensure-radiance-environment ()
   "Ensure RADIANCE environment is properly configured for persistence"
   (if (radiance:environment)
-      (format t "~2&Looks like default environment: ~A~2%" (radiance:environment))
+      (format t "~2&Startup default environment: ~A~2%" (radiance:environment))
       (progn
         (setf (radiance:environment) "asteroid")
         (format t "~2&Set environment to: ~A~2%" (radiance:environment))))
@@ -1030,6 +1030,13 @@
             ":static"
             (radiance:environment-directory (radiance-core:environment) :static)))
 
+(defun start-slynk-server-in-new-thread (&optional (port 4009))
+  "Starts a Slynk server in a new thread on the specified port."
+  (bt:make-thread (lambda ()
+                    (format t "~&Starting Slynk server on port ~a in a new thread.~%" port)
+                    (slynk:create-server :port port :dont-close t))
+                  :name (format nil "Slynk Server Thread on Port ~a" port)))
+
 (defun -main (&optional args (debug t))
   (declare (ignorable args))
   (when (uiop:getenvp "ASTEROID_STREAM_URL")
@@ -1038,9 +1045,10 @@
   (format t "~%🎵 ASTEROID RADIO - Music for Hackers 🎵~%")
   (format t "Using stream server at ~a~%" *stream-base-url*)
 
-  (format t "Starting RADIANCE web server...~%")
   (when debug
-    (slynk:create-server :port 4009 :dont-close t))
+    (start-slynk-server-in-new-thread 4009))  
+
+  (format t "Starting RADIANCE web server...~%")
   
   ;; Ensure proper environment setup before starting
   (ensure-radiance-environment)
