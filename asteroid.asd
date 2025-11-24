@@ -24,7 +24,7 @@
                :drakma
                ;; radiance interfaces
                :i-log4cl
-               ;; :i-postmodern
+               :i-postmodern
                :r-clip
                :r-data-model
                :r-simple-profile
