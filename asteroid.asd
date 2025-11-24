@@ -28,6 +28,9 @@
                :bordeaux-threads
                :drakma
                ;; radiance interfaces
+               :i-log4cl
+               :i-postmodern
+               :r-clip
                :r-data-model
                (:interface :auth)
                (:interface :database)
