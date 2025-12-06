@@ -1,0 +1,144 @@
+#EXTM3U
+#PLAYLIST:Escape Velocity - A Christmas Journey Through Space
+#PHASE:Escape Velocity
+#DURATION:12 hours (approx)
+#CURATOR:Asteroid Radio
+#DESCRIPTION:A festive 12-hour voyage blending Christmas classics with ambient, IDM, and space music for the holiday season
+
+# === PHASE 1: WINTER AWAKENING (Ambient Beginnings) ===
+#EXTINF:-1,Brian Eno - Snow
+/app/music/Brian Eno/2020 - Roger Eno and Brian Eno - Mixing Colours/09 Snow.flac
+#EXTINF:-1,Brian Eno - Wintergreen
+/app/music/Brian Eno/2020 - Roger Eno and Brian Eno - Mixing Colours/04 Wintergreen.flac
+#EXTINF:-1,Proem - Winter Wolves
+/app/music/Proem - 2018 Modern Rope (WEB)/01. Winter Wolves.flac
+#EXTINF:-1,Tim Hecker - Winter's Coming
+/app/music/Tim Hecker - The North Water Original Score (2021 - WEB - FLAC)/Tim Hecker - The North Water (Original Score) - 10 Winter's Coming.flac
+#EXTINF:-1,Biosphere - Drifter
+/app/music/Biosphere - The Petrified Forest (2017) - CD FLAC/01. Biosphere - Drifter.flac
+#EXTINF:-1,Dead Voices On Air - On Winters Gibbet
+/app/music/Dead Voices On Air - Ghohst Stories (FLAC)/02 - On Winters Gibbet.flac
+#EXTINF:-1,Color Therapy - Wintering
+/app/music/Color Therapy - Mr. Wolf Is Dead (2015) WEB FLAC/12 - Wintering.flac
+
+# === PHASE 2: CHRISTMAS ARRIVAL (TSO Introduction) ===
+#EXTINF:-1,Trans-Siberian Orchestra - The Ghosts Of Christmas Eve
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/01 The Ghosts Of Christmas Eve.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas In The Air
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/14 Christmas In The Air.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Canon
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/08 Christmas Canon.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Appalachian Snowfall
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/11 Appalachian Snowfall.flac
+#EXTINF:-1,Trans-Siberian Orchestra - The Snow Came Down
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/13 The Snow Came Down.flac
+
+# === PHASE 3: AMBIENT INTERLUDE (Space & Atmosphere) ===
+#EXTINF:-1,Biosphere - 10 Snurp 1937
+/app/music/Biosphere - Sound Installations -2000-2009 [FLAC]/Biosphere - Sound Installations -2000-2009- - 10 Snurp 1937.flac
+#EXTINF:-1,Biosphere - 05 Fluvialmorphologie
+/app/music/Biosphere - Sound Installations -2000-2009 [FLAC]/Biosphere - Sound Installations -2000-2009- - 05 Fluvialmorphologie.flac
+#EXTINF:-1,God is an Astronaut - Winter Dusk-Awakening
+/app/music/God is an Astronaut - Epitaph (2018) WEB FLAC/03. Winter Dusk-Awakening.flac
+#EXTINF:-1,Proem - Snow Drifts
+/app/music/Proem - Twelve Tails-(2021) @FLAC [16-48]/11 - Snow Drifts.flac
+#EXTINF:-1,Proem - Stick to Music Snowflake
+/app/music/Proem - Until Here for Years (n5md, 2019) flac/04 - Stick to Music Snowflake.flac
+#EXTINF:-1,Four Tet - 04 Tremper
+/app/music/Four Tet - New Energy {CD} [FLAC] (2017)/04 Tremper.flac
+
+# === PHASE 4: CHRISTMAS EVE STORIES ===
+#EXTINF:-1,Trans-Siberian Orchestra - First Snow (Instrumental)
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/Christmas Eve and Other Stories/04 First Snow (Instrumental).flac
+#EXTINF:-1,Trans-Siberian Orchestra - The Silent Nutcracker (Instrumental)
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/Christmas Eve and Other Stories/05 The Silent Nutcracker (Instrumental).flac
+#EXTINF:-1,Trans-Siberian Orchestra - A Mad Russian's Christmas (Instrumental)
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/Christmas Eve and Other Stories/06 A Mad Russian's Christmas (Instrumental).flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Eve,Sarajevo 12,24 (Instrumental)
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/Christmas Eve and Other Stories/08 Christmas Eve,Sarajevo 12,24 (Instrumental).flac
+#EXTINF:-1,Trans-Siberian Orchestra - This Christmas Day
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/Christmas Eve and Other Stories/14 This Christmas Day.flac
+
+# === PHASE 5: ELECTRONIC DREAMS (IDM & Ambient) ===
+#EXTINF:-1,Autechre - NTS Session 1-005-Autechre-carefree counter dronal
+/app/music/Autechre - 2018 - NTS Session 1/NTS Session 1-005-Autechre-carefree counter dronal.flac
+#EXTINF:-1,Clark - Living Fantasy
+/app/music/Clark - Death Peak (2017) [FLAC]/08 - Living Fantasy.flac
+#EXTINF:-1,Clark - My Machines (Clark Remix)
+/app/music/Clark - Feast Beast (2013) [24 Bit WEB FLAC] [16-44]/1.17. Battles - My Machines (Clark Remix).flac
+#EXTINF:-1,Plaid - Dancers
+/app/music/Plaid - Polymer (2019) [WEB FLAC]/07 - Dancers.flac
+#EXTINF:-1,Faux Tales - Avalon
+/app/music/Faux Tales - 2015 - Kairos [FLAC] {Kensai Records KNS006 WEB}/3 - Avalon.flac
+#EXTINF:-1,Color Therapy - Expect Delays (feat. Ulrich Schnauss)
+/app/music/Color Therapy - Mr. Wolf Is Dead (2015) WEB FLAC/11 - Expect Delays (feat. Ulrich Schnauss).flac
+
+# === PHASE 6: THE LOST CHRISTMAS EVE ===
+#EXTINF:-1,Trans-Siberian Orchestra - The Lost Christmas Eve
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/02 The Lost Christmas Eve.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Dreams
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/03 Christmas Dreams.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Wizards in Winter
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/04 Wizards in Winter.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Concerto
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/07 Christmas Concerto.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Queen Of The Winter Night
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/08 Queen Of The Winter Night.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Nights In Blue
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/09 Christmas Nights In Blue.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Jazz
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/10 Christmas Jazz.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Jam
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/11 Christmas Jam.flac
+
+# === PHASE 7: CLASSICAL WINTER (Nutcracker & More) ===
+#EXTINF:-1,Various Artists - Dance of the Sugar-Plum Fairy
+/app/music/Various Artists - The 50 Darkest Pieces of Classical Music (2011) - FLAC/CD 1/02 - Tchaikovsky - The Nutcracker - Dance of the Sugar-Plum Fairy.flac
+#EXTINF:-1,Quaeschning and Ulrich Schnauss - Thirst
+/app/music/Quaeschning and Ulrich Schnauss - Synthwaves (2017) {vista003, GER, CD} [FLAC]/06 - Thirst.flac
+#EXTINF:-1,Proem - 04. Drawing Room Anguish
+/app/music/Proem - 2018 Modern Rope (WEB)/04. Drawing Room Anguish.flac
+#EXTINF:-1,Dead Voices On Air - 07. Dogger Doorlopende Split
+/app/music/Dead Voices On Air - Frankie Pett En De Onderzeer Boten (2017) web/07. Dogger Doorlopende Split.flac
+
+# === PHASE 8: WISDOM & REFLECTION ===
+#EXTINF:-1,Trans-Siberian Orchestra - What Is Christmas
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/13 What Is Christmas.flac
+#EXTINF:-1,Trans-Siberian Orchestra - The Wisdom Of Snow
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/15 The Wisdom Of Snow.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Bells, Carousels & Time
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/18 Christmas Bells, Carousels & Time.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas Canon Rock
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Lost Christmas Eve/21 Christmas Canon Rock.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Midnight Christmas Eve
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/05 Midnight Christmas Eve.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Dream Child (A Christmas Dream)
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/15 Dream Child (A Christmas Dream).flac
+
+# === PHASE 9: DEEP SPACE JOURNEY (Extended Ambient) ===
+#EXTINF:-1,Dead Voices On Air - Red Howls
+/app/music/Dead Voices On Air - Ghohst Stories (FLAC)/01 - Red Howls.flac
+#EXTINF:-1,Cut Copy - Airborne
+/app/music/Cut Copy - Haiku From Zero (2017) [FLAC] {2557864014}/05 - Airborne.flac
+#EXTINF:-1,Owl City - 01 Hot Air Balloon
+/app/music/Owl City - Ocean Eyes (Deluxe Edition) [Flac,Cue,Logs]/Disc 2/01 Hot Air Balloon.flac
+#EXTINF:-1,VA - What Is Loneliness (feat. Danny Claire) [Skylex Radio Edit]
+/app/music/VA - Melodic Vocal Trance 2017/24. Airborn, Bogdan Vix & KeyPlayer - What Is Loneliness (feat. Danny Claire) [Skylex Radio Edit].flac
+#EXTINF:-1,VA - Winter Took Over (Radio Edit)
+/app/music/VA - Melodic Vocal Trance 2017/22. Bluskay, KeyPlayer & Esmee Bor Stotijn - Winter Took Over (Radio Edit).flac
+#EXTINF:-1,Alison Krauss and Union Station - My Opening Farewell
+/app/music/Alison Krauss and Union Station - Paper Airplane (flac)/11 - Alison Krauss & Union Station - My Opening Farewell.flac
+#EXTINF:-1,Bedouin Soundclash - Money Worries (E-Clair Refix)
+/app/music/Bedouin Soundclash - Sounding a Mosaic (2004) [FLAC] {SD1267}/14 - Money Worries (E-Clair Refix).flac
+
+# === PHASE 10: RETURN TO WINTER (Closing Circle) ===
+#EXTINF:-1,Brian Eno - Snow
+/app/music/Brian Eno/2020 - Roger Eno and Brian Eno - Mixing Colours/09 Snow.flac
+#EXTINF:-1,Proem - Winter Wolves
+/app/music/Proem - 2018 Modern Rope (WEB)/01. Winter Wolves.flac
+#EXTINF:-1,God is an Astronaut - Winter Dusk-Awakening
+/app/music/God is an Astronaut - Epitaph (2018) WEB FLAC/03. Winter Dusk-Awakening.flac
+#EXTINF:-1,Trans-Siberian Orchestra - The Snow Came Down
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/13 The Snow Came Down.flac
+#EXTINF:-1,Trans-Siberian Orchestra - Christmas In The Air
+/app/music/Trans-Siberian Orchestra - The Christmas Trilogy (2004) [FLAC]/The Christmas Attic/14 Christmas In The Air.flac
