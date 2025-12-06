@@ -11,38 +11,40 @@
                                          :want-stream nil
                                          :basic-authorization '("admin" "asteroid_admin_2024"))))
       (when response
-          (let ((xml-string (if (stringp response)
-                                response
-                                (babel:octets-to-string response :encoding :utf-8))))
-            ;; Extract total listener count from root <listeners> tag (sums all mount points)
-            ;; Extract title from asteroid.mp3 mount point
-            (let* ((total-listeners (multiple-value-bind (match groups)
-                                        (cl-ppcre:scan-to-strings "<listeners>(\\d+)</listeners>" xml-string)
-                                      (if (and match groups)
-                                          (parse-integer (aref groups 0) :junk-allowed t)
-                                          0)))
-                   ;; Get title from asteroid.mp3 mount point
-                   (mount-start (cl-ppcre:scan "<source mount=\"/asteroid\\.mp3\">" xml-string))
-                   (title (if mount-start
-                             (let* ((source-section (subseq xml-string mount-start
-                                                           (or (cl-ppcre:scan "</source>" xml-string :start mount-start)
-                                                               (length xml-string)))))
-                               (multiple-value-bind (match groups)
-                                   (cl-ppcre:scan-to-strings "<title>(.*?)</title>" source-section)
-                                 (if (and match groups)
-                                     (aref groups 0)
-                                     "Unknown")))
-                             "Unknown")))
-              ;; Track recently played if title changed
-              (when (and title 
-                        (not (string= title "Unknown"))
-                        (not (equal title *last-known-track*)))
-                (setf *last-known-track* title)
-                (add-recently-played (list :title title
-                                          :timestamp (get-universal-time))))
-              `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
-                (:title . ,title)
-                (:listeners . ,total-listeners)))))))
+        (let ((xml-string (if (stringp response)
+                              response
+                              (babel:octets-to-string response :encoding :utf-8))))
+          ;; Extract total listener count from root <listeners> tag (sums all mount points)
+          ;; Extract title from asteroid.mp3 mount point
+          (let* ((total-listeners (multiple-value-bind (match groups)
+                                      (cl-ppcre:scan-to-strings "<listeners>(\\d+)</listeners>" xml-string)
+                                    (if (and match groups)
+                                        (parse-integer (aref groups 0) :junk-allowed t)
+                                        0)))
+                 ;; Get title from asteroid.mp3 mount point
+                 (mount-start (cl-ppcre:scan "<source mount=\"/asteroid\\.mp3\">" xml-string))
+                 (title (if mount-start
+                           (let* ((source-section (subseq xml-string mount-start
+                                                         (or (cl-ppcre:scan "</source>" xml-string :start mount-start)
+                                                             (length xml-string)))))
+                             (multiple-value-bind (match groups)
+                                 (cl-ppcre:scan-to-strings "<title>(.*?)</title>" source-section)
+                               (if (and match groups)
+                                   (aref groups 0)
+                                   "Unknown")))
+                           "Unknown")))
+            
+            ;; Track recently played if title changed
+            (when (and title 
+                      (not (string= title "Unknown"))
+                      (not (equal title *last-known-track*)))
+              (setf *last-known-track* title)
+              (add-recently-played (list :title title
+                                        :timestamp (get-universal-time))))
+            
+            `((:listenurl . ,(format nil "~a/asteroid.mp3" *stream-base-url*))
+              (:title . ,title)
+              (:listeners . ,total-listeners)))))))
 
 (define-api asteroid/partial/now-playing () ()
   "Get Partial HTML with live status from Icecast server"

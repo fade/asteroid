@@ -1,6 +1,6 @@
 #+TITLE: Stream Queue Control System
 #+AUTHOR: Asteroid Radio Development Team
-#+DATE: 2025-12-06
+#+DATE: 2025-10-26
 
 * Overview
 

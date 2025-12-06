@@ -4,13 +4,20 @@
   <title data-text="title">Asteroid Radio - Web Player</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/asteroid/static/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/asteroid/static/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/asteroid/static/favicon-16x16.png">
   <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
   <script src="/asteroid/static/js/auth-ui.js"></script>
   <script src="/asteroid/static/js/player.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🎵 WEB PLAYER</h1>
+    <h1 style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+      <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 50px; width: auto;">
+      <span>WEB PLAYER</span>
+      <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 50px; width: auto;">
+    </h1>
     <div class="nav">
       <a href="/asteroid">Home</a>
       <a href="/asteroid/profile">Profile</a>

@@ -173,7 +173,7 @@
             ;; Page request - redirect to login (redirect doesn't return)
             (progn
               (format t "Authentication failed - redirecting to login~%")
-              (radiance:redirect "/asteroid/login"))))))
+              (radiance:redirect "/login"))))))
 
 (defun require-role (role &key (api nil))
   "Require user to have a specific role.
@@ -284,7 +284,11 @@
 (defun initialize-user-system ()
   "Initialize the user management system"
   (format t "Initializing user management system...~%")
+  ;; Skip database check at startup - database queries hang with current setup
+  (format t "Skipping admin creation check - database already initialized~%")
+  (format t "User management initialization complete.~%")
   ;; Try immediate initialization first
+  #+nil
   (handler-case
       (progn
         (format t "Setting up user management...~%")

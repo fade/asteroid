@@ -1,0 +1,80 @@
+#+TITLE: Asteroid Low Orbit Playlist
+#+AUTHOR: Glenn
+#+DATE: 2025-11-06
+
+* Files
+
+- *Asteroid-Low-Orbit.m3u* - Original playlist with relative paths
+- *Asteroid-Low-Orbit-DOCKER.m3u* - Ready for VPS deployment (Docker container paths)
+
+* For VPS Deployment
+
+The =Asteroid-Low-Orbit-DOCKER.m3u= file is ready to use on the VPS (b612).
+
+** Installation Steps
+
+1. *Copy the file to the VPS:*
+
+   #+begin_src bash
+   scp scripts/Asteroid-Low-Orbit-DOCKER.m3u glenneth@b612:~/asteroid/stream-queue.m3u
+   #+end_src
+
+2. *Ensure music files exist on VPS:*
+   - Music should be in =/home/glenneth/Music/=
+   - The directory structure should match the paths in the playlist
+   - Example: =/home/glenneth/Music/Vector Lovers/City Lights From a Train.flac=
+
+3. *Restart Liquidsoap container:*
+
+   #+begin_src bash
+   cd ~/asteroid/docker
+   docker-compose restart liquidsoap
+   #+end_src
+
+** How It Works
+
+- *Host path*: =/home/glenneth/Music/= (on VPS)
+- *Container path*: =/app/music/= (inside Liquidsoap Docker container)
+- *Playlist paths*: Use =/app/music/...= because Liquidsoap reads from inside the container
+
+The docker-compose.yml mounts the music directory:
+
+#+begin_src yaml
+volumes:
+  - ${MUSIC_LIBRARY:-../music/library}:/app/music:ro
+#+end_src
+
+* Playlist Contents
+
+This playlist contains ~50 tracks of ambient/IDM music curated for Asteroid Radio's "Low Orbit" programming block.
+
+** Artists Featured
+
+- Vector Lovers
+- The Black Dog
+- Plaid
+- ISAN
+- Ochre
+- Arovane
+- Proem
+- Solvent
+- Bochum Welt
+- Mrs Jynx
+- Kettel
+- Christ.
+- Cepia
+- Datassette
+- Plant43
+- Claro Intelecto
+- E.R.P.
+- Der Zyklus
+- Dopplereffekt
+- And more...
+
+* Notes for Fade & easilok
+
+- This playlist is ready to deploy to b612
+- All paths are formatted for the Docker container setup
+- Music files need to be present in =/home/glenneth/Music/= on the VPS
+- The playlist can be manually copied to replace =stream-queue.m3u= when ready
+- No changes to the main project repository required

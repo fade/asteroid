@@ -51,7 +51,7 @@
 (define-page logout #@"/logout" ()
   "Handle user logout"
   (setf (session:field "user-id") nil)
-  (radiance:redirect "/asteroid/"))
+  (radiance:redirect "/"))
 
 ;; API: Get all users (admin only)
 (define-api asteroid/users () ()

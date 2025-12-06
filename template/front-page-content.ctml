@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title data-text="title">🎵 ASTEROID RADIO 🎵</title>
+    <title data-text="title">ASTEROID RADIO</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="/asteroid/static/favicon.ico">
@@ -26,6 +26,28 @@
       <!-- Spectrum Analyzer Canvas -->
       <div style="text-align: center; margin: 15px 0;">
         <canvas id="spectrum-canvas" width="800" height="100" style="max-width: 100%; border: 1px solid #00ff00; background: #000; border-radius: 4px;"></canvas>
+        <div style="margin-top: 8px; font-size: 0.9em;">
+          <label style="margin-right: 10px;">
+            Style: 
+            <select id="spectrum-style-selector" onchange="setSpectrumStyle(this.value)" style="padding: 3px; background: #000; color: #00ff00; border: 1px solid #00ff00;">
+              <option value="bars">Bars</option>
+              <option value="wave">Wave</option>
+              <option value="dots">Dots</option>
+            </select>
+          </label>
+          <label>
+            Theme: 
+            <select id="spectrum-theme-selector" onchange="setSpectrumTheme(this.value)" style="padding: 3px; background: #000; color: #00ff00; border: 1px solid #00ff00;">
+              <option value="monotone">Monotone</option>
+              <option value="green">Green</option>
+              <option value="blue">Blue</option>
+              <option value="purple">Purple</option>
+              <option value="red">Red</option>
+              <option value="amber">Amber</option>
+              <option value="rainbow">Rainbow</option>
+            </select>
+          </label>
+        </div>
       </div>
       
       <nav class="nav">
@@ -53,7 +75,7 @@
       <div id="now-playing" class="now-playing"></div>
       
       <!-- Recently Played Tracks -->
-      <div class="recently-played-panel">
+      <div id="recently-played-panel" class="recently-played-panel">
         <h3>Recently Played</h3>
         <div id="recently-played-list" class="recently-played-list">
           <p class="loading">Loading...</p>

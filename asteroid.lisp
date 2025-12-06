@@ -86,6 +86,26 @@
                     ("message" . "Library scan completed")
                     ("tracks-added" . ,tracks-added))))))
 
+(define-api asteroid/recently-played () ()
+  "Get the last 3 played tracks with MusicBrainz links"
+  (with-error-handling
+    (let ((tracks (get-recently-played)))
+      (api-output `(("status" . "success")
+                    ("tracks" . ,(mapcar (lambda (track)
+                                           (let* ((title (getf track :title))
+                                                  (timestamp (getf track :timestamp))
+                                                  (unix-timestamp (universal-time-to-unix timestamp))
+                                                  (parsed (parse-track-title title))
+                                                  (artist (getf parsed :artist))
+                                                  (song (getf parsed :song))
+                                                  (search-url (generate-music-search-url artist song)))
+                                             `(("title" . ,title)
+                                               ("artist" . ,artist)
+                                               ("song" . ,song)
+                                               ("timestamp" . ,unix-timestamp)
+                                               ("search_url" . ,search-url))))
+                                         tracks)))))))
+
 (define-api asteroid/admin/tracks () ()
   "API endpoint to view all tracks in database"
   (require-authentication)
@@ -486,8 +506,8 @@
   "Main front page"
   (clip:process-to-string 
    (load-template "front-page")
-   :title "🎵 ASTEROID RADIO 🎵"
-   :station-name "🎵 ASTEROID RADIO 🎵"
+   :title "ASTEROID RADIO"
+   :station-name "ASTEROID RADIO"
    :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
    :listeners "0"
    :stream-quality "128kbps MP3"
@@ -505,15 +525,15 @@
   "Frameset wrapper with persistent audio player"
   (clip:process-to-string 
    (load-template "frameset-wrapper")
-   :title "🎵 ASTEROID RADIO 🎵"))
+   :title "ASTEROID RADIO"))
 
 ;; Content frame - front page content without player
 (define-page front-page-content #@"/content" ()
   "Front page content (displayed in content frame)"
   (clip:process-to-string 
    (load-template "front-page-content")
-   :title "🎵 ASTEROID RADIO 🎵"
-   :station-name "🎵 ASTEROID RADIO 🎵"
+   :title "ASTEROID RADIO"
+   :station-name "ASTEROID RADIO"
    :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"
    :listeners "0"
    :stream-quality "128kbps MP3"
@@ -533,9 +553,83 @@
    :default-stream-encoding "audio/aac"))
 
 ;; Configure static file serving for other files
+;; BUT exclude ParenScript-compiled JS files
 (define-page static #@"/static/(.*)" (:uri-groups (path))
-  (serve-file (merge-pathnames (format nil "static/~a" path) 
-                               (asdf:system-source-directory :asteroid))))
+  (cond
+    ;; Serve ParenScript-compiled auth-ui.js
+    ((string= path "js/auth-ui.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-auth-ui-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating auth-ui.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve ParenScript-compiled front-page.js
+    ((string= path "js/front-page.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-front-page-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating front-page.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve ParenScript-compiled profile.js
+    ((string= path "js/profile.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-profile-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating profile.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve ParenScript-compiled users.js
+    ((string= path "js/users.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-users-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating users.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve ParenScript-compiled admin.js
+    ((string= path "js/admin.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-admin-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating admin.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve ParenScript-compiled player.js
+    ((string= path "js/player.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-player-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating player.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve ParenScript-compiled recently-played.js
+    ((string= path "js/recently-played.js")
+     (setf (content-type *response*) "application/javascript")
+     (handler-case
+         (let ((js (generate-recently-played-js)))
+           (if js js "// Error: No JavaScript generated"))
+       (error (e)
+         (format t "ERROR generating recently-played.js: ~a~%" e)
+         (format nil "// Error generating JavaScript: ~a~%" e))))
+    
+    ;; Serve regular static file
+    (t
+     (serve-file (merge-pathnames (format nil "static/~a" path) 
+                                  (asdf:system-source-directory :asteroid))))))
 
 ;; Status check functions
 (defun check-icecast-status ()
@@ -586,7 +680,7 @@
   (require-authentication)
   (clip:process-to-string 
    (load-template "users")
-   :title "🎵 ASTEROID RADIO - User Management"))
+   :title "ASTEROID RADIO - User Management"))
 
 ;; User Profile page (requires authentication)
 (define-page user-profile #@"/profile" ()

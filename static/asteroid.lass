@@ -1161,10 +1161,12 @@
                    :opacity 1
                    :background-color #(color-accented-black)))
 
-  ;; Live stream blink animation
+  ;; Live stream pulse animation (like old MacBook sleep indicator)
   (.live-stream-indicator
-   :animation "asteroid-blink 1s steps(5, start) infinite")
+   :animation "asteroid-pulse 2s ease-in-out infinite")
 
-  (:keyframes asteroid-blink
-              (to :visibility "hidden"))
+  (:keyframes asteroid-pulse
+              (0% :opacity 1)
+              (50% :opacity 0.3)
+              (100% :opacity 1))
 ) ;; End of let block

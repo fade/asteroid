@@ -635,12 +635,6 @@ function displayQueueSearchResults(results) {
 
 // Live stream info update
 async function updateLiveStreamInfo() {
-    // Don't update if stream is paused
-    const audioElement = document.getElementById('live-stream-audio');
-    if (audioElement && audioElement.paused) {
-        return;
-    }
-    
     try {
         const response = await fetch('/api/asteroid/partial/now-playing-inline');
         const contentType = response.headers.get("content-type");

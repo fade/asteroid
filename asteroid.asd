@@ -11,11 +11,15 @@
   :class "radiance:virtual-module"
   :depends-on (:slynk
                :lparallel
-               :alexandria
-               :cl-json
                :radiance
+               :i-log4cl
+               :r-clip
+               :r-simple-rate
+               :r-simple-profile
                :lass
                :parenscript
+               :cl-json
+               :alexandria
                :local-time
                :taglib
                :ironclad
@@ -24,12 +28,7 @@
                :bordeaux-threads
                :drakma
                ;; radiance interfaces
-               :i-log4cl
-               ;; :i-postmodern
-               :r-clip
                :r-data-model
-               :r-simple-profile
-               :r-simple-rate
                (:interface :auth)
                (:interface :database)
                (:interface :user))
@@ -41,8 +40,16 @@
                (:file "conditions")
                (:file "database")
                (:file "template-utils")
+               (:file "parenscript-utils")
                (:module :parenscript
-                :components ((:file "spectrum-analyzer")))
+                :components ((:file "recently-played")
+                             (:file "auth-ui")
+                             (:file "front-page")
+                             (:file "profile")
+                             (:file "users")
+                             (:file "admin")
+                             (:file "player")
+                             (:file "spectrum-analyzer")))
                (:file "stream-media")
                (:file "user-management")
                (:file "playlist-management")

@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Project Overview
 #+AUTHOR: Glenn Thompson & Brian O'Reilly (Fade)
-#+DATE: 2025-12-06
+#+DATE: 2025-10-26
 
 * 🎯 Mission
 
@@ -45,8 +45,6 @@ Asteroid Radio is a modern, web-based music streaming platform designed for hack
 - **HTML5** with semantic templates
 - **CSS3** with dark hacker theme
 - **JavaScript** for interactive features
-- **Parenscript** - Lisp-to-JavaScript compiler for spectrum analyzer
-- **Web Audio API** - Real-time audio visualization
 - **VT323 Font** for retro terminal aesthetic
 
 **Streaming:**
@@ -83,7 +81,6 @@ Asteroid Radio is a modern, web-based music streaming platform designed for hack
 - ✅ **Music Library** - Track management with pagination, search, and filtering
 - ✅ **User Playlists** - Create, manage, and play personal music collections
 - ✅ **Multiple Player Modes** - Inline, pop-out, and persistent frameset players
-- ✅ **Real-Time Spectrum Analyzer** - Visual audio frequency display using Web Audio API and Parenscript
 - ✅ **Stream Queue Control** - Admin control over broadcast stream queue (M3U-based)
 - ✅ **REST API** - Comprehensive JSON API with 15+ endpoints
 - ✅ **Music Streaming** - Multiple quality formats (128k MP3, 96k AAC, 64k MP3)

@@ -10,8 +10,7 @@
         <header-timeout>15</header-timeout>
         <source-timeout>10</source-timeout>
         <burst-on-connect>1</burst-on-connect>
-        <!-- Reduced from 65535 to minimize buffer accumulation during pause -->
-        <burst-size>8192</burst-size>
+        <burst-size>65535</burst-size>
     </limits>
 
     <authentication>

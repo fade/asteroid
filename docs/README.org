@@ -65,7 +65,6 @@ Pagination system for efficient browsing of large music libraries.
 - **Music Library**: Track management with pagination, search, and filtering
 - **Playlists**: User playlists with creation and playback
 - **Multiple Player Modes**: Inline, pop-out, and persistent frameset players
-- **Real-Time Spectrum Analyzer**: Visual audio frequency display using Web Audio API
 - **Stream Queue Control**: Admin control over broadcast stream queue
 - **Docker Streaming Infrastructure**: Icecast2 + Liquidsoap containers
 - **Three Quality Streams**: 128kbps MP3, 96kbps AAC, 64kbps MP3  
@@ -148,5 +147,5 @@ For detailed technical information, see the **[[file:PROJECT-OVERVIEW.org][Proje
 
 ---
 
-*Last Updated: 2025-12-06*
-*Documentation Version: 3.1*
+*Last Updated: 2025-10-26*
+*Documentation Version: 3.0*

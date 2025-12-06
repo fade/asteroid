@@ -94,6 +94,13 @@
                      (error-stream-type condition)
                      (error-message condition)))))
 
+(define-condition stream-connectivity-error (asteroid-error)
+  ()
+  (:documentation "Signaled when stream connectivity fails but plain text response is needed")
+  (:report (lambda (condition stream)
+             (format stream "Stream connectivity failed: ~a"
+                     (error-message condition)))))
+
 ;;; Error Handling Macros
 
 (defmacro with-error-handling (&body body)
@@ -144,6 +151,10 @@
                      ("message" . ,(error-message e)))
                    :message (error-message e)
                    :status 500))
+     (stream-connectivity-error (e)
+       ;; For endpoints that need plain text responses (like now-playing-inline)
+       (setf (header "Content-Type") "text/plain")
+       "Stream Offline")
      (error (e)
        (format t "Unexpected error: ~a~%" e)
        (api-output `(("status" . "error")

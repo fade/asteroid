@@ -1,5 +1,8 @@
 ;; -*-lisp-*-
 
+(unless *load-pathname*
+  (error "Please LOAD this file."))
+
 (defpackage #:asteroid-bootstrap
   (:nicknames #:ab)
   (:use #:cl)

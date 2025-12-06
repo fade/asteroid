@@ -1,6 +1,6 @@
 #+TITLE: Asteroid Radio - Project Development History
 #+AUTHOR: Asteroid Radio Development Team
-#+DATE: 2025-12-06
+#+DATE: 2025-10-26
 #+DESCRIPTION: Comprehensive history of the Asteroid Radio project from inception to present
 
 * Project Overview
@@ -11,8 +11,7 @@ Asteroid Radio is a web-based internet radio station built with Common Lisp, fea
 - *Backend*: Common Lisp (SBCL), Radiance web framework
 - *Streaming*: Icecast2, Liquidsoap
 - *Database*: PostgreSQL (configured, ready for migration)
-- *Frontend*: HTML5, JavaScript, Parenscript, CLIP templating, LASS (CSS in Lisp)
-- *Audio Visualization*: Web Audio API, Canvas
+- *Frontend*: HTML5, JavaScript, CLIP templating, LASS (CSS in Lisp)
 - *Infrastructure*: Docker, Docker Compose
 
 * Project Timeline
@@ -232,43 +231,19 @@ Asteroid Radio is a web-based internet radio station built with Common Lisp, fea
 - Synchronized with upstream/main
 - Prepared comprehensive documentation PR
 
-** Phase 9: Visual Audio Features (December 2025)
-
-*** 2025-12-06: Real-Time Spectrum Analyzer
-- *Lead*: Brian O'Reilly (Fade), Glenn Thompson
-- Implemented spectrum analyzer using Parenscript
-- Web Audio API integration for real-time visualization
-- Dynamic JavaScript generation via API endpoint
-- Canvas-based frequency display
-- Works across all player modes (inline, pop-out, frameset)
-- Lisp-to-JavaScript compilation for maintainability
-
 * Development Statistics
 
 ** Contributors (by commit count)
-1. Glenn Thompson (glenneth/Glenneth) - 236 commits
-2. Brian O'Reilly (Fade) - 109 commits
-3. Luis Pereira (easilok) - 63 commits
+1. Glenn Thompson (glenneth/Glenneth) - 135+ commits
+2. Brian O'Reilly (Fade) - 55+ commits
+3. Luis Pereira (easilok) - 23+ commits
 
-** Total Commits: 408 commits
-
-** Code Statistics
-- *Total Lines of Code*: ~9,300 lines
-- *Common Lisp*: 2,753 lines (.lisp, .asd)
-- *JavaScript*: 2,315 lines (.js)
-- *Templates*: 1,505 lines (.ctml)
-- *Other*: 2,720 lines (CSS, Shell, Python, etc.)
-- *Source Files*: 50 files
-
-** Release Information
-- *Current Version*: Development (pre-1.0)
-- *Tagged Releases*: None (continuous development)
-- *Deployment Status*: Production-ready
+** Total Commits: 213+ commits
 
 ** Active Development Period
 - Start: August 12, 2025
-- Current: December 6, 2025
-- Duration: ~4 months of active development
+- Current: November 1, 2025
+- Duration: ~2.75 months of active development
 
 * Major Features Implemented
 
@@ -291,7 +266,6 @@ Asteroid Radio is a web-based internet radio station built with Common Lisp, fea
 - ✅ Multiple quality options (AAC 96k, MP3 128k, MP3 64k)
 - ✅ ReplayGain volume normalization
 - ✅ Live now-playing information
-- ✅ Real-time spectrum analyzer visualization
 - ✅ Icecast integration
 - ✅ Liquidsoap DJ controls
 - ✅ Stream queue management
@@ -351,7 +325,7 @@ Asteroid Radio is a web-based internet radio station built with Common Lisp, fea
 - Parallel music scanning
 - Client-side caching
 
-* Current State (December 2025)
+* Current State (November 2025)
 
 ** Production Ready Features
 - Full music streaming platform
@@ -359,7 +333,6 @@ Asteroid Radio is a web-based internet radio station built with Common Lisp, fea
 - Admin control panel
 - DJ controls
 - Multiple player modes
-- Real-time spectrum analyzer
 - Complete Docker deployment (streams + application)
 - Multi-environment support with dynamic URLs
 - Comprehensive documentation
@@ -419,9 +392,9 @@ Asteroid Radio is a web-based internet radio station built with Common Lisp, fea
 
 * Conclusion
 
-Asteroid Radio has evolved from a simple concept into a full-featured internet radio platform in just 4 months of active development. The project demonstrates the power of Common Lisp for web development and the collaborative nature of open-source development.
+Asteroid Radio has evolved from a simple concept into a full-featured internet radio platform in just 2.75 months of active development. The project demonstrates the power of Common Lisp for web development and the collaborative nature of open-source development.
 
-With complete Docker deployment, real-time audio visualization, comprehensive documentation, and a growing feature set, Asteroid Radio is ready for production use while continuing to evolve with regular improvements, bug fixes, and new features based on user needs and technical requirements.
+With complete Docker deployment, comprehensive documentation, and a growing feature set, Asteroid Radio is ready for production use while continuing to evolve with regular improvements, bug fixes, and new features based on user needs and technical requirements.
 
 ** Project Links
 - Repository: https://github.com/fade/asteroid
@@ -430,4 +403,4 @@ With complete Docker deployment, real-time audio visualization, comprehensive do
 
 ---
 
-*Last Updated: 2025-12-06*
+*Last Updated: 2025-11-01*
