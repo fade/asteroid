@@ -8,9 +8,9 @@
       ;; (config :connections :default) :main
       (config :connections :main :host) "localhost"
       (config :connections :main :port) 5432
-      (config :connections :main :user) "asteroid"
-      (config :connections :main :pass) "asteroid_db_2025"
-      (config :connections :main :database) "asteroid")
+      (config :connections :main :user) (or (uiop:getenv "ASTEROID_DB_USER") "asteroid")
+      (config :connections :main :pass) (or (uiop:getenv "ASTEROID_DB_PASSWORD") "asteroid_db_2025")
+      (config :connections :main :database) (or (uiop:getenv "ASTEROID_DB_NAME") "asteroid"))
 
 ;; Alternative Docker configuration (uncomment when running Asteroid in Docker)
 ;; (setf (config :database :connection)
