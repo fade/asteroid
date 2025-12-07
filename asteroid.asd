@@ -6,7 +6,7 @@
   :author "Brian O'Reilly <fade@deepsky.com>"
   :license "GNU AFFERO GENERAL PUBLIC LICENSE V.3"
   :serial t
-  :version "0.0.0"
+  :version "1.0.0"
   :defsystem-depends-on (:radiance)
   :class "radiance:virtual-module"
   :depends-on (:slynk
