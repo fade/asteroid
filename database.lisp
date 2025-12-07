@@ -23,8 +23,8 @@
                              (user-id :integer)
                              (track-ids :text))))
   
-  (unless (db:collection-exists-p "users")
-    (db:create "users" '((username :text)
+  (unless (db:collection-exists-p "USERS")
+    (db:create "USERS" '((username :text)
                          (email :text)
                          (password-hash :text)
                          (role :text)
