@@ -35,9 +35,9 @@ services:
     image: postgres:16-alpine
     container_name: asteroid-postgres
     environment:
-      POSTGRES_DB: asteroid
-      POSTGRES_USER: asteroid
-      POSTGRES_PASSWORD: asteroid_db_2025
+      - POSTGRES_DB=${ASTEROID_DB_NAME:-asteroid}
+      - POSTGRES_USER=${ASTEROID_DB_USER:-asteroid}
+      - POSTGRES_PASSWORD=${ASTEROID_DB_PASSWORD:-asteroid_db_2025}
     ports:
       - "5432:5432"
     volumes:

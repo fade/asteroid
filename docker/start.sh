@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# source our environment for credentials
+. environment.sh
+
 # Simple start script for Docker directory
 # Run from: /home/glenn/Projects/Code/asteroid/docker/
 

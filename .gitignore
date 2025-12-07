@@ -56,3 +56,4 @@ logs/
 performance-logs/
 
 # Temporary files
+/static/asteroid.css
