@@ -82,14 +82,14 @@ CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 
 -- Create default admin user (password: admin - CHANGE THIS!)
 -- Password hash for 'admin' using bcrypt
-INSERT INTO users (username, email, password_hash, role, active)
-VALUES ('admin', 'admin@asteroid.radio', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqYqYqYqYq', 'admin', true)
-ON CONFLICT (username) DO NOTHING;
+-- INSERT INTO users (username, email, password_hash, role, active)
+-- VALUES ('admin', 'admin@asteroid.radio', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqYqYqYqYq', 'admin', true)
+-- ON CONFLICT (username) DO NOTHING;
 
 -- Create a test listener user
-INSERT INTO users (username, email, password_hash, role, active)
-VALUES ('listener', 'listener@asteroid.radio', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqYqYqYqYq', 'listener', true)
-ON CONFLICT (username) DO NOTHING;
+-- INSERT INTO users (username, email, password_hash, role, active)
+-- VALUES ('listener', 'listener@asteroid.radio', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqYqYqYqYq', 'listener', true)
+-- ON CONFLICT (username) DO NOTHING;
 
 -- Grant necessary permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO asteroid;
