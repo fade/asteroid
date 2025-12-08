@@ -311,3 +311,49 @@
              (error (e)
                (format t "Error initializing user system: ~a~%" e)))))
        :name "user-init"))))
+
+(defun dump-users (users)
+  (with-open-file (s "userdump.csv" :direction :output :if-exists :supersede)
+    (loop for user in users
+          do
+             (let* ((_id (dm:field user "_id"))
+                    (username (dm:field user "username"))
+                    (email (dm:field user "email"))
+                    (password-hash (dm:field user "password-hash"))
+                    (role (dm:field user "role"))
+                    (active (dm:field user "active"))
+                    (created-date (dm:field user "created-date"))
+                    (last-login (dm:field user "last-login")))
+               (format s "~&~{~A~^,~}~%" (list _id username email password-hash role active created-date last-login))
+               (finish-output s)))))
+
+(defun get-users-from-csv (filename)
+  (with-open-file (s filename :direction :input)
+    (let ((csv-data (cl-csv:read-csv s)))
+      csv-data)))
+
+(defun ensure-users (filename)
+  (let* ((users (get-users-from-csv filename)))
+    (princ users)
+    (loop 
+      for (_id username email password-hash role active created-date last-login) in users
+      do
+         (progn
+           (format t "~&_id: ~A, username: ~A, email: ~A password-hash: ~A role: ~A active: ~A created-date: ~A  last-login: ~A" _id username email password-hash role active created-date last-login)
+           (let ((user (dm:hull "USERS")))
+             (setf (dm:field user "username") username)
+             (setf (dm:field user "email") email)
+             (setf (dm:field user "password-hash") password-hash)
+             (setf (dm:field user "role") role)
+             (setf (dm:field user "active") active)
+             (setf (dm:field user "created-date") created-date)
+             (setf (dm:field user "last-login") nil)
+
+             (handler-case
+                 (db:with-transaction ()
+                   (format t "Inserting user: ~A~%" user)
+                   (let ((result (dm:insert user)))
+                     (format t "Insert result: ~A~%" result)
+                     (format t "User created: ~A (~A)~%" username role)))
+               (error (e)
+                 (format t "Error creating user ~A: ~A~%" username e))))))))

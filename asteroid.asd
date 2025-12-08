@@ -19,6 +19,7 @@
                :lass
                :parenscript
                :cl-json
+               :cl-csv
                :alexandria
                :local-time
                :taglib
