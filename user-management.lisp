@@ -313,6 +313,10 @@
        :name "user-init"))))
 
 (defun dump-users (users)
+  "Given a list of USER data model objects, dump them into a csv file,
+   userdump.csv. It is extremely unlikely you will ever have to do this,
+   but if you do, you will know why and you will be thankful that this
+   utility exists."
   (with-open-file (s "userdump.csv" :direction :output :if-exists :supersede)
     (loop for user in users
           do
@@ -328,11 +332,18 @@
                (finish-output s)))))
 
 (defun get-users-from-csv (filename)
+  "Given a csv file, userdump.csv by design, read the file, and return a
+   list of lists representing users in the radiance datamodel form."
   (with-open-file (s filename :direction :input)
     (let ((csv-data (cl-csv:read-csv s)))
       csv-data)))
 
 (defun ensure-users (filename)
+  "Given a csv file, userdump.csv by design, read the file, and create
+   the asteroid users contained in the csv in the asteroid database.
+   Originally, this was used to migrate users who signed up for
+   asteroid.radio while it was running sqlite, prior to the conversion to
+   postgresql."
   (let* ((users (get-users-from-csv filename)))
     (princ users)
     (loop 
