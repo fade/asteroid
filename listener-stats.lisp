@@ -34,6 +34,13 @@
 (defvar *active-listeners* (make-hash-table :test 'equal)
   "Hash table tracking active listeners by IP hash")
 
+;;; Web request listener tracking (real IPs from X-Forwarded-For)
+(defvar *web-listeners* (make-hash-table :test 'equal)
+  "Hash table tracking listeners by session - stores real IP from web requests")
+
+(defvar *web-listener-timeout* 300
+  "Seconds before a web listener is considered inactive (5 minutes)")
+
 ;;; Geo lookup cache (IP hash -> country code)
 (defvar *geo-cache* (make-hash-table :test 'equal)
   "Cache of IP hash to country code mappings")
@@ -56,6 +63,65 @@
                             (babel:string-to-octets 
                              (format nil "~a-~a" (get-universal-time) (random 1000000))))
     (subseq (ironclad:byte-array-to-hex-string (ironclad:produce-digest digest)) 0 32)))
+
+;;; Web Listener Tracking (using real IPs from X-Forwarded-For)
+
+(defun get-real-client-ip ()
+  "Get the real client IP from the current request.
+   Radiance automatically extracts X-Forwarded-For into (remote *request*)."
+  (when (boundp '*request*)
+    (let ((ip (remote *request*)))
+      ;; Filter out private/internal IPs
+      (when (and ip 
+                 (not (string= ip "unknown"))
+                 (not (search "172." ip))
+                 (not (search "192.168." ip))
+                 (not (search "10." ip))
+                 (not (search "127." ip)))
+        ip))))
+
+(defun register-web-listener ()
+  "Register current web request as an active listener.
+   Call this from player page or stream-related API endpoints."
+  (let ((ip (get-real-client-ip)))
+    (when ip
+      (let ((ip-hash (hash-ip-address ip)))
+        ;; Use IP hash as key (no session required)
+        (setf (gethash ip-hash *web-listeners*)
+              (list :ip ip
+                    :ip-hash ip-hash
+                    :last-seen (get-universal-time)))
+        ;; Do geo lookup and cache it
+        (unless (gethash ip-hash *geo-cache*)
+          (let ((geo (lookup-geoip ip)))
+            (when geo
+              (setf (gethash ip-hash *geo-cache*)
+                    (list :country (getf geo :country-code)
+                          :city (getf geo :city)
+                          :region (getf geo :region)
+                          :time (get-universal-time))))))
+        ip-hash))))
+
+(defun cleanup-stale-web-listeners ()
+  "Remove web listeners that haven't been seen recently."
+  (let ((cutoff (- (get-universal-time) *web-listener-timeout*))
+        (to-remove nil))
+    (maphash (lambda (ip-hash data)
+               (when (< (getf data :last-seen) cutoff)
+                 (push ip-hash to-remove)))
+             *web-listeners*)
+    (dolist (ip-hash to-remove)
+      (remhash ip-hash *web-listeners*))))
+
+(defun get-active-web-listener-ips ()
+  "Get list of real IPs from active web listeners."
+  (cleanup-stale-web-listeners)
+  (let ((ips nil))
+    (maphash (lambda (session-id data)
+               (declare (ignore session-id))
+               (push (getf data :ip) ips))
+             *web-listeners*)
+    (remove-duplicates ips :test #'string=)))
 
 ;;; GeoIP Lookup
 
@@ -350,7 +416,7 @@
               country))))))
 
 (defun collect-geo-stats-for-mount (mount)
-  "Collect geo stats for all listeners on a mount"
+  "Collect geo stats for all listeners on a mount (from Icecast - may show proxy IPs)"
   (let ((listclients-xml (fetch-icecast-listclients mount)))
     (when listclients-xml
       (let ((ips (extract-listener-ips listclients-xml))
@@ -365,6 +431,24 @@
                    (update-geo-stats country count))
                  country-counts)))))
 
+(defun collect-geo-stats-from-web-listeners ()
+  "Collect geo stats from web listeners (uses real IPs from X-Forwarded-For)"
+  (cleanup-stale-web-listeners)
+  (let ((country-counts (make-hash-table :test 'equal)))
+    ;; Count listeners by country from cached geo data
+    (maphash (lambda (session-id data)
+               (declare (ignore session-id))
+               (let* ((ip-hash (getf data :ip-hash))
+                      (cached-geo (gethash ip-hash *geo-cache*))
+                      (country (when cached-geo (getf cached-geo :country))))
+                 (when country
+                   (incf (gethash country country-counts 0)))))
+             *web-listeners*)
+    ;; Store each country's count
+    (maphash (lambda (country count)
+               (update-geo-stats country count))
+             country-counts)))
+
 (defun poll-and-store-stats ()
   "Single poll iteration: fetch stats and store"
   (let ((stats (fetch-icecast-stats)))
@@ -375,10 +459,9 @@
                 (listeners (getf source :listeners)))
             (when mount
               (store-listener-snapshot mount listeners)
-              ;; Collect geo stats if there are listeners
-              (when (and listeners (> listeners 0))
-                (collect-geo-stats-for-mount mount))
-              (log:debug "Stored snapshot: ~a = ~a listeners" mount listeners))))))))
+              (log:debug "Stored snapshot: ~a = ~a listeners" mount listeners)))))))
+  ;; Collect geo stats from web listeners (uses real IPs from X-Forwarded-For)
+  (collect-geo-stats-from-web-listeners))
 
 (defun stats-polling-loop ()
   "Main polling loop - runs in background thread"

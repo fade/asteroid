@@ -742,6 +742,8 @@
 ;; Front page - regular view by default
 (define-page front-page #@"/" ()
   "Main front page"
+  ;; Register this visitor for geo stats (captures real IP from X-Forwarded-For)
+  (register-web-listener)
   (clip:process-to-string 
    (load-template "front-page")
    :title "ASTEROID RADIO"
@@ -784,6 +786,8 @@
 ;; Persistent audio player frame (bottom frame)
 (define-page audio-player-frame #@"/audio-player-frame" ()
   "Persistent audio player frame (bottom of page)"
+  ;; Register this visitor for geo stats (captures real IP from X-Forwarded-For)
+  (register-web-listener)
   (clip:process-to-string 
    (load-template "audio-player-frame")
    :stream-base-url *stream-base-url*
