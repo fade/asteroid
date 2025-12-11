@@ -389,6 +389,11 @@ Built with:
 
 Special thanks to all contributors and the Common Lisp community.
 
+* Credits
+
+** Icons
+- [[https://www.flaticon.com/free-icons/cycle][Cycle icons created by meaicon - Flaticon]] (sync.png reconnect button)
+
 ---
 
 *Last Updated: 2025-10-26*
