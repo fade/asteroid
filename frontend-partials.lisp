@@ -75,7 +75,7 @@
               (:listeners . ,total-listeners)
               (:track-id . ,(find-track-by-title title))))))))
 
-(define-api-with-limit asteroid/partial/now-playing (&optional mount) ()
+(define-api-with-limit asteroid/partial/now-playing (&optional mount) (:limit 3 :timeout 1)
   "Get Partial HTML with live status from Icecast server.
    Optional MOUNT parameter specifies which stream to get metadata from.
    Always polls both streams to keep recently played lists updated."
@@ -105,7 +105,7 @@
              :connection-error t
              :stats nil))))))
 
-(define-api-with-limit asteroid/partial/now-playing-inline (&optional mount) ()
+(define-api-with-limit asteroid/partial/now-playing-inline (&optional mount) (:limit 3 :timeout 1)
   "Get inline text with now playing info (for admin dashboard and widgets).
    Optional MOUNT parameter specifies which stream to get metadata from."
   (with-error-handling
