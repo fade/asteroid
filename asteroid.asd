@@ -36,6 +36,7 @@
                :r-data-model
                (:interface :auth)
                (:interface :database)
+               (:interface :rate)
                (:interface :user))
   :pathname "./"
   :components ((:file "app-utils")
@@ -43,6 +44,7 @@
                (:module :config
                 :components ((:file radiance-postgres)))
                (:file "conditions")
+               (:file "limiter")
                (:file "database")
                (:file "template-utils")
                (:file "parenscript-utils")
