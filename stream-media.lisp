@@ -135,6 +135,7 @@
 ;; Simple file copy endpoint for manual uploads
 (define-page copy-files #@"/admin/copy-files" ()
   "Copy files from incoming directory to library"
+  (require-role :admin)
   (handler-case
       (let ((incoming-dir (merge-pathnames "music/incoming/" 
                                            (asdf:system-source-directory :asteroid)))
