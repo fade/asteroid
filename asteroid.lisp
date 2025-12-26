@@ -1128,16 +1128,16 @@
 |#
 
 ;; Auth status API endpoint
-(define-api asteroid/auth-status () ()
+(define-api-with-limit asteroid/auth-status () ()
   "Check if user is logged in and their role"
   (with-error-handling
     (let* ((user-id (session:field "user-id"))
            (user (when user-id (find-user-by-id user-id))))
       (api-output `(("loggedIn" . ,(if user t nil))
                     ("isAdmin" . ,(if (and user (user-has-role-p user :admin)) t nil))
-                    ("username" . ,(if user 
+                    ("username" . ,(if user
                                        (dm:field user "username")
-                                      nil)))))))
+                                       nil)))))))
 
 ;; User profile API endpoints
 (define-api asteroid/user/profile () ()
@@ -1199,66 +1199,66 @@
                                           artists)))))))
 
 ;; Register page (GET)
-(define-page register #@"/register" ()
+(define-page-with-limit register #@"/register" ()
   "User registration page"
-  (let ((username (radiance:post-var "username"))
-        (email (radiance:post-var "email"))
-        (password (radiance:post-var "password"))
-        (confirm-password (radiance:post-var "confirm-password")))
-    (if (and username password)
-        ;; Handle registration form submission
-        (cond
-          ;; Validate passwords match
-          ((not (string= password confirm-password))
-           (format t "Failed to register new user '~a': passwords do not match.~%" username)
-           (clip:process-to-string
-            (load-template "register")
-            :title "Asteroid Radio - Register"
-            :display-error "display: block;"
-            :display-success "display: none;"
-            :error-message "Passwords do not match"
-            :success-message ""))
-          
-          ;; Check if username already exists
-          ((find-user-by-username username)
-           (format t "Failed to register new user '~a': Username already exists.~%" username)
-           (clip:process-to-string
-            (load-template "register")
-            :title "Asteroid Radio - Register"
-            :display-error "display: block;"
-            :display-success "display: none;"
-            :error-message "Username already exists"
-            :success-message ""))
-          
-          ;; Create the user
-          (t
-           (if (create-user username email password :role :listener :active t)
-               (progn
-                 ;; Auto-login after successful registration
-                 (let ((user (find-user-by-username username)))
-                   (when user
-                     (let ((user-id (dm:id user)))
-                       (setf (session:field "user-id") user-id))))
-                 ;; Redirect new users to their profile page
-                 (radiance:redirect "/asteroid/profile"))
-               (clip:process-to-string
-                (load-template "register")
-                :title "Asteroid Radio - Register"
-                :display-error "display: block;"
-                :display-success "display: none;"
-                :error-message "Registration failed. Please try again."
-                :success-message ""))))
-        ;; Show registration form (no POST data)
-        (clip:process-to-string
-         (load-template "register")
-         :title "Asteroid Radio - Register"
-         :display-error "display: none;"
-         :display-success "display: none;"
-         :error-message ""
-         :success-message ""))))
+    (let ((username (radiance:post-var "username"))
+          (email (radiance:post-var "email"))
+          (password (radiance:post-var "password"))
+          (confirm-password (radiance:post-var "confirm-password")))
+      (if (and username password)
+          ;; Handle registration form submission
+          (cond
+            ;; Validate passwords match
+            ((not (string= password confirm-password))
+             (format t "Failed to register new user '~a': passwords do not match.~%" username)
+             (clip:process-to-string
+              (load-template "register")
+              :title "Asteroid Radio - Register"
+              :display-error "display: block;"
+              :display-success "display: none;"
+              :error-message "Passwords do not match"
+              :success-message ""))
 
-(define-page player #@"/player" ()
-  (clip:process-to-string 
+            ;; Check if username already exists
+            ((find-user-by-username username)
+             (format t "Failed to register new user '~a': Username already exists.~%" username)
+             (clip:process-to-string
+              (load-template "register")
+              :title "Asteroid Radio - Register"
+              :display-error "display: block;"
+              :display-success "display: none;"
+              :error-message "Username already exists"
+              :success-message ""))
+
+            ;; Create the user
+            (t
+             (if (create-user username email password :role :listener :active t)
+                 (progn
+                   ;; Auto-login after successful registration
+                   (let ((user (find-user-by-username username)))
+                     (when user
+                       (let ((user-id (dm:id user)))
+                         (setf (session:field "user-id") user-id))))
+                   ;; Redirect new users to their profile page
+                   (radiance:redirect "/asteroid/profile"))
+                 (clip:process-to-string
+                  (load-template "register")
+                  :title "Asteroid Radio - Register"
+                  :display-error "display: block;"
+                  :display-success "display: none;"
+                  :error-message "Registration failed. Please try again."
+                  :success-message ""))))
+          ;; Show registration form (no POST data)
+          (clip:process-to-string
+           (load-template "register")
+           :title "Asteroid Radio - Register"
+           :display-error "display: none;"
+           :display-success "display: none;"
+           :error-message ""
+           :success-message ""))))
+
+(define-page-with-limit player #@"/player" (:limit-group "public")
+  (clip:process-to-string
    (load-template "player")
    :title "Asteroid Radio - Web Player"
    :stream-base-url *stream-base-url*
@@ -1270,18 +1270,18 @@
    :player-status "Stopped"))
 
 ;; Player content frame (for frameset mode)
-(define-page player-content #@"/player-content" ()
+(define-page-with-limit player-content #@"/player-content" (:limit-group "public")
   "Player page content (displayed in content frame)"
-  (clip:process-to-string 
+  (clip:process-to-string
    (load-template "player-content")
    :title "Asteroid Radio - Web Player"
    :stream-base-url *stream-base-url*
    :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
    :default-stream-encoding "audio/aac"))
 
-(define-page popout-player #@"/popout-player" ()
+(define-page-with-limit popout-player #@"/popout-player" (:limit-group "public")
   "Pop-out player window"
-  (clip:process-to-string 
+  (clip:process-to-string
    (load-template "popout-player")
    :stream-base-url *stream-base-url*
    :curated-channel-name (get-curated-channel-name)
@@ -1289,27 +1289,27 @@
    :default-stream-encoding "audio/aac"))
 
 ;; About page (non-frameset mode)
-(define-page about-page #@"/about" ()
+(define-page-with-limit about-page #@"/about" (:limit-group "public")
   "About Asteroid Radio"
-  (clip:process-to-string 
+  (clip:process-to-string
    (load-template "about")
    :title "About - Asteroid Radio"))
 
 ;; About content (for frameset mode)
-(define-page about-content #@"/about-content" ()
+(define-page-with-limit about-content #@"/about-content" (:limit-group "public")
   "About page content (displayed in content frame)"
-  (clip:process-to-string 
+  (clip:process-to-string
    (load-template "about-content")
    :title "About - Asteroid Radio"))
 
 ;; Status content (for frameset mode)
-(define-page status-content #@"/status-content" ()
+(define-page-with-limit status-content #@"/status-content" (:limit-group "public")
   "Status page content (displayed in content frame)"
-  (clip:process-to-string 
+  (clip:process-to-string
    (load-template "status-content")
    :title "Status - Asteroid Radio"))
 
-(define-api asteroid/status () ()
+(define-api-with-limit asteroid/status () ()
   "Get server status"
   (api-output `(("status" . "running")
                 ("server" . "asteroid-radio")
@@ -1323,23 +1323,23 @@
                 ("stream-status" . "live"))))
 
 ;; Live stream status from Icecast
-(define-api asteroid/icecast-status () ()
+(define-api-with-limit asteroid/icecast-status () ()
   "Get live status from Icecast server"
   (with-error-handling
     (let* ((icecast-url (format nil "~a/admin/stats.xml" *stream-base-url*))
-           (response (drakma:http-request icecast-url 
-                                         :want-stream nil
-                                         :basic-authorization '("admin" "asteroid_admin_2024"))))
+           (response (drakma:http-request icecast-url
+                                          :want-stream nil
+                                          :basic-authorization '("admin" "asteroid_admin_2024"))))
       (if response
-          (let ((xml-string (if (stringp response) 
-                                response 
+          (let ((xml-string (if (stringp response)
+                                response
                                 (babel:octets-to-string response :encoding :utf-8))))
             ;; Simple XML parsing to extract source information
             ;; Look for <source mount="/asteroid.mp3"> sections and extract title, listeners, etc.
             (multiple-value-bind (match-start match-end)
                 (cl-ppcre:scan "<source mount=\"/asteroid\\.mp3\">" xml-string)
               (if match-start
-                  (let* ((source-section (subseq xml-string match-start 
+                  (let* ((source-section (subseq xml-string match-start
                                                  (or (cl-ppcre:scan "</source>" xml-string :start match-start)
                                                      (length xml-string))))
                          (titlep (cl-ppcre:all-matches "<title>" source-section))
@@ -1360,12 +1360,13 @@
 
 ;;; Listener Statistics API Endpoints
 
-(define-api asteroid/stats/current () ()
+(define-api-with-limit asteroid/stats/current () ()
   "Get current listener count from recent snapshots"
-  (let ((listeners (get-current-listeners)))
-    (api-output `(("status" . "success")
-                  ("listeners" . ,listeners)
-                  ("timestamp" . ,(get-universal-time))))))
+  (with-error-handling
+    (let ((listeners (get-current-listeners)))
+      (api-output `(("status" . "success")
+                    ("listeners" . ,listeners)
+                    ("timestamp" . ,(get-universal-time)))))))
 
 (define-api asteroid/stats/daily (&optional (days "30")) ()
   "Get daily listener statistics (admin only)"

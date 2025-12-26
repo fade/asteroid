@@ -4,7 +4,7 @@
 (in-package :asteroid)
 
 ;; Login page (GET)
-(define-page login #@"/login" ()
+(define-page-with-limit login #@"/login" ()
   "User login page"
   (let ((username (radiance:post-var "username"))
         (password (radiance:post-var "password")))
