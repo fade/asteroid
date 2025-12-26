@@ -39,7 +39,10 @@
 (define-api-format json (data)
   "JSON API format for Radiance"
   (setf (header "Content-Type") "application/json")
-  (cl-json:encode-json-to-string data))
+  (let ((status (gethash "status" data)))
+    (when (and status (boundp '*response*))
+      (setf (return-code *response*) status))
+    (cl-json:encode-json-to-string data)))
 
 ;; Set JSON as the default API format
 (setf *default-api-format* "json")
