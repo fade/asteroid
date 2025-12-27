@@ -7,90 +7,79 @@
 ;;; User Favorites - Track likes/ratings
 ;;; ==========================================================================
 
+(defun get-favorite (user-id track-id &optional track-title)
+  "Gets a user's favorite track by id or name"
+  (when (and user-id (or track-id track-title))
+    (let ((query (if track-id
+                     (db:query (:and (:= 'user-id user-id) (:= 'track-id track-id)))
+                     (when track-title
+                       (db:query (:and (:= 'user-id user-id) (:= 'track_title track-title)))))))
+      (when query
+        (dm:get-one "user_favorites" query)))))
+
 (defun add-favorite (user-id track-id &optional (rating 1) track-title)
   "Add a track to user's favorites with optional rating (1-5).
-   If track-id is nil but track-title is provided, stores by title."
-  (when (null user-id)
-    (return-from add-favorite nil))
-  (let ((rating-val (max 1 (min 5 (or rating 1)))))
-    (with-db
-      (if track-id
-          (postmodern:query
-           (:raw (format nil "INSERT INTO user_favorites (\"user-id\", \"track-id\", track_title, rating) VALUES (~a, ~a, ~a, ~a)"
-                         user-id track-id 
-                         (if track-title (format nil "$$~a$$" track-title) "NULL")
-                         rating-val)))
-          ;; No track-id, store by title only
-          (when track-title
-            (postmodern:query
-             (:raw (format nil "INSERT INTO user_favorites (\"user-id\", track_title, rating) VALUES (~a, $$~a$$, ~a)"
-                           user-id track-title rating-val))))))))
+   If track-id is nil but track-title is provided, stores by title.
+   When favorite already exists for user, returns it instead to avoid duplicates."
+  (when (and user-id (or track-id track-title))
+    (let ((favorite (get-favorite user-id track-id track-title)))
+      (if favorite
+          favorite
+          (let ((rating-val (max 1 (min 5 (or rating 1))))
+                (favorite (dm:hull "user_favorites")))
+            (setf (dm:field favorite "user-id") user-id)
+            (setf (dm:field favorite "rating") rating-val)
+            (when track-id
+              (setf (dm:field favorite "track-id") track-id))
+            (when track-title
+              (setf (dm:field favorite "track_title") track-title))
+            (dm:insert favorite))))))
 
 (defun remove-favorite (user-id track-id &optional track-title)
   "Remove a track from user's favorites by track-id or title"
-  (when (null user-id)
-    (return-from remove-favorite nil))
-  (with-db
-    (if track-id
-        (postmodern:query
-         (:raw (format nil "DELETE FROM user_favorites WHERE \"user-id\" = ~a AND \"track-id\" = ~a"
-                       user-id track-id)))
-        (when track-title
-          (postmodern:query
-           (:raw (format nil "DELETE FROM user_favorites WHERE \"user-id\" = ~a AND track_title = $$~a$$"
-                         user-id track-title)))))))
+  (let ((favorite (get-favorite user-id track-id track-title)))
+    (when favorite
+      (dm:delete favorite))))
 
 (defun update-favorite-rating (user-id track-id rating)
   "Update the rating for a favorited track"
   (when (null user-id)
     (return-from update-favorite-rating nil))
-  (let ((rating-val (max 1 (min 5 rating))))
-    (with-db
-      (postmodern:query
-       (:update 'user_favorites
-        :set 'rating rating-val
-        :where (:and (:= '"user-id" user-id)
-                     (:= '"track-id" track-id)))))))
+  (let ((rating-val (max 1 (min 5 rating)))
+        (favorite (get-favorite user-id track-id)))
+    (unless favorite
+      (error 'not-found-error
+             :message (format nil "Favorite #~a not found for user #~a"
+                              track-id
+                              user-id)))
+    (setf (dm:field favorite "rating-val") rating-val)
+    (data-model-save favorite)))
 
 (defun get-user-favorites (user-id &key (limit 50) (offset 0))
-  "Get user's favorite tracks - works with both track-id and title-based favorites"
-  (when (null user-id)
-    (return-from get-user-favorites nil))
-  (with-db
-    (postmodern:query
-     (:raw (format nil "SELECT _id, rating, \"created-date\", track_title, \"track-id\" FROM user_favorites WHERE \"user-id\" = ~a ORDER BY \"created-date\" DESC LIMIT ~a OFFSET ~a"
-                   user-id limit offset))
-     :alists)))
+ "Get user's favorite tracks - works with both track-id and title-based favorites"
+  (when user-id
+    (dm:get "user_favorites" (db:query (:= 'user-id user-id))
+            :amount limit
+            :skip offset
+            :sort '(("created-date" :DESC)))))
 
 (defun is-track-favorited (user-id track-id)
   "Check if a track is in user's favorites, returns rating or nil"
-  (when (null user-id)
-    (return-from is-track-favorited nil))
-  (with-db
-    (postmodern:query
-     (:raw (format nil "SELECT rating FROM user_favorites WHERE \"user-id\" = ~a AND \"track-id\" = ~a"
-                   user-id track-id))
-     :single)))
+  (when (and user-id track-id)
+    (dm:get-one "user_favorites" (db:query (:and (:= 'user-id user-id)
+                                                 (:= 'track-id track-id))))))
 
 (defun get-favorites-count (user-id)
   "Get total count of user's favorites"
-  (when (null user-id)
-    (return-from get-favorites-count 0))
-  (with-db
-    (postmodern:query
-     (:raw (format nil "SELECT COUNT(*) FROM user_favorites WHERE \"user-id\" = ~a" user-id))
-     :single)))
+  (when user-id
+    (db:count "user_favorites" (db:query (:= 'user-id user-id)))))
 
 (defun get-track-favorite-count (track-title)
   "Get count of how many users have favorited a track by title"
   (if (and track-title (not (string= track-title "")))
       (handler-case
-          (with-db
-            (let* ((escaped-title (sql-escape-string track-title))
-                   (result (postmodern:query
-                            (:raw (format nil "SELECT COUNT(*) FROM user_favorites WHERE track_title = '~a'" escaped-title))
-                            :single)))
-              (or result 0)))
+          (let ((result (db:count "user_favorites" (db:query (:= 'track_title track-title)))))
+            (or result 0))
         (error (e)
           (declare (ignore e))
           0))
@@ -185,12 +174,12 @@
            (favorites (get-user-favorites user-id)))
       (api-output `(("status" . "success")
                     ("favorites" . ,(or (mapcar (lambda (fav)
-                                                  `(("id" . ,(aget-profile "-ID" fav))
-                                                    ("track_id" . ,(aget-profile "TRACK-ID" fav))
-                                                    ("title" . ,(aget-profile "TRACK-TITLE" fav))
-                                                    ("rating" . ,(aget-profile "RATING" fav))))
-                                                favorites)
-                                        (list)))  ; Return empty list instead of null
+                                              `(("id" . ,(dm:id fav))
+                                                ("track_id" . ,(dm:field fav "track-id"))
+                                                ("title" . ,(dm:field fav "track_title"))
+                                                ("rating" . ,(dm:field fav "rating"))))
+                                            favorites)
+                                        (list)))
                     ("count" . ,(get-favorites-count user-id)))))))
 
 (define-api asteroid/user/favorites/add (&optional track-id rating title) ()
@@ -204,6 +193,9 @@
            (track-id-int (when (and track-id (not (string= track-id "")))
                            (parse-integer track-id :junk-allowed t)))
            (rating-int (if rating (parse-integer rating :junk-allowed t) 1)))
+      (unless user-id
+        (error 'authentication-error
+             :message "User not authenticated"))
       (format t "Adding favorite: user-id=~a track-id=~a title=~a~%" user-id track-id-int title)
       (add-favorite user-id track-id-int (or rating-int 1) title)
       (api-output `(("status" . "success")
