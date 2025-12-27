@@ -112,11 +112,11 @@
              (:raw (format nil "INSERT INTO listening_history (\"user-id\", \"track-id\", track_title, \"listen-duration\", completed) VALUES (~a, ~a, ~a, ~a, ~a)"
                            user-id track-id
                            (if track-title (format nil "'~a'" (sql-escape-string track-title)) "NULL")
-                           duration (if completed "TRUE" "FALSE"))))
+                           duration (if completed 1 0))))
             (when track-title
               (postmodern:query
                (:raw (format nil "INSERT INTO listening_history (\"user-id\", track_title, \"listen-duration\", completed) VALUES (~a, '~a', ~a, ~a)"
-                             user-id (sql-escape-string track-title) duration (if completed "TRUE" "FALSE"))))))))))
+                             user-id (sql-escape-string track-title) duration (if completed 1 0))))))))))
 
 (defun get-listening-history (user-id &key (limit 20) (offset 0))
   "Get user's listening history - works with title-based history"
