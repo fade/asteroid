@@ -4,10 +4,11 @@ PACKAGEUTILS=asteroid.app-utils
 OUT=asteroid
 ENTRY=-main
 BROWN_MM="Nil"
+BUILD_FLAGS ?= ""
 
 .PHONY: $(OUT)
 $(OUT): clean
-	sbcl --load build-asteroid.lisp
+	sbcl $(BUILD_FLAGS) --load build-asteroid.lisp
 
 quicklisp-manifest.txt: *.asd
 	sbcl --non-interactive \

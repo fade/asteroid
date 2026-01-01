@@ -16,21 +16,24 @@ RUN curl -O https://beta.quicklisp.org/quicklisp.lisp
 # Installs quicklisp and radiance
 RUN sbcl --eval "(load \"quicklisp.lisp\")" \
 	 --eval "(quicklisp-quickstart:install)" \
-  	 --eval "(ql-dist:install-dist \"http://dist.shirakumo.org/shirakumo.txt\" :prompt nil)" \
+	 --eval "(ql-dist:install-dist \"http://dist.shirakumo.org/shirakumo.txt\" :prompt nil)" \
 	 --eval "(ql:quickload :radiance)"
 
 # Makes the project workdir known as a quicklisp project
-RUN mkdir -p $HOME/.config/common-lisp/source-registry.conf.d
+RUN mkdir -p "$HOME/.config/common-lisp/source-registry.conf.d"
 RUN echo '(:tree "/app/")' >> "$HOME/.config/common-lisp/source-registry.conf.d/projects.conf"
 
+# Adds radiance system configuration file
+RUN mkdir -p /root/.config/radiance/asteroid/radiance-core
+COPY docker/radiance-default.conf.lisp /root/.config/radiance/asteroid/radiance-core/radiance-core.conf.lisp
+
 # Builds Asteroid binary
+ARG BUILD_FLAGS
+ENV BUILD_FLAGS=${BUILD_FLAGS}
 RUN make
 
 # Links binary to path
 ENV PATH="$PATH:/app"
-
-# Adds radiance system configuration file
-COPY docker/radiance-default.conf.lisp $HOME/.config/radiance/default/radiance-core/radiance-core.conf.lisp
 
 # Application
 EXPOSE 8080

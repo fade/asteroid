@@ -3,6 +3,9 @@ services:
     build:
       context: ../
       dockerfile: Dockerfile.asteroid
+      # Uncomment for exit build on enter lisp debugger
+      # args:
+      #   - BUILD_FLAGS="--disable-debugger"
     image: asteroid/app
     container_name: asteroid
     environment:
