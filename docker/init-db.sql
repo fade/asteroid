@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS "USERS" (
     active integer DEFAULT 1,
     "created-date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "last-login" TIMESTAMP,
+    avatar_path TEXT,
     CONSTRAINT valid_role CHECK (role IN ('listener', 'dj', 'admin'))
 );
 
@@ -81,6 +82,165 @@ CREATE INDEX idx_playlist_tracks_track_id ON playlist_tracks(track_id);
 -- CREATE INDEX idx_sessions_user_id ON sessions(user_id);
 -- CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
 
+-- Listener snapshots table
+CREATE TABLE IF NOT EXISTS listener_snapshots (
+    _id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    mount VARCHAR(100) NOT NULL,
+    listener_count INTEGER NOT NULL DEFAULT 0
+);
+
+-- Create indexes for user snapshot queries
+CREATE INDEX idx_snapshots_timestamp ON listener_snapshots(timestamp);
+CREATE INDEX idx_snapshots_mount ON listener_snapshots(mount);
+
+-- Listener sessions: individual connection records (privacy-safe)
+CREATE TABLE IF NOT EXISTS listener_sessions (
+    _id SERIAL PRIMARY KEY,
+    session_id VARCHAR(64) UNIQUE NOT NULL,
+    session_start TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    session_end TIMESTAMP,
+    ip_hash VARCHAR(64) NOT NULL,  -- SHA256 hash, not reversible
+    country_code VARCHAR(2),
+    city VARCHAR(100),
+    region VARCHAR(100),
+    user_agent TEXT,
+    mount VARCHAR(100) NOT NULL,
+    duration_seconds INTEGER,
+    user_id INTEGER REFERENCES "USERS"(_id) ON DELETE SET NULL  -- Optional link to registered user
+);
+
+-- Create indexes for listener sessions queries
+CREATE INDEX idx_sessions_start ON listener_sessions(session_start);
+CREATE INDEX idx_sessions_ip_hash ON listener_sessions(ip_hash);
+CREATE INDEX idx_sessions_country ON listener_sessions(country_code);
+CREATE INDEX idx_sessions_user ON listener_sessions(user_id);
+
+-- Daily aggregated statistics (for efficient dashboard queries)
+CREATE TABLE IF NOT EXISTS listener_daily_stats (
+    _id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    mount VARCHAR(100) NOT NULL,
+    unique_listeners INTEGER DEFAULT 0,
+    peak_concurrent INTEGER DEFAULT 0,
+    total_listen_minutes INTEGER DEFAULT 0,
+    new_listeners INTEGER DEFAULT 0,
+    returning_listeners INTEGER DEFAULT 0,
+    avg_session_minutes DECIMAL(10,2),
+    UNIQUE(date, mount)
+);
+
+-- Create indexes for listener daily stats queries
+CREATE INDEX idx_daily_stats_date ON listener_daily_stats(date);
+
+-- Hourly breakdown for time-of-day analysis
+CREATE TABLE IF NOT EXISTS listener_hourly_stats (
+    _id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    hour INTEGER NOT NULL CHECK (hour >= 0 AND hour <= 23),
+    mount VARCHAR(100) NOT NULL,
+    unique_listeners INTEGER DEFAULT 0,
+    peak_concurrent INTEGER DEFAULT 0,
+    UNIQUE(date, hour, mount)
+);
+
+-- Create indexes for listener hourly stats queries
+CREATE INDEX idx_hourly_stats_date ON listener_hourly_stats(date);
+
+-- Geographic aggregates
+CREATE TABLE IF NOT EXISTS listener_geo_stats (
+    _id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    country_code VARCHAR(2) NOT NULL,
+    city VARCHAR(100),
+    listener_count INTEGER DEFAULT 0,
+    listen_minutes INTEGER DEFAULT 0,
+    UNIQUE(date, country_code, city)
+);
+
+-- Create indexes for listener geo stats queries
+CREATE INDEX idx_geo_stats_date ON listener_geo_stats(date);
+CREATE INDEX idx_geo_stats_country ON listener_geo_stats(country_code);
+
+-- Table for playlist schedules
+CREATE TABLE IF NOT EXISTS playlist_schedule (
+    _id SERIAL PRIMARY KEY,
+    hour INTEGER NOT NULL UNIQUE CHECK (hour >= 0 AND hour <= 23),
+    playlist VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User favorites table - tracks that users have liked/rated
+CREATE TABLE IF NOT EXISTS user_favorites (
+    _id SERIAL PRIMARY KEY,
+    "user-id" INTEGER NOT NULL REFERENCES "USERS"(_id) ON DELETE CASCADE,
+    "track-id" INTEGER,  -- Optional: references tracks(_id) when available
+    track_title TEXT,    -- Store title directly for title-based favorites
+    rating INTEGER DEFAULT 1 CHECK (rating >= 1 AND rating <= 5),
+    "created-date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for efficient queries
+CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites("user-id");
+CREATE INDEX IF NOT EXISTS idx_user_favorites_track_id ON user_favorites("track-id");
+CREATE INDEX IF NOT EXISTS idx_user_favorites_rating ON user_favorites(rating);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_favorites_unique ON user_favorites("user-id", COALESCE(track_title, ''));
+
+-- User listening history - per-user track play history
+CREATE TABLE IF NOT EXISTS listening_history (
+    _id SERIAL PRIMARY KEY,
+    "user-id" INTEGER NOT NULL REFERENCES "USERS"(_id) ON DELETE CASCADE,
+    "track-id" INTEGER,  -- Optional: references tracks(_id) when available
+    track_title TEXT,    -- Store title directly for title-based history
+    "listened-at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "listen-duration" INTEGER DEFAULT 0,  -- seconds listened
+    completed INTEGER DEFAULT 0           -- 1 if they listened to the whole track
+);
+
+-- Create indexes for efficient queries
+CREATE INDEX IF NOT EXISTS idx_listening_history_user_id ON listening_history("user-id");
+CREATE INDEX IF NOT EXISTS idx_listening_history_track_id ON listening_history("track-id");
+CREATE INDEX IF NOT EXISTS idx_listening_history_listened_at ON listening_history("listened-at");
+
+-- Track requests table
+CREATE TABLE IF NOT EXISTS track_requests (
+    _id SERIAL PRIMARY KEY,
+    "user-id" INTEGER NOT NULL REFERENCES "USERS"(_id) ON DELETE CASCADE,
+    track_title TEXT NOT NULL,           -- Track title (Artist - Title format)
+    track_path TEXT,                      -- Optional: path to file if known
+    message TEXT,                         -- Optional message from requester
+    status TEXT DEFAULT 'pending',        -- pending, approved, rejected, played
+    "created-at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "reviewed-at" TIMESTAMP,              -- When admin reviewed
+    "reviewed-by" INTEGER REFERENCES "USERS"(_id),
+    "played-at" TIMESTAMP                 -- When it was actually played
+);
+
+-- Create indexes for efficient queries
+CREATE INDEX IF NOT EXISTS idx_track_requests_user_id ON track_requests("user-id");
+CREATE INDEX IF NOT EXISTS idx_track_requests_status ON track_requests(status);
+CREATE INDEX IF NOT EXISTS idx_track_requests_created ON track_requests("created-at");
+
+-- Adds table for user-created playlists with submission/review workflow
+CREATE TABLE IF NOT EXISTS user_playlists (
+    _id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES "USERS"(_id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    track_ids TEXT DEFAULT '[]',  -- JSON array of track IDs
+    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'rejected', 'scheduled')),
+    created_date INTEGER DEFAULT EXTRACT(EPOCH FROM NOW())::INTEGER,
+    submitted_date INTEGER,
+    reviewed_date INTEGER,
+    reviewed_by INTEGER REFERENCES "USERS"(_id),
+    review_notes TEXT
+);
+
+-- Create indexes for efficient queries
+CREATE INDEX IF NOT EXISTS idx_user_playlists_user_id ON user_playlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_playlists_status ON user_playlists(status);
+
 -- Create default admin user (password: admin - CHANGE THIS!)
 -- Password hash for 'admin' using bcrypt
 INSERT INTO "USERS" (username, email, "password-hash", role, active)
@@ -102,6 +262,24 @@ RETURNS TRIGGER AS $$
 BEGIN
     NEW.modified_date = CURRENT_TIMESTAMP;
     RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Data retention: function to clean old session data (GDPR compliance)
+CREATE OR REPLACE FUNCTION cleanup_old_listener_data(retention_days INTEGER DEFAULT 30)
+RETURNS INTEGER AS $$
+DECLARE
+    deleted_count INTEGER;
+BEGIN
+    -- Delete individual sessions older than retention period
+    DELETE FROM listener_sessions 
+    WHERE session_start < NOW() - (retention_days || ' days')::INTERVAL;
+    
+    GET DIAGNOSTICS deleted_count = ROW_COUNT;
+    
+    RAISE NOTICE 'Cleaned up % listener session records older than % days', deleted_count, retention_days;
+    
+    RETURN deleted_count;
 END;
 $$ LANGUAGE plpgsql;
 
