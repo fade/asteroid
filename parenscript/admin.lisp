@@ -1159,14 +1159,17 @@
                            (setf (ps:@ status-el inner-h-t-m-l) 
                                  "<span style=\"color: #ffaa00;\">🟡 Disabled</span>"))))
                    
-                   ;; Update available playlists dropdown
+                   ;; Update available playlists dropdown (preserve current selection)
                    (let ((playlist-select (ps:chain document (get-element-by-id "schedule-playlist")))
                          (available (ps:@ data available_playlists)))
                      (when (and playlist-select available)
-                       (let ((html "<option value=\"\">-- Select Playlist --</option>"))
+                       (let ((current-value (ps:@ playlist-select value))
+                             (html "<option value=\"\">-- Select Playlist --</option>"))
                          (ps:chain available
                                    (for-each (lambda (p)
-                                               (setf html (+ html "<option value=\"" p "\">" p "</option>")))))
+                                               (setf html (+ html "<option value=\"" p "\"" 
+                                                             (if (= p current-value) " selected" "")
+                                                             ">" p "</option>")))))
                          (setf (ps:@ playlist-select inner-h-t-m-l) html))))
                    
                    ;; Update schedule table with edit/delete buttons
