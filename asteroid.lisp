@@ -47,6 +47,14 @@
 ;; Set JSON as the default API format
 (setf *default-api-format* "json")
 
+(define-api || () ()
+  "Defines a catch all handler for non existing API routes
+   Overrides default radiance definition that invokes an error condition."
+  (api-output `(("status" . "error")
+                ("message" .  "It seems that you have hit an unidentified astronomical object."))
+              :message   "It seems that you have hit an unidentified astronomical object."
+              :status 404))
+
 ;; Recently played tracks management
 (defun add-recently-played (track-info &optional (stream-type :curated))
   "Add a track to the recently played list (max 3 tracks).
