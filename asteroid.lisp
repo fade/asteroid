@@ -1285,7 +1285,8 @@
 (define-page-with-limit player-content #@"/player-content" (:limit-group "public")
   "Player page content (displayed in content frame)"
   (clip:process-to-string
-   (load-template "player-content")
+   (load-template "player")
+   :framesetp t
    :title "Asteroid Radio - Web Player"
    :stream-base-url *stream-base-url*
    :default-stream-url (format nil "~a/asteroid.aac" *stream-base-url*)
