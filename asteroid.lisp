@@ -853,7 +853,8 @@
 (define-page front-page-content #@"/content" ()
   "Front page content (displayed in content frame)"
   (clip:process-to-string 
-   (load-template "front-page-content")
+   (load-template "front-page")
+   :framesetp t
    :title "ASTEROID RADIO"
    :station-name "ASTEROID RADIO"
    :status-message "🟢 LIVE - Broadcasting asteroid music for hackers"

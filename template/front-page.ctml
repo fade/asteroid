@@ -51,15 +51,30 @@
       </div>
       
       <nav class="nav">
-          <a href="/asteroid/">Home</a>
-          <a href="/asteroid/player">Player</a>
-          <a href="/asteroid/about">About</a>
-          <a href="/asteroid/status">Status</a>
-          <a href="/asteroid/profile" data-show-if-logged-in>Profile</a>
-          <a href="/asteroid/admin" data-show-if-admin>Admin</a>
-          <a href="/asteroid/login" data-show-if-logged-out>Login</a>
-          <a href="/asteroid/register" data-show-if-logged-out>Register</a>
-          <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
+        <c:if test="(not framesetp)">
+          <c:then>
+            <a href="/asteroid/">Home</a>
+            <a href="/asteroid/player">Player</a>
+            <a href="/asteroid/about">About</a>
+            <a href="/asteroid/status">Status</a>
+            <a href="/asteroid/profile" data-show-if-logged-in>Profile</a>
+            <a href="/asteroid/admin" data-show-if-admin>Admin</a>
+            <a href="/asteroid/login" data-show-if-logged-out>Login</a>
+            <a href="/asteroid/register" data-show-if-logged-out>Register</a>
+            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
+          </c:then>
+          <c:else>
+            <a href="/asteroid/content" target="_self">Home</a>
+            <a href="/asteroid/player-content" target="_self">Player</a>
+            <a href="/asteroid/about-content" target="_self">About</a>
+            <a href="/asteroid/status-content" target="_self">Status</a>
+            <a href="/asteroid/profile" target="_self" data-show-if-logged-in>Profile</a>
+            <a href="/asteroid/admin" target="_self" data-show-if-admin>Admin</a>
+            <a href="/asteroid/login" target="_self" data-show-if-logged-out>Login</a>
+            <a href="/asteroid/register" target="_self" data-show-if-logged-out>Register</a>
+            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
+          </c:else>
+        </c:if>
       </nav>
     </header>
 
@@ -77,43 +92,54 @@
             <option value="shuffle">🎲 Shuffle</option>
           </select>
         </div>
-        
-        <!-- Stream Quality Selector -->
-        <div class="live-stream-quality" style="margin-bottom: 15px;">
-          <label for="stream-quality" class="live-stream-label" ><strong>Quality:</strong></label>
-          <select id="stream-quality" onchange="changeStreamQuality()">
-            <option value="aac">AAC 96kbps (Recommended)</option>
-            <option value="mp3">MP3 128kbps (Compatible)</option>
-            <option value="low">MP3 64kbps (Low Bandwidth)</option>
-          </select>
-        </div>
-        
+
+        <c:if test="(not framesetp)">
+          <c:then>
+            <!-- Stream Quality Selector -->
+            <div class="live-stream-quality" style="margin-bottom: 15px;">
+              <label for="stream-quality" class="live-stream-label" ><strong>Quality:</strong></label>
+              <select id="stream-quality" onchange="changeStreamQuality()">
+                <option value="aac">AAC 96kbps (Recommended)</option>
+                <option value="mp3">MP3 128kbps (Compatible)</option>
+                <option value="low">MP3 64kbps (Low Bandwidth)</option>
+              </select>
+            </div>
+          </c:then>
+        </c:if>
+
         <input type="hidden" id="stream-base-url" lquery="(val stream-base-url)">
         <p><strong class="live-stream-label">Stream URL:</strong> <code id="stream-url" lquery="(text default-stream-url)"></code></p>
         <p><strong class="live-stream-label">Stream Quality:</strong> <span id="stream-format" lquery="(text default-stream-encoding-desc)"></span></p>
         <p><strong class="live-stream-label" class="live-stream-label">BROADCASTING:</strong> <span id="stream-status" style="">Asteroid music for Hackers</span></p>
 
-        <div style="display: flex; gap: 10px; justify-content: end; margin-bottom: 20px;">
-            <button id="reconnect-btn" class="btn btn-warning" onclick="reconnectStream()" style="font-size: 0.9em; display: none;">
+        <c:if test="(not framesetp)">
+          <c:then>
+            <div style="display: flex; gap: 10px; justify-content: end; margin-bottom: 20px;">
+              <button id="reconnect-btn" class="btn btn-warning" onclick="reconnectStream()" style="font-size: 0.9em; display: none;">
                 🔄 Reconnect Stream
-            </button>
-            <button id="popout-btn" class="btn btn-info" onclick="openPopoutPlayer()" style="font-size: 0.9em;">
+              </button>
+              <button id="popout-btn" class="btn btn-info" onclick="openPopoutPlayer()" style="font-size: 0.9em;">
                 🗗 Pop Out Player
-            </button>
-            <button id="frameset-btn" class="btn btn-secondary" onclick="enableFramesetMode()" style="font-size: 0.9em;">
+              </button>
+              <button id="frameset-btn" class="btn btn-secondary" onclick="enableFramesetMode()" style="font-size: 0.9em;">
                 🖼️ Enable Persistent Player
-            </button>
-        </div>
-        
-        <!-- Stream connection status -->
-        <div id="stream-status-indicator" style="display: none; padding: 8px; margin-bottom: 10px; border-radius: 4px; text-align: center;"></div>
-        
-        <div id="audio-container">
-          <audio id="live-audio" controls crossorigin="anonymous" style="width: 100%; margin: 10px 0;">
-            <source id="audio-source" lquery="(attr :src default-stream-url :type default-stream-encoding)">
-            Your browser does not support the audio element.
-          </audio>
-        </div>
+              </button>
+            </div>
+
+            <!-- Stream connection status -->
+            <div id="stream-status-indicator" style="display: none; padding: 8px; margin-bottom: 10px; border-radius: 4px; text-align: center;"></div>
+
+            <div id="audio-container">
+              <audio id="live-audio" controls crossorigin="anonymous" style="width: 100%; margin: 10px 0;">
+                <source id="audio-source" lquery="(attr :src default-stream-url :type default-stream-encoding)">
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          </c:then>
+          <c:else>
+            <p class="frame-enable-message"><em>The live stream player is now in the persistent bar at the bottom of the page</em></p>
+          </c:else>
+        </c:if>
       </div>
       
       <div id="now-playing" class="now-playing"></div>
