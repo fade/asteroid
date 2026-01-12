@@ -1316,11 +1316,18 @@
    :framesetp t
    :title "About - Asteroid Radio"))
 
+(define-page-with-limit status-page #@"/status" (:limit-group "public")
+  "Status page content"
+  (clip:process-to-string
+   (load-template "status")
+   :title "Status - Asteroid Radio"))
+
 ;; Status content (for frameset mode)
 (define-page-with-limit status-content #@"/status-content" (:limit-group "public")
   "Status page content (displayed in content frame)"
   (clip:process-to-string
-   (load-template "status-content")
+   (load-template "status")
+   :framesetp t
    :title "Status - Asteroid Radio"))
 
 (define-api-with-limit asteroid/status () ()

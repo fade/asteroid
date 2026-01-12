@@ -15,16 +15,32 @@
         <span>📡 SYSTEM STATUS</span>
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 50px; width: auto;">
       </h1>
+
       <nav class="nav">
-        <a href="/asteroid/frameset">Home</a>
-        <a href="/asteroid/player">Player</a>
-        <a href="/asteroid/about">About</a>
-        <a href="/asteroid/status">Status</a>
-        <a href="/asteroid/profile" data-show-if-logged-in>Profile</a>
-        <a href="/asteroid/admin" data-show-if-admin>Admin</a>
-        <a href="/asteroid/login" data-show-if-logged-out>Login</a>
-        <a href="/asteroid/register" data-show-if-logged-out>Register</a>
-        <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout" onclick="event.preventDefault(); fetch('/asteroid/logout').then(() => window.location.href='/asteroid/frameset');">Logout</a>
+        <c:if test="(not framesetp)">
+          <c:then>
+            <a href="/asteroid">Home</a>
+            <a href="/asteroid/player">Player</a>
+            <a href="/asteroid/about">About</a>
+            <a href="/asteroid/status">Status</a>
+            <a href="/asteroid/profile" data-show-if-logged-in>Profile</a>
+            <a href="/asteroid/admin" data-show-if-admin>Admin</a>
+            <a href="/asteroid/login" data-show-if-logged-out>Login</a>
+            <a href="/asteroid/register" data-show-if-logged-out>Register</a>
+            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
+          </c:then>
+          <c:else>
+            <a href="/asteroid/content" target="_self">Home</a>
+            <a href="/asteroid/player-content" target="_self">Player</a>
+            <a href="/asteroid/about-content" target="_self">About</a>
+            <a href="/asteroid/status-content" target="_self">Status</a>
+            <a href="/asteroid/profile" target="_self" data-show-if-logged-in>Profile</a>
+            <a href="/asteroid/admin" target="_self" data-show-if-admin>Admin</a>
+            <a href="/asteroid/login" target="_self" data-show-if-logged-out>Login</a>
+            <a href="/asteroid/register" target="_self" data-show-if-logged-out>Register</a>
+            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
+          </c:else>
+        </c:if>
       </nav>
     </header>
     
