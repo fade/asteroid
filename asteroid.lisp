@@ -1312,7 +1312,8 @@
 (define-page-with-limit about-content #@"/about-content" (:limit-group "public")
   "About page content (displayed in content frame)"
   (clip:process-to-string
-   (load-template "about-content")
+   (load-template "about")
+   :framesetp t
    :title "About - Asteroid Radio"))
 
 ;; Status content (for frameset mode)
