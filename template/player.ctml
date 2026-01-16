@@ -28,7 +28,7 @@
     <!-- Spectrum Analyzer Canvas -->
     <c:if test="framesetp">
       <c:then>
-        <div style="text-align: center; margin: 15px 0;">
+        <div style="text-align: center; margin: 15px 0; display: none;">
           <canvas id="spectrum-canvas" width="800" height="100" style="max-width: 100%; border: 1px solid #00ff00; background: #000; border-radius: 4px;"></canvas>
           <div style="margin-top: 8px; font-size: 0.9em;">
             <label style="margin-right: 10px;">

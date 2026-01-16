@@ -24,7 +24,7 @@
       <h3 class="page-subtitle">The Station at the End of Time</h3>
       
       <!-- Spectrum Analyzer Canvas -->
-      <div style="text-align: center; margin: 15px 0;">
+      <div style="text-align: center; margin: 15px 0;" lquery='(css :display (when framesetp "none") :margin (when framesetp "0"))'>
         <canvas id="spectrum-canvas" width="800" height="100" style="max-width: 100%; border: 1px solid #00ff00; background: #000; border-radius: 4px;"></canvas>
         <div style="margin-top: 8px; font-size: 0.9em;">
           <label style="margin-right: 10px;">
