@@ -1,0 +1,53 @@
+<c:let home-href='(if framesetp "content" "")'
+       player-href='(if framesetp "player-content" "player")'
+       about-href='(if framesetp "about-content" "about")'
+       status-href='(if framesetp "status-content" "status")'
+       current-user='(asteroid::get-current-user)'
+       framesetp='framesetp'>
+  <!-- Navbar definition -->
+  <nav class="nav">
+    <a lquery='(attr :href (eval (format nil "/asteroid/~a" home-href)) :target (when framesetp "_self"))'>
+      Home
+    </a>
+    <a lquery='(attr :href (eval (format nil "/asteroid/~a" player-href)) :target (when framesetp "_self"))'>
+      Player
+    </a>
+    <a lquery='(attr :href (eval (format nil "/asteroid/~a" about-href)) :target (when framesetp "_self"))'>
+      About
+    </a>
+    <a lquery='(attr :href (eval (format nil "/asteroid/~a" status-href)) :target (when framesetp "_self"))'>
+      Status
+    </a>
+    <c:when test="current-user">
+      <a href="/asteroid/profile"
+         lquery='(attr :target (when framesetp "_self"))'>
+        Profile
+      </a>
+    </c:when>
+    <c:when test='(equal "admin" (clip current-user :role))'>
+      <a href="/asteroid/admin"
+         lquery='(attr :target (when framesetp "_self"))'>
+        Admin
+      </a>
+    </c:when>
+    <c:when test="(not current-user)">
+      <a href="/asteroid/login"
+         lquery='(attr :target (when framesetp "_self"))'>
+        Login
+      </a>
+    </c:when>
+    <c:when test="(not current-user)">
+      <a href="/asteroid/register"
+         lquery='(attr :target (when framesetp "_self"))'>
+        Register
+      </a>
+    </c:when>
+    <c:when test="current-user">
+      <a href="/asteroid/logout"
+         lquery='(attr :target (when framesetp "_self"))'
+         class="btn-logout">
+        Logout
+      </a>
+    </c:when>
+  </nav>
+</c:let>
