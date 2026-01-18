@@ -157,6 +157,19 @@
   "Get the currently authenticated user's ID from session"
   (session:field "user-id"))
 
+(defun get-auth-state-js-var ()
+  "Builds a JavaScript variable definition with the current authentication state
+   for a request. The variable definition is a string ready to be injected in a
+   template file."
+  (let ((user (get-current-user)))
+    (format nil "var AUTHSTATE = ~a"
+            (if user
+              (cl-json:encode-json-to-string
+               `(("loggedIn" .  t)
+                 ("isAdmin" . ,(when (user-has-role-p user :admin) t))
+                 ("username" . ,(dm:field user "username"))))
+              "null"))))
+
 (defun require-authentication (&key (api nil))
   "Require user to be authenticated. 
    Returns T if authenticated, NIL if not (after emitting error response).
