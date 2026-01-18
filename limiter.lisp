@@ -2,6 +2,23 @@
 
 (in-package :asteroid)
 
+(defun cleanup-corrupted-rate-limits ()
+  "Clean up corrupted rate limit entries with negative amounts.
+   The r-simple-rate library has a bug where the reset condition only triggers
+   when amount >= 0, so negative amounts never reset. This function deletes
+   any corrupted entries so they can be recreated fresh."
+  (handler-case
+      (let ((deleted (db:remove 'simple-rate::tracking 
+                                (db:query (:< 'amount 0)))))
+        (when (and deleted (> deleted 0))
+          (l:info :rate-limiter "Cleaned up ~a corrupted rate limit entries" deleted)))
+    (error (e)
+      (l:warn :rate-limiter "Failed to cleanup rate limits: ~a" e))))
+
+(define-trigger db:connected ()
+  "Clean up any corrupted rate limit entries on startup"
+  (cleanup-corrupted-rate-limits))
+
 (defun render-rate-limit-error-page()
   (clip:process-to-string
    (load-template "error")
