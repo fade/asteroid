@@ -4,7 +4,8 @@
   (:use :cl)
   (:export :internal-disable-debugger)
   (:export :internal-quit
-   :pht))
+   :pht
+   :member-string))
 
 (in-package :asteroid.app-utils)
 
@@ -18,6 +19,11 @@
          (format t "~a~%" c)
          (internal-quit)))
     (setf *debugger-hook* #'internal-exit)))
+
+(defun member-string (item seq)
+  "Checkes if a string 'item' is a member of a list. Returns t or nil for the finding result."
+  (when (member item seq :test #'string-equal)
+      t))
 
 (defun internal-quit (&optional code)
   "Taken from the cliki"

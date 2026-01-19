@@ -6,25 +6,33 @@
        framesetp='framesetp'>
   <!-- Navbar definition -->
   <nav class="nav">
-    <a lquery='(attr :href (eval (format nil "/asteroid/~a" home-href)) :target (when framesetp "_self"))'>
-      Home
-    </a>
-    <a lquery='(attr :href (eval (format nil "/asteroid/~a" player-href)) :target (when framesetp "_self"))'>
-      Player
-    </a>
-    <a lquery='(attr :href (eval (format nil "/asteroid/~a" about-href)) :target (when framesetp "_self"))'>
-      About
-    </a>
-    <a lquery='(attr :href (eval (format nil "/asteroid/~a" status-href)) :target (when framesetp "_self"))'>
-      Status
-    </a>
-    <c:when test="current-user">
+    <c:unless test='(asteroid::member-string "home" (** :navbar-exclude))'>
+      <a lquery='(attr :href (eval (format nil "/asteroid/~a" home-href)) :target (when framesetp "_self"))'>
+        Home
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "player" (** :navbar-exclude))'>
+      <a lquery='(attr :href (eval (format nil "/asteroid/~a" player-href)) :target (when framesetp "_self"))'>
+        Player
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "about" (** :navbar-exclude))'>
+      <a lquery='(attr :href (eval (format nil "/asteroid/~a" about-href)) :target (when framesetp "_self"))'>
+        About
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "status" (** :navbar-exclude))'>
+      <a lquery='(attr :href (eval (format nil "/asteroid/~a" status-href)) :target (when framesetp "_self"))'>
+        Status
+      </a>
+    </c:unless>
+    <c:when test='(and current-user (not (asteroid::member-string "profile" (** :navbar-exclude))))'>
       <a href="/asteroid/profile"
          lquery='(attr :target (when framesetp "_self"))'>
         Profile
       </a>
     </c:when>
-    <c:when test='(equal "admin" (clip current-user :role))'>
+    <c:when test='(and (equal "admin" (clip current-user :role)) (not (asteroid::member-string "admin" (** :navbar-exclude))))'>
       <a href="/asteroid/admin"
          lquery='(attr :target (when framesetp "_self"))'>
         Admin
