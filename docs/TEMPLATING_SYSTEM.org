@@ -1,0 +1,160 @@
+#+TITLE: Templating System
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2026-01-17
+
+* Introduction
+
+The radiance ecosystem includes an HTML templating system that is built on top of [[https://quickdocs.org/clip][Clip]] and [[https://shinmera.github.io/lquery/][lquery]] for advanced costumization.
+
+While =clip= enables conditional logic on rendering parts in an HTML document, re-using the same tag mechanics, =lquery= enables dynamically setting of element properties with some lisp integrations.
+
+Dominating these tools enables some smarter approaches on page content building with conditional rendering and code reuse.
+
+* Clip mechanics
+
+** Conditionals
+
+Clip uses HTML tags for its logic and has 3 simple conditional directives: =if=, =when= and =unless=, that work exactly as their lisp counterparts, having the =test= attribute as the validator for truthness.
+
+The =if= check is accomplished by the =c:if= tag, and requires a =c:then= tag for the body of its branch. It also has =c:else= and =c:elseif= to enable multiple branching:
+
+#+begin_src html
+<c:if test='framesetp'>
+  <c:then>
+    <!-- HTML test true branch -->
+  </c:then>
+  <c:else>
+    <!-- HTML test false branch -->
+  </c:else>
+</c:if>
+#+end_src
+
+The above example tests for the truthness of the variable =framesetp= and executes the associate branch based on that. The =test= argument can, naturally, receive any kind of lisp syntax.
+
+The =c:when= and =c:unless= directives, like their lisp counterparts, only have a branch that is executed when the check of =test= argument value is true or false accordingly.
+
+*Note:* Clip also has =c:case= and =c:cond= conditionals that should work like they lisp counterparts but I didn't need them until now so I'll not try to explain them.
+
+** Data usage
+
+Using a variable content in the template engine is accomplished by the =lquery= tag attribute, which will be explained later. But as this is a tag attribute, it requires an HTML tag to be attached. To enable the possibility of inserting something anywhere on the HTML document, Clip supplies the =c:splice= tag, a virtual HTML node that is removed after rendering, leaving only the content inserted by =lquery=.
+
+The follow example inserts a textual value of the =content= variable directly into the HTML page:
+
+#+begin_src html
+<c:splice lquery='(text content)></c:splice>
+#+end_src
+
+However, a common use case is inserting external HTML rendered content in a different HTML document, for example, to reuse a navbar HTML partial in every page:
+
+#+begin_src html
+<c:splice lquery='(html navbar)></c:splice>
+#+end_src
+
+Those two usages are so frequently that Clip supplies shorhand aliases for both as the =c:s= and =c:h= tags:
+
+#+begin_src html
+<!-- Insert a textual value -->
+<c:s>content</c:s>
+
+<!-- Insert an HTML partial to render -->
+<c:h>navbar</c:h>
+#+end_src
+
+A great usage of this feature is our new navbar reusable HTML partial, that can be loaded from a speficic lisp function on any page:
+
+#+begin_src html
+<c:h>(asteroid::load-template "partial/navbar")</c:h>
+#+end_src
+
+*Note:* As far as I understand, the templating engine works on a different package, so refering to the =asteroid= package is always required inside a template to use defined functions.
+
+** Clipboard environments
+
+Clip uses the concept of environment as the data that is available to be used in the templating system.
+
+The =c:let= directive lets define a new clipboard environment directly on the template. This will supersede the default clipboard, so any useful data needs to also be added to the clipboard for easy access:
+
+#+begin_src html
+
+<c:let new-var='"hello"' forward='var'>
+  <!-- HTML content -->
+</c:let>
+
+#+end_src
+
+The above example defines a local =new-var= with the value ="hello"= and a local =forward= with the parent =var= variable content.
+
+Alternatively, if forwarding a variable to the new clipboard environment is not desired, the special =(** :var)= syntax can be used to access the parent clipboard.
+
+The =c:using= directive creates a new clipboard environment with the contents of an existing variable on the parent clipboard.
+
+#+begin_src html
+
+<c:using value='obj'>
+  <!-- HTML content using the 'obj.attribute1' value-->
+  <c:splice>attribute1</c:splice>
+</c:let>
+
+#+end_src
+
+The example creates a new clipboard environment inside the =c:using= attribute that has direct access to all properties of some structured variable =obj=. This tag transparently destructures any kind of composed data structure like =plists=, =alists= and =classes=.
+
+Like the simplicity of structural access of the =c:using= tag, the =clip= function enables the same easy of access in any template context. For example, the same splice of the previous example can be obtained with:
+
+#+begin_src html
+
+<c:s>(clip obj :attribute1)</c:s>
+
+#+end_src
+
+This approach is, clearly, more useful when a single value is wanted, while the previous when several values on the structured variable will be used.
+
+** Iterators
+
+Clip also has the =c:iterate= directive that iterates a sequence, and its body is rendered having the clipboard environment matching each element of that iteration. As I am yet to use this directive, I will leave its documentation to a later moment.
+
+* lquery mechanics
+
+The [[https://shinmera.github.io/lquery/][lquery]] library enables changing any property of an HTML node, being its =text= or =html= content, =css= styles, element attributes (=attr=) and assigned css classes.
+
+Its usage is very simple: an =lquery= attribute is added to an HTML document, and its value is a s-expression with an accepted funtion and the value for it to work on.
+
+The following topics present some basic accepted =lquery= functions in use on our templates.
+
+** HTML node content
+
+There are two basic =lquery= functions that change the content of the assigned HTML node:
+ - =html= renders HTML elements as child
+ - =text= sets a text content to the element
+
+
+The =lquery= s-expression accepts variable or lisp calls for any of the referred functions. For example, the following example sets the content of the =script= tag to the result of the  =(asteroid::get-auth-state-js-var)= function:
+
+#+begin_src html
+<script lquery='(text (asteroid::get-auth-state-js-var))'></script>
+#+end_src
+
+*Note:* the template render process works on a different package, so call to application defined functions needs to include the package name.
+
+** HTML node styling
+
+=lquery= also grants easy styling customization of an HTML node. HTML styling can be accomplished in two ways:
+- =css=, which sets the HTML =style= attribute of the element. It's called as a plist with all the properties to set.
+- css classes that can be added (=add-class=) or removed (=remove-class=)
+
+The following example adds the =display= and =marging= style properties to the document when the variable =framesetp= is true (=margin= is overwriten in this case):
+
+#+begin_src html
+<div style="margin: 15px 0;" lquery='(css :display (when framesetp "none") :margin (when framesetp "0"))'>
+#+end_src
+
+** HTML attributes
+
+The =attr= function of the =lquery= s-expression allows customization of any valid HTML node attribute. The following example sets two attributes of an anchor tag:
+- =href=, which uses the =eval= function to evaluate some lisp call
+- =target= which only has a value when the variable =framesetp= is true
+
+#+begin_src html
+<a lquery='(attr :href (eval (format nil "/asteroid/~a" status-href)) :target (when framesetp "_self"))'>
+#+end_src
