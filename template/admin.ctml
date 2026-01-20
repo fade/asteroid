@@ -5,19 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
-  <script src="/asteroid/static/js/auth-ui.js"></script>
+  <script lquery='(text (asteroid::get-auth-state-js-var))'></script>
   <script src="/asteroid/static/js/admin.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>🎛️ ADMIN DASHBOARD</h1>
-    <div class="nav">
-      <a href="/asteroid">Home</a>
-      <a href="/asteroid/player">Player</a>
-      <a href="/asteroid/profile">Profile</a>
-      <a href="/asteroid/admin/users">👥 Users</a>
-      <a href="/asteroid/logout" class="btn-logout">Logout</a>
-    </div>
+    <c:h>(asteroid::load-template "partial/navbar-admin")</c:h>
     
     <!-- System Status -->
     <div class="admin-section">

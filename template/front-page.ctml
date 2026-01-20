@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/asteroid/static/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/asteroid/static/favicon-16x16.png">
     <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
-  <script src="/asteroid/static/js/auth-ui.js"></script>
+  <script lquery='(text (asteroid::get-auth-state-js-var))'></script>
   <script src="/asteroid/static/js/front-page.js"></script>
   <script src="/asteroid/static/js/recently-played.js"></script>
   <script src="/api/asteroid/spectrum-analyzer.js"></script>
@@ -50,32 +50,7 @@
         </div>
       </div>
       
-      <nav class="nav">
-        <c:if test="(not framesetp)">
-          <c:then>
-            <a href="/asteroid/">Home</a>
-            <a href="/asteroid/player">Player</a>
-            <a href="/asteroid/about">About</a>
-            <a href="/asteroid/status">Status</a>
-            <a href="/asteroid/profile" data-show-if-logged-in>Profile</a>
-            <a href="/asteroid/admin" data-show-if-admin>Admin</a>
-            <a href="/asteroid/login" data-show-if-logged-out>Login</a>
-            <a href="/asteroid/register" data-show-if-logged-out>Register</a>
-            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
-          </c:then>
-          <c:else>
-            <a href="/asteroid/content" target="_self">Home</a>
-            <a href="/asteroid/player-content" target="_self">Player</a>
-            <a href="/asteroid/about-content" target="_self">About</a>
-            <a href="/asteroid/status-content" target="_self">Status</a>
-            <a href="/asteroid/profile" target="_self" data-show-if-logged-in>Profile</a>
-            <a href="/asteroid/admin" target="_self" data-show-if-admin>Admin</a>
-            <a href="/asteroid/login" target="_self" data-show-if-logged-out>Login</a>
-            <a href="/asteroid/register" target="_self" data-show-if-logged-out>Register</a>
-            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
-          </c:else>
-        </c:if>
-      </nav>
+      <c:h>(asteroid::load-template "partial/navbar")</c:h>
     </header>
 
     <main>

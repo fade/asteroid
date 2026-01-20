@@ -10,12 +10,8 @@
 <body>
   <div class="container">
     <h1>👥 USER MANAGEMENT</h1>
-    <div class="nav">
-      <a href="/asteroid">Home</a>
-      <a href="/asteroid/admin">Admin</a>
-      <a href="/asteroid/logout" class="btn-logout">Logout</a>
-    </div>
-    
+    <c:h>(asteroid::load-template "partial/navbar-admin")</c:h>
+
     <!-- User Statistics -->
     <div class="admin-section">
       <h2>User Statistics</h2>

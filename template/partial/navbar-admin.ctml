@@ -1,0 +1,41 @@
+<c:let home-href='(if framesetp "content" "")'
+       player-href='(if framesetp "player-content" "player")'
+       current-user='(asteroid::get-current-user)'
+       framesetp='framesetp'>
+  <!-- Navbar definition -->
+  <nav class="nav">
+    <c:unless test='(asteroid::member-string "home" (** :navbar-exclude))'>
+      <a lquery='(attr :href (eval (format nil "/asteroid/~a" home-href)) :target (when framesetp "_self"))'>
+        Home
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "player" (** :navbar-exclude))'>
+      <a lquery='(attr :href (eval (format nil "/asteroid/~a" player-href)) :target (when framesetp "_self"))'>
+        Player
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "profile" (** :navbar-exclude))'>
+      <a href="/asteroid/profile"
+         lquery='(attr :target (when framesetp "_self"))'>
+        Profile
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "admin" (** :navbar-exclude))'>
+      <a href="/asteroid/admin"
+         lquery='(attr :target (when framesetp "_self"))'>
+        Admin
+      </a>
+    </c:unless>
+    <c:unless test='(asteroid::member-string "users" (** :navbar-exclude))'>
+      <a href="/asteroid/admin/users"
+         lquery='(attr :target (when framesetp "_self"))'>
+        👥 Users
+      </a>
+    </c:unless>
+    <a href="/asteroid/logout"
+       lquery='(attr :target (when framesetp "_self"))'
+       class="btn-logout">
+      Logout
+    </a>
+  </nav>
+</c:let>

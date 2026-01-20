@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
-  <script src="/asteroid/static/js/auth-ui.js"></script>
+  <script lquery='(text (asteroid::get-auth-state-js-var))'></script>
 </head>
 <body>
   <div class="container">
@@ -16,34 +16,8 @@
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 50px; width: auto;">
       </h1>
 
-      <nav class="nav">
-        <c:if test="(not framesetp)">
-          <c:then>
-            <a href="/asteroid">Home</a>
-            <a href="/asteroid/player">Player</a>
-            <a href="/asteroid/about">About</a>
-            <a href="/asteroid/status">Status</a>
-            <a href="/asteroid/profile" data-show-if-logged-in>Profile</a>
-            <a href="/asteroid/admin" data-show-if-admin>Admin</a>
-            <a href="/asteroid/login" data-show-if-logged-out>Login</a>
-            <a href="/asteroid/register" data-show-if-logged-out>Register</a>
-            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
-          </c:then>
-          <c:else>
-            <a href="/asteroid/content" target="_self">Home</a>
-            <a href="/asteroid/player-content" target="_self">Player</a>
-            <a href="/asteroid/about-content" target="_self">About</a>
-            <a href="/asteroid/status-content" target="_self">Status</a>
-            <a href="/asteroid/profile" target="_self" data-show-if-logged-in>Profile</a>
-            <a href="/asteroid/admin" target="_self" data-show-if-admin>Admin</a>
-            <a href="/asteroid/login" target="_self" data-show-if-logged-out>Login</a>
-            <a href="/asteroid/register" target="_self" data-show-if-logged-out>Register</a>
-            <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
-          </c:else>
-        </c:if>
-      </nav>
-    </header>
-    
+      <c:h>(asteroid::load-template "partial/navbar")</c:h>
+
     <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
       <section style="margin-bottom: 30px;">
         <h2 style="color: #00ff00; border-bottom: 2px solid #00ff00; padding-bottom: 10px;">🟢 Server Status</h2>
@@ -61,12 +35,14 @@
         </ul>
       </section>
 
-      <section style="margin-bottom: 30px;">
-        <h2 style="color: #00ff00; border-bottom: 2px solid #00ff00; padding-bottom: 10px;">ℹ️ Additional Information</h2>
-        <p style="line-height: 1.6;">
-          For detailed system status and administration, please visit the <a href="/asteroid/admin" style="color: #00ff00;" data-show-if-admin>Admin Dashboard</a>.
-        </p>
-      </section>
+      <c:when test='(equal "admin" (clip (asteroid::get-current-user) :role))'>
+        <section style="margin-bottom: 30px;">
+          <h2 style="color: #00ff00; border-bottom: 2px solid #00ff00; padding-bottom: 10px;">ℹ️ Additional Information</h2>
+          <p style="line-height: 1.6;">
+            For detailed system status and administration, please visit the <a href="/asteroid/admin" style="color: #00ff00;">Admin Dashboard</a>.
+          </p>
+        </section>
+      </c:when>
     </main>
   </div>
 </body>

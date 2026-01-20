@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/asteroid/static/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/asteroid/static/favicon-16x16.png">
   <link rel="stylesheet" type="text/css" href="/asteroid/static/asteroid.css">
-  <script src="/asteroid/static/js/auth-ui.js"></script>
+  <script lquery='(text (asteroid::get-auth-state-js-var))'></script>
   <script src="/asteroid/static/js/front-page.js"></script>
   <script src="/asteroid/static/js/player.js"></script>
   <c:if test="framesetp">
@@ -56,26 +56,7 @@
       </c:then>
     </c:if>
 
-    <div class="nav">
-    <c:if test="(not framesetp)">
-      <c:then>
-        <a href="/asteroid">Home</a>
-        <a href="/asteroid/profile">Profile</a>
-        <a href="/asteroid/admin" data-show-if-admin>Admin</a>
-        <a href="/asteroid/login" data-show-if-logged-out>Login</a>
-        <a href="/asteroid/register" data-show-if-logged-out>Register</a>
-        <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
-      </c:then>
-      <c:else>
-        <a href="/asteroid/content" target="content-frame">Home</a>
-        <a href="/asteroid/profile" target="content-frame" data-show-if-logged-in>Profile</a>
-        <a href="/asteroid/admin" target="content-frame" data-show-if-admin>Admin</a>
-        <a href="/asteroid/login" target="content-frame" data-show-if-logged-out>Login</a>
-        <a href="/asteroid/register" target="content-frame" data-show-if-logged-out>Register</a>
-        <a href="/asteroid/logout" data-show-if-logged-in class="btn-logout">Logout</a>
-      </c:else>
-    </c:if>
-    </div>
+    <c:h>(asteroid::load-template "partial/navbar")</c:h>
 
     <!-- Live Stream Section -->
     <div class="player-section">

@@ -17,11 +17,7 @@
         <span>ASTEROID RADIO</span>
         <img src="/asteroid/static/asteroid.png" alt="Asteroid" style="height: 50px; width: auto;">
       </h1>
-      <nav class="nav">
-        <a href="/asteroid/">Home</a>
-        <a href="/asteroid/player">Player</a>
-        <a href="/asteroid/about">About</a>
-      </nav>
+      <c:h>(asteroid::load-template "partial/navbar")</c:h>
     </header>
     <main style="max-width: 800px; margin: 0 auto; padding: 20px;">
       <section style="margin-bottom: 30px;">

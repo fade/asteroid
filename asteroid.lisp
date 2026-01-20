@@ -1009,6 +1009,7 @@
                        (error () 0))))
     (clip:process-to-string 
      (load-template "admin")
+     :navbar-exclude '("admin")
      :title "🎵 ASTEROID RADIO - Admin Dashboard"
      :server-status "🟢 Running"
      :database-status (handler-case 
@@ -1027,6 +1028,7 @@
   (require-authentication)
   (clip:process-to-string 
    (load-template "users")
+   :navbar-exclude '("profile" "users")
    :title "ASTEROID RADIO - User Management"))
 
 ;; User Profile page (requires authentication)
@@ -1035,6 +1037,7 @@
   (require-authentication)
   (clip:process-to-string 
    (load-template "profile")
+   :navbar-exclude '("about" "status" "profile")
    :title "🎧 admin - Profile | Asteroid Radio"
    :username "admin"
    :user-role "admin"
