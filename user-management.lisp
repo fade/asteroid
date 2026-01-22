@@ -163,12 +163,10 @@
    template file."
   (let ((user (get-current-user)))
     (format nil "var AUTHSTATE = ~a"
-            (if user
-              (cl-json:encode-json-to-string
-               `(("loggedIn" .  t)
-                 ("isAdmin" . ,(when (user-has-role-p user :admin) t))
-                 ("username" . ,(dm:field user "username"))))
-              "null"))))
+            (cl-json:encode-json-to-string
+             `(("loggedIn" .  ,(when user t))
+               ("isAdmin" . ,(when (and user (user-has-role-p user :admin)) t))
+               ("username" . ,(when user (dm:field user "username"))))))))
 
 (defun require-authentication (&key (api nil))
   "Require user to be authenticated. 
