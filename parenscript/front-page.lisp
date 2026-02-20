@@ -222,9 +222,9 @@
           (catch (lambda (error)
                    ;; Silently fail
                    nil)))))
-     
+
      ;; Update now playing info from API
-     (defun update-now-playing ()
+     (defun update-now-playing()
        (let ((mount (get-current-mount)))
          (ps:chain
           (fetch (+ "/api/asteroid/partial/now-playing?mount=" mount))
@@ -250,19 +250,25 @@
                               ;; Check if this track is in user's favorites
                               (check-favorite-status)
                               ;; Update favorite count display
-                              (let ((count-el (ps:chain document (get-element-by-id "favorite-count-display")))
-                                    (count-val-el (ps:chain document (get-element-by-id "favorite-count-value"))))
-                                (when (and count-el count-val-el)
-                                  (let ((fav-count (parse-int (or (ps:@ count-val-el value) "0") 10)))
-                                    (if (> fav-count 0)
-                                        (setf (ps:@ count-el text-content)
-                                              (if (= fav-count 1)
-                                                  "1 person loves this track ❤️"
-                                                  (+ fav-count " people love this track ❤️")))
-                                        (setf (ps:@ count-el text-content) "")))))))))))))
+                              (update-favorite-information)
+                              (update-media-session new-title)))))))))
           (catch (lambda (error)
                    (ps:chain console (log "Could not fetch stream status:" error)))))))
-     
+
+     ;; Update favorite count display
+     (defun update-favorite-information ()
+       (let ((count-el (ps:chain document (get-element-by-id "favorite-count-display")))
+             (count-val-el (ps:chain document (get-element-by-id "favorite-count-value"))))
+         (when (and count-el count-val-el)
+           (let ((fav-count (parse-int (or (ps:@ count-val-el value) "0") 10)))
+             (if (> fav-count 0)
+                 (setf (ps:@ count-el text-content)
+                       (if (= fav-count 1)
+                           "1 person loves this track ❤️"
+                           (+ fav-count " people love this track ❤️")))
+                 (setf (ps:@ count-el text-content) ""))))))
+
+
      ;; Update stream information
      (defun update-stream-information ()
        (let* ((channel-selector (or (ps:chain document (get-element-by-id "stream-channel"))
@@ -635,6 +641,7 @@
 
          ;; Load user's favorites for highlight feature
          (load-favorites-cache)
+         (update-favorite-information)
          
          ;; Update now playing
          (update-now-playing)
@@ -864,4 +871,6 @@
 
 (defun generate-front-page-js ()
   "Return the pre-compiled JavaScript for front page"
-  *front-page-js*)
+  (ps-join
+   *common-player-js*
+  *front-page-js*))

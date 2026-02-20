@@ -524,6 +524,7 @@
                         (setf (ps:@ el text-content) title)
                         ;; Check if this track is in user's favorites
                         (check-favorite-status-mini))
+                      (update-media-session title)
                       (when track-id-el
                         (let ((track-id (or (ps:@ data data track_id) (ps:@ data track_id))))
                           (setf (ps:@ track-id-el value) (or track-id ""))))
@@ -634,7 +635,8 @@
                           (when title-el
                             (setf (ps:@ title-el text-content) (ps:chain track-text (trim))))
                           (when artist-el
-                            (setf (ps:@ artist-el text-content) "Asteroid Radio"))))))))
+                            (setf (ps:@ artist-el text-content) "Asteroid Radio")))))
+                  (update-media-session track-text))))
           (catch (lambda (error)
                    (ps:chain console (error "Error updating now playing:" error)))))))
      
@@ -1082,4 +1084,6 @@
 
 (defun generate-stream-player-js ()
   "Generate JavaScript code for the stream player"
-  *stream-player-js*)
+  (ps-join
+    *common-player-js*
+    *stream-player-js*))

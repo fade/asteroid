@@ -49,7 +49,8 @@
                (:file "template-utils")
                (:file "parenscript-utils")
                (:module :parenscript
-                :components ((:file "recently-played")
+                :components ((:file "parenscript-utils")
+                             (:file "recently-played")
                              (:file "auth-ui")
                              (:file "front-page")
                              (:file "profile")
