@@ -977,8 +977,11 @@
     
     ;; Serve regular static file
     (t
-     (serve-file (merge-pathnames (format nil "static/~a" path) 
-                                  (asdf:system-source-directory :asteroid))))))
+     (let ((file-path (merge-pathnames (format nil "static/~a" path)
+                                       (asdf:system-source-directory :asteroid))))
+       (if (probe-file file-path)
+           (serve-file file-path)
+           (error 'radiance:request-not-found))))))
 
 ;; Status check functions
 (defun check-icecast-status ()
@@ -1435,14 +1438,30 @@
 ;; RADIANCE server management functions
 
 (defun start-server (&key (port *server-port*))
-  "Start the Asteroid Radio RADIANCE server"
+  "Start the Asteroid Radio RADIANCE server.
+   Reads ASTEROID_DEBUG from the environment to control Radiance's debugger policy:
+     nil (or unset)       - never invoke debugger (production default)
+     if-swank-connected   - invoke only when Swank/Slynk is connected
+     t                    - always invoke debugger"
   (format t "Starting Asteroid Radio RADIANCE server on port ~a~%"  port)
   (compile-styles)  ; Generate CSS file using LASS
-  
-  ;; Ensure RADIANCE environment is properly set before startup
-  ;; (unless (radiance:environment)
-  ;;   (setf (radiance:environment) "asteroid"))
-  
+
+  ;; Set debugger policy from environment to prevent stray conditions from
+  ;; accumulating debugger sessions (e.g. vulnerability scanners hitting bogus paths)
+  (let ((debug-env (uiop:getenv "ASTEROID_DEBUG")))
+    (setf radiance:*debugger*
+          (cond
+            ((or (null debug-env)
+                 (string-equal debug-env "nil")
+                 (string-equal debug-env ""))
+             nil)
+            ((string-equal debug-env "t")
+             t)
+            ((string-equal debug-env "if-swank-connected")
+             :if-swank-connected)
+            (t nil)))
+    (format t "Debugger policy: ~a~%" radiance:*debugger*))
+
   (radiance:startup)
   
   ;; Start listener statistics polling

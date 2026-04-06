@@ -202,3 +202,27 @@
   (error 'authorization-error
          :message message
          :required-role required-role))
+
+;;; Override Radiance's default render-error-page to return proper HTTP
+;;; status codes instead of a blanket 500 for conditions like
+;;; request-not-found and file-to-serve-does-not-exist. This prevents
+;;; vulnerability scanners from generating misleading 500 responses and
+;;; gives us control over error presentation.
+(defun radiance:render-error-page (condition)
+  (cond
+    ((typep condition 'radiance:request-not-found)
+     (setf (radiance:return-code radiance:*response*) 404)
+     (setf (radiance:content-type radiance:*response*) "text/plain")
+     "Not Found")
+    ((typep condition 'radiance:file-to-serve-does-not-exist)
+     (setf (radiance:return-code radiance:*response*) 404)
+     (setf (radiance:content-type radiance:*response*) "text/plain")
+     "Not Found")
+    ((typep condition 'radiance:request-denied)
+     (setf (radiance:return-code radiance:*response*) 403)
+     (setf (radiance:content-type radiance:*response*) "text/plain")
+     "Forbidden")
+    (t
+     (setf (radiance:return-code radiance:*response*) 500)
+     (setf (radiance:content-type radiance:*response*) "text/plain")
+     "Internal Server Error")))
