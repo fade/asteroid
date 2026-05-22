@@ -1523,6 +1523,43 @@
                     (slynk:create-server :port port :dont-close t))
                   :name (format nil "Slynk Server Thread on Port ~a" port)))
 
+(defun url-scheme (url)
+  "Return the scheme portion of URL as a lowercase string, or NIL if URL has no
+   recognizable scheme separator. Tolerant of nil and malformed input."
+  (when (and url (stringp url))
+    (let ((marker (search "://" url)))
+      (when (and marker (> marker 0))
+        (string-downcase (subseq url 0 marker))))))
+
+(defun check-stream-url-scheme ()
+  "Compare schemes of STATION_URL and ASTEROID_STREAM_URL at startup.
+   A mismatch — typically STATION_URL=https://... with ASTEROID_STREAM_URL=http://... —
+   means the page is served over HTTPS but embeds an HTTP audio source, which
+   browsers silently block as mixed content. The player widget appears to do
+   nothing on click and there is no in-page indicator of the failure. Loud
+   warning at startup so the misconfiguration is visible before user reports."
+  (let* ((station-url (uiop:getenvp "STATION_URL"))
+         (stream-url (uiop:getenvp "ASTEROID_STREAM_URL"))
+         (station-scheme (url-scheme station-url))
+         (stream-scheme (url-scheme stream-url)))
+    (cond
+      ((or (null station-url) (null stream-url))
+       ;; One or both unset — dev workflow, nothing to check against.
+       nil)
+      ((or (null station-scheme) (null stream-scheme))
+       (format t "~&WARNING: malformed URL in env (STATION_URL=~A, ASTEROID_STREAM_URL=~A)~%"
+               station-url stream-url))
+      ((string= station-scheme stream-scheme)
+       (format t "~&Stream/station URL schemes match (~A).~%" station-scheme))
+      (t
+       (format t "~&================================================================~%")
+       (format t "WARNING: scheme mismatch between STATION_URL and ASTEROID_STREAM_URL.~%")
+       (format t "  STATION_URL          = ~A  (~A)~%" station-url station-scheme)
+       (format t "  ASTEROID_STREAM_URL  = ~A  (~A)~%" stream-url stream-scheme)
+       (format t "  An HTTPS page cannot load HTTP audio (mixed-content block).~%")
+       (format t "  The player widget will silently fail until both URLs share the same scheme.~%")
+       (format t "================================================================~%")))))
+
 (defun -main (&optional args (debug t))
   (declare (ignorable args))
   (when (uiop:getenvp "ASTEROID_STREAM_URL")
@@ -1530,6 +1567,7 @@
   (format t "~&args of asteroid: ~A~%" args)
   (format t "~%🎵 ASTEROID RADIO - Music for Hackers 🎵~%")
   (format t "Using stream server at ~a~%" *stream-base-url*)
+  (check-stream-url-scheme)
 
   (when debug
     (start-slynk-server-in-new-thread 4009))  
