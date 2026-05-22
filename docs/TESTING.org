@@ -4,13 +4,68 @@
 
 * Overview
 
-This document describes the automated testing system for Asteroid Radio.
+Asteroid Radio has two test layers:
+
+1. *Unit tests* — In-image CL tests run via ASDF + parachute. Cover pure
+   helpers and tight side-effecting functions in isolation. Fast (<1s).
+   Live in =tests/= and are described in [[*Unit Tests][Unit Tests]] below.
+2. *Integration tests* — The =test-server.sh= shell script. Drives the
+   running server with curl, validates that endpoints respond. Described
+   in [[*Integration Tests][Integration Tests]] below.
+
+The two layers are complementary: unit tests catch logic regressions
+before the binary is even built; the integration script catches wiring
+regressions that only surface against a live server.
 
 #+BEGIN_QUOTE
 *Note on Package Managers*: Examples use =apt= (Debian/Ubuntu). Replace with your distribution's package manager (=dnf=, =pacman=, =zypper=, =apk=, etc.).
 #+END_QUOTE
 
-* Test Script
+* Unit Tests
+
+The =asteroid-tests= ASDF system covers the pure CL helpers in asteroid:
+URL parsing, stream-URL derivation, the startup scheme-mismatch
+detector. Tests live in =tests/= and use [[https://shinmera.github.io/parachute/][parachute]].
+
+** Running
+
+From a Lisp REPL with quicklisp + the asteroid checkout on the
+=*central-registry*=:
+
+#+BEGIN_SRC lisp
+;; first time only — parachute isn't an asteroid dep
+(ql:quickload :parachute)
+
+;; Run the suite
+(asdf:test-system :asteroid-tests)
+
+;; Or interactively, with parachute's reporter
+(parachute:test :asteroid-tests)
+#+END_SRC
+
+The suite is fast; the full set runs in well under a second.
+
+** Layout
+
+| File | Covers |
+|---+---|
+| =tests/package.lisp=        | =asteroid-tests= package; =with-env-vars= helper for mocking env vars |
+| =tests/url-helpers.lisp=    | =url-scheme=, =derive-stream-url-from-station= |
+| =tests/stream-config.lisp=  | =check-stream-url-scheme= behavior across env-var combinations |
+
+** Adding tests
+
+New CL tests should:
+
+- Live in =tests/= and be added as a component of =asteroid-tests.asd=
+- Use =parachute:define-test= for the test form
+- Use =asteroid-tests:with-env-vars= when the function-under-test reads env
+- Reference asteroid internals via =asteroid::= (double-colon — most are not exported)
+
+The framework is SBCL-only (=sb-posix:setenv= is used to mock env vars).
+Asteroid itself is SBCL-only in production, so this is consistent.
+
+* Integration Tests
 
 The =test-server.sh= script provides comprehensive testing of all server endpoints and functionality.
 
