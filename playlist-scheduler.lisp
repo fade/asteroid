@@ -19,6 +19,12 @@
 (defvar *scheduler-running* nil
   "Internal flag tracking if scheduler cron jobs are registered.")
 
+(defvar *scheduler-cron-keys* (make-hash-table)
+  "Hash mapping schedule hour -> the cl-cron hash-key that owns that hour's job.
+   Allows replacing individual jobs in place via delete-cron-job + make-cron-job,
+   so schedule edits don't require destroying and recreating the dispatcher thread
+   (which previously accumulated orphan jobs and could wedge SBCL signal handling).")
+
 ;;; Scheduler Functions
 
 (defun get-scheduled-playlist-for-hour (hour)
@@ -93,16 +99,33 @@
 
 ;;; Cron Job Management
 
+(defun register-cron-job-for-hour (hour playlist-name)
+  "Install (or replace) the cl-cron job that loads PLAYLIST-NAME at HOUR.
+   Updates *scheduler-cron-keys* in place — no dispatcher restart."
+  (let ((existing (gethash hour *scheduler-cron-keys*)))
+    (when existing
+      (cl-cron:delete-cron-job existing)))
+  (let ((key (gensym (format nil "asteroid-h~A-" hour))))
+    (cl-cron:make-cron-job
+     (scheduled-playlist-loader hour playlist-name)
+     :minute 0
+     :hour hour
+     :hash-key key)
+    (setf (gethash hour *scheduler-cron-keys*) key)
+    key))
+
+(defun deregister-cron-job-for-hour (hour)
+  "Remove the cl-cron job for HOUR, if one is registered."
+  (let ((existing (gethash hour *scheduler-cron-keys*)))
+    (when existing
+      (cl-cron:delete-cron-job existing)
+      (remhash hour *scheduler-cron-keys*))))
+
 (defun setup-playlist-cron-jobs ()
   "Set up cl-cron jobs for all scheduled playlists."
   (unless *scheduler-running*
     (dolist (entry *playlist-schedule*)
-      (let ((hour (car entry))
-            (playlist (cdr entry)))
-        (cl-cron:make-cron-job 
-         (scheduled-playlist-loader hour playlist)
-         :minute 0 
-         :hour hour)))
+      (register-cron-job-for-hour (car entry) (cdr entry)))
     (setf *scheduler-running* t)))
 
 (defun start-playlist-scheduler ()
@@ -112,13 +135,19 @@
   t)
 
 (defun stop-playlist-scheduler ()
-  "Stop the playlist scheduler."
+  "Stop the playlist scheduler.
+   Clears the per-hour key table and the cl-cron jobs hash so a subsequent
+   start doesn't inherit orphaned jobs from a previous lifecycle."
   (cl-cron:stop-cron)
+  (clrhash *scheduler-cron-keys*)
+  (clrhash cl-cron::*cron-jobs-hash*)
   (setf *scheduler-running* nil)
   t)
 
 (defun restart-playlist-scheduler ()
-  "Restart the playlist scheduler with current configuration."
+  "Restart the playlist scheduler with current configuration.
+   Reserved for explicit recovery; schedule edits should use
+   register-cron-job-for-hour / deregister-cron-job-for-hour instead."
   (stop-playlist-scheduler)
   (start-playlist-scheduler))
 
@@ -166,22 +195,24 @@
       (log:warn "Scheduler could not delete schedule entry: ~a" e))))
 
 (defun add-scheduled-playlist (hour playlist-name)
-  "Add or update a playlist in the schedule (persists to database)."
+  "Add or update a playlist in the schedule (persists to database).
+   Updates the single cron job for HOUR in place — no thread restart."
   (save-schedule-entry-to-db hour playlist-name)
-  (setf *playlist-schedule* 
+  (setf *playlist-schedule*
         (cons (cons hour playlist-name)
               (remove hour *playlist-schedule* :key #'car)))
   (when *scheduler-running*
-    (restart-playlist-scheduler))
+    (register-cron-job-for-hour hour playlist-name))
   *playlist-schedule*)
 
 (defun remove-scheduled-playlist (hour)
-  "Remove a playlist from the schedule (persists to database)."
+  "Remove a playlist from the schedule (persists to database).
+   Removes the single cron job for HOUR in place — no thread restart."
   (delete-schedule-entry-from-db hour)
-  (setf *playlist-schedule* 
+  (setf *playlist-schedule*
         (remove hour *playlist-schedule* :key #'car))
   (when *scheduler-running*
-    (restart-playlist-scheduler))
+    (deregister-cron-job-for-hour hour))
   *playlist-schedule*)
 
 (defun get-schedule ()
@@ -334,14 +365,18 @@
 ;;; This ensures the scheduler starts after the server is fully initialized
 
 (define-trigger db:connected ()
-  "Start the playlist scheduler after database connection is established"
+  "Start the playlist scheduler after database connection is established.
+   Idempotent — repeated DB reconnects refresh *playlist-schedule* but
+   never restart the dispatcher thread (which previously accumulated
+   destroy-thread events and could wedge the scheduler)."
   (handler-case
       (progn
         (load-schedule-from-db)
-        (start-playlist-scheduler)
-        (let ((current-playlist (get-current-scheduled-playlist)))
-          (when current-playlist
-            (load-scheduled-playlist current-playlist)))
-        (log:info "Playlist scheduler started"))
+        (unless *scheduler-running*
+          (start-playlist-scheduler)
+          (let ((current-playlist (get-current-scheduled-playlist)))
+            (when current-playlist
+              (load-scheduled-playlist current-playlist)))
+          (log:info "Playlist scheduler started")))
     (error (e)
       (log:error "Scheduler failed to start: ~a" e))))
