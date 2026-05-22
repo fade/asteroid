@@ -13,6 +13,7 @@ framework dependency doesn't bloat the production binary."
   :pathname "tests/"
   :components ((:file "package")
                (:file "url-helpers")
-               (:file "stream-config"))
+               (:file "stream-config")
+               (:file "scheduler"))
   :perform (asdf:test-op (op c)
              (uiop:symbol-call :parachute :test :asteroid-tests)))
