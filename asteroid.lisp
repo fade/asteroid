@@ -820,9 +820,19 @@
      ("message" . "Listening history cleared successfully"))))
 |#
 
+(defun set-no-cache-headers ()
+  "Mark the current response as not-cacheable without revalidation.
+   Use on dynamic HTML routes whose rendered body embeds runtime values
+   (notably *stream-base-url* in <input> / <source> elements). Without
+   this, browsers may serve heuristically-cached stale HTML after the
+   server-side value has been corrected, as happened during the 22 May
+   2026 incident."
+  (setf (radiance:header "Cache-Control") "no-cache, must-revalidate"))
+
 ;; Front page - regular view by default
 (define-page front-page #@"/" ()
   "Main front page"
+  (set-no-cache-headers)
   ;; Register this visitor for geo stats (captures real IP from X-Forwarded-For)
   (register-web-listener)
   (let ((now-playing-stats (icecast-now-playing *stream-base-url*)))
@@ -847,14 +857,16 @@
 ;; Frameset wrapper for persistent player mode
 (define-page frameset-wrapper #@"/frameset" ()
   "Frameset wrapper with persistent audio player"
-  (clip:process-to-string 
+  (set-no-cache-headers)
+  (clip:process-to-string
    (load-template "frameset-wrapper")
    :title "ASTEROID RADIO"))
 
 ;; Content frame - front page content without player
 (define-page front-page-content #@"/content" ()
   "Front page content (displayed in content frame)"
-  (clip:process-to-string 
+  (set-no-cache-headers)
+  (clip:process-to-string
    (load-template "front-page")
    :framesetp t
    :title "ASTEROID RADIO"
@@ -872,6 +884,7 @@
 ;; Persistent audio player frame (bottom frame)
 (define-page audio-player-frame #@"/audio-player-frame" ()
   "Persistent audio player frame (bottom of page)"
+  (set-no-cache-headers)
   ;; Register this visitor for geo stats (captures real IP from X-Forwarded-For)
   (register-web-listener)
   (clip:process-to-string 
@@ -1008,6 +1021,7 @@
 ;; Admin page (requires authentication)
 (define-page admin #@"/admin" ()
   "Admin dashboard"
+  (set-no-cache-headers)
   (require-authentication)
   (let ((track-count (handler-case 
                        (length (dm:get "tracks" (db:query :all)))
@@ -1030,8 +1044,9 @@
 ;; User Management page (requires authentication)
 (define-page users-management #@"/admin/user" ()
   "User Management dashboard"
+  (set-no-cache-headers)
   (require-authentication)
-  (clip:process-to-string 
+  (clip:process-to-string
    (load-template "users")
    :navbar-exclude '("profile" "users")
    :title "ASTEROID RADIO - User Management"))
@@ -1278,6 +1293,7 @@
            :success-message ""))))
 
 (define-page-with-limit player #@"/player" (:limit-group "public")
+  (set-no-cache-headers)
   (clip:process-to-string
    (load-template "player")
    :title "Asteroid Radio - Web Player"
@@ -1292,6 +1308,7 @@
 ;; Player content frame (for frameset mode)
 (define-page-with-limit player-content #@"/player-content" (:limit-group "public")
   "Player page content (displayed in content frame)"
+  (set-no-cache-headers)
   (clip:process-to-string
    (load-template "player")
    :framesetp t
@@ -1302,6 +1319,7 @@
 
 (define-page-with-limit popout-player #@"/popout-player" (:limit-group "public")
   "Pop-out player window"
+  (set-no-cache-headers)
   (clip:process-to-string
    (load-template "popout-player")
    :stream-base-url *stream-base-url*
