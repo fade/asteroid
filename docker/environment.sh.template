@@ -3,6 +3,13 @@
 # Ensure you copy this file to 'environment.sh' in this directory, and
 # change it to match your own stream configuration.
 
+# ASTEROID_STREAM_URL: base URL from which browsers fetch icecast audio.
+# Embedded directly into the rendered HTML's <audio src="...">. The scheme
+# of this URL MUST match the scheme of STATION_URL (set below). When the
+# site is served over HTTPS but this URL is HTTP, browsers silently block
+# the audio load as mixed content and the player appears broken.
+# Dev: http://localhost:8080 (no TLS needed locally)
+# Production example: export ASTEROID_STREAM_URL=https://ice.your-domain.tld
 export ASTEROID_STREAM_URL='http://localhost:8080'
 
 # source this file prior to starting the asteroid containers. Set the

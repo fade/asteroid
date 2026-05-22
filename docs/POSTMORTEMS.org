@@ -1,0 +1,179 @@
+#+TITLE: Asteroid Radio - Operations Postmortems
+#+AUTHOR: Asteroid Radio Development Team
+#+DATE: 2026-05-22
+#+DESCRIPTION: Postmortem write-ups for production incidents. Append a new top-level heading per incident.
+
+* 2026-05-22 — Player widget silent after binary bounce
+
+** Symptom
+
+After the asteroid binary on =b612.asteroid.radio= was rebuilt and bounced
+following deploy of the cron-scheduler fix, the web player widget at
+https://asteroid.radio/ no longer played audio when "play" was clicked. The
+audio element appeared loaded (=readyState=4=) and reported no error, but
+remained =paused=. The bug was browser-specific in surface form: a
+Chromium-based browser opened in a fresh profile played fine; the operator's
+existing Firefox tab did not, even after Ctrl+Shift+R force-reload. A Firefox
+*Private Browsing* window did play.
+
+The bug was not caused by the scheduler change. The bounce surfaced a
+pre-existing latent misconfiguration that had been masked at runtime.
+
+** Root cause — four layers
+
+The user-visible failure was the conjunction of four independent issues. Any
+one of them in isolation would have been benign or trivially detected.
+
+*** L1 — Configuration drift in =docker/environment.sh=
+
+The line that exports the streaming base URL used scheme =http://=:
+
+#+BEGIN_SRC sh
+export ASTEROID_STREAM_URL=http://ice.asteroid.radio
+#+END_SRC
+
+The same file correctly used =https://= for =STATION_URL=. The two values had
+silently diverged at some prior edit. The site is served over HTTPS via
+nginx; the stream URL was the only piece of config still pointing at plain
+HTTP.
+
+*** L2 — The app trusts the env var verbatim
+
+At =asteroid.lisp:1529=:
+
+#+BEGIN_SRC lisp
+(when (uiop:getenvp "ASTEROID_STREAM_URL")
+  (setf *stream-base-url* (uiop:getenv "ASTEROID_STREAM_URL")))
+#+END_SRC
+
+There is no scheme normalization, no cross-check against =STATION_URL=, and
+no warning at startup if the schemes disagree. =*stream-base-url*= is a
+=defparameter=, which means it is /re-initialized to the env value at every
+binary start/. Whatever in-REPL =setf= had previously corrected the value at
+runtime — and we believe such a setf was indeed how the pre-bounce image
+ended up serving =https://...= — was lost on the bounce.
+
+The runtime value of =*stream-base-url*= is embedded directly into every
+rendered HTML page, in two places:
+
+- ~<input type="hidden" id="stream-base-url" value="...">~
+- ~<source id="audio-source" src="${value}/asteroid.aac" type="audio/aac">~
+
+So after the bounce, every page served had =src="http://ice.asteroid.radio/asteroid.aac"=.
+
+*** L3 — Mixed content is blocked silently
+
+The site is HTTPS. Modern browsers refuse to load HTTP sub-resources from an
+HTTPS page; the =<audio>= element's load is dropped with no popup, no toast,
+and only a developer-console warning. The element reports
+=readyState=4, paused=true, error=null=. There is no in-page indicator that
+anything failed.
+
+=curl= from the same host worked because curl does not enforce mixed-content
+rules — that is a browser-only security boundary.
+
+*** L4 — No cache headers on dynamic HTML
+
+The radiance/hunchentoot response for the homepage includes no
+=Cache-Control=, no =ETag=, no =Last-Modified= header. When all three are
+absent, Firefox falls back to /heuristic caching/: it picks a freshness
+lifetime on its own.
+
+After the in-image hot-fix (see below) was applied and the page started
+serving =https://...= URLs, the operator's normal Firefox tab continued to
+behave as if the player were broken even through Ctrl+Shift+R. Several
+factors contributed:
+
+- The previously-loaded DOM, including the =<audio>= element instantiated
+  against the old =src=, persisted in the tab's bfcache.
+- Heuristic-cached HTML from before the hot-fix could be served from
+  Firefox's disk cache on a reload that the cache layer judged "fresh".
+- JS state already initialized against the old hidden-input value was not
+  re-run from scratch.
+
+A Firefox *Private Browsing* window starts with no disk cache, no in-memory
+DOM holdovers, and no service workers carried over. The first request
+fetched the corrected HTML, the audio loaded over HTTPS, the player worked.
+
+The chromium-based session driven by =agent-browser= behaved the same way as
+Firefox Private Browsing for the same reason — fresh profile, no carry-over.
+
+** Fixes applied
+
+*** Hot-fix (live image, no restart)
+
+Via the slynk listener on =127.0.0.1:4009= (forwarded over SSH):
+
+#+BEGIN_SRC lisp
+(setf asteroid::*stream-base-url* "https://ice.asteroid.radio")
+#+END_SRC
+
+All subsequent page renders embedded =https://...=. Existing tabs needed a
+true fresh fetch (Private window or DevTools-cleared site data) to pick up
+the corrected HTML.
+
+*** Persistent fix (next bounce)
+
+Edited =docker/environment.sh= on the production host in place. Original
+value was preserved at =docker/environment.sh.pre-https-fix-2026-05-22=. The
+file is in =.gitignore= (it holds per-environment secrets), so no source
+commit was needed.
+
+#+BEGIN_SRC sh
+# before
+export ASTEROID_STREAM_URL=http://ice.asteroid.radio
+# after
+export ASTEROID_STREAM_URL=https://ice.asteroid.radio
+#+END_SRC
+
+** Open follow-ups
+
+These were identified during the postmortem but not applied yet. They are
+defense-in-depth, not strict bug fixes.
+
+- *Scheme cross-check at startup.* In =-main=, when both =ASTEROID_STREAM_URL=
+  and =STATION_URL= are set, warn (or hard-fail) if their schemes disagree.
+  Today the misconfiguration is invisible; the operator only finds out by
+  receiving "player is broken" reports.
+- *Cache-Control on dynamic HTML.* The home page response should set at
+  minimum =Cache-Control: no-cache= or attach an =ETag=, so that a reload
+  reliably re-fetches. The absence of all three cache-control headers is
+  what made Firefox treat the stale HTML as fresh enough to skip
+  re-validation. This affects future incidents where the running image has
+  been corrected but operator browsers still show old content.
+- *Derive stream URL from station URL by default.* Since both URLs are
+  served from the same TLS-terminated infrastructure, a sensible default
+  would be to compute =ASTEROID_STREAM_URL= from =STATION_URL= when the env
+  var is unset, replacing the bare host portion with =ice.= prefixed
+  hostname. Reduces the surface area for divergence by one variable.
+
+** Diagnostic techniques used (worth keeping)
+
+- *Slynk over SSH local-forward* for live REPL inspection of the running
+  image. Setup:
+  #+BEGIN_SRC sh
+  ssh -fNL 14009:127.0.0.1:4009 asteroid@asteroid.radio
+  #+END_SRC
+  Then any slynk-protocol client can talk to =127.0.0.1:14009= and reach the
+  prod image's listener. Slynk's =slynk:interactive-eval= takes a form as a
+  string and returns the printed result; this is enough for almost all
+  read-only inspection.
+
+- *Browser automation for symptom reproduction.* Driving an actual browser
+  (=agent-browser=) against the live site distinguished server-side bugs
+  from client-side bugs in seconds. The Chrome session played; that was the
+  clue that the server was now correct and the issue had moved to
+  cache/client state.
+
+- *Comparing /proc state across minute boundaries* — used during the earlier
+  cron livelock investigation. Watching =wchan= and
+  =nr_voluntary_switches= for a thread across two minute boundaries
+  proved the dispatcher thread was alive but never escaping
+  =hrtimer_nanosleep=. The technique generalizes to any "is this thread
+  actually doing work" question.
+
+** Related
+
+- Commit =71a4e1f= (PR #103): the cron scheduler fix that was being
+  deployed when this incident surfaced. Not causally related to the player
+  bug, but the two are in the same bounce window.
