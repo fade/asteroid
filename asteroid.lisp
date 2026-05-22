@@ -1531,6 +1531,21 @@
       (when (and marker (> marker 0))
         (string-downcase (subseq url 0 marker))))))
 
+(defun derive-stream-url-from-station (station-url)
+  "Derive a stream base URL from STATION-URL by prepending 'ice.' to the host
+   portion. Scheme, port, and path are preserved.
+   E.g. 'https://asteroid.radio' -> 'https://ice.asteroid.radio'
+        'https://asteroid.radio:8443/x' -> 'https://ice.asteroid.radio:8443/x'
+   Returns NIL when STATION-URL has no parseable scheme."
+  (when (and station-url (stringp station-url))
+    (let ((scheme-end (search "://" station-url)))
+      (when (and scheme-end (> scheme-end 0))
+        (let ((host-start (+ scheme-end 3)))
+          (concatenate 'string
+                       (subseq station-url 0 host-start)
+                       "ice."
+                       (subseq station-url host-start)))))))
+
 (defun check-stream-url-scheme ()
   "Compare schemes of STATION_URL and ASTEROID_STREAM_URL at startup.
    A mismatch — typically STATION_URL=https://... with ASTEROID_STREAM_URL=http://... —
@@ -1562,8 +1577,21 @@
 
 (defun -main (&optional args (debug t))
   (declare (ignorable args))
-  (when (uiop:getenvp "ASTEROID_STREAM_URL")
-    (setf *stream-base-url* (uiop:getenv "ASTEROID_STREAM_URL")))
+  ;; Stream URL precedence: explicit env > derived from STATION_URL > defparameter default.
+  ;; Deriving from STATION_URL is guaranteed scheme-consistent, which avoids the most
+  ;; common misconfiguration (https station with http stream URL → silent mixed-content block).
+  (cond
+    ((uiop:getenvp "ASTEROID_STREAM_URL")
+     (setf *stream-base-url* (uiop:getenv "ASTEROID_STREAM_URL")))
+    ((uiop:getenvp "STATION_URL")
+     (let ((derived (derive-stream-url-from-station (uiop:getenv "STATION_URL"))))
+       (cond
+         (derived
+          (setf *stream-base-url* derived)
+          (format t "~&ASTEROID_STREAM_URL unset; derived ~A from STATION_URL.~%" derived))
+         (t
+          (format t "~&WARNING: STATION_URL malformed (~A); using dev default ~A.~%"
+                  (uiop:getenv "STATION_URL") *stream-base-url*))))))
   (format t "~&args of asteroid: ~A~%" args)
   (format t "~%🎵 ASTEROID RADIO - Music for Hackers 🎵~%")
   (format t "Using stream server at ~a~%" *stream-base-url*)
