@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 (in-package #:rad-user)
 
 (define-module #:asteroid

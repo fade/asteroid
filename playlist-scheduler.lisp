@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; playlist-scheduler.lisp - Automatic Playlist Scheduling for Asteroid Radio
 ;;;; Uses cl-cron to load time-based playlists at scheduled times
 

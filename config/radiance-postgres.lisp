@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; Radiance PostgreSQL Configuration for Asteroid Radio
 ;;;; This file configures Radiance to use PostgreSQL instead of the default database
 

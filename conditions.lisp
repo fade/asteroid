@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; conditions.lisp - Custom error conditions for Asteroid Radio
 ;;;; Provides a hierarchy of error conditions for better error handling and debugging
 

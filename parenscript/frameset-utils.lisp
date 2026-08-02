@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; frameset-utils.lisp - ParenScript for frameset utilities
 ;;;; Frame-busting and other frameset-related functionality
 

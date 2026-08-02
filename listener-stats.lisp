@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; listener-stats.lisp - Listener Statistics Collection Service
 ;;;; Polls Icecast for listener data and stores with GDPR compliance
 

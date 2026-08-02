@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; user-profile.lisp - User profile features: favorites, listening history
 ;;;; Part of Asteroid Radio
 

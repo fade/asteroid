@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; recently-played.lisp - ParenScript version of recently-played.js
 ;;;; Recently Played Tracks functionality
 

@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; front-page.lisp - ParenScript version of front-page.js
 ;;;; Stream quality, now playing, pop-out player, frameset mode
 

@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; test-ps-compile.lisp - Test ParenScript compilation for auth-ui
 
 (load "~/quicklisp/setup.lisp")

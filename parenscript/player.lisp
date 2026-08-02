@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; player.lisp - ParenScript version of player.js
 ;;;; Web Player functionality including audio playback, playlists, queue management, and live streaming
 

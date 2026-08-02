@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; limiter.lisp - Rate limiter definitions for the application
 ;;;;
 ;;;; Replaces r-simple-rate's with-limitation with a fixed-window

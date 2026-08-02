@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; profile.lisp - ParenScript version of profile.js
 ;;;; User profile page with listening stats and history
 

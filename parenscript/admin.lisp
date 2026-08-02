@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; admin.lisp - ParenScript version of admin.js
 ;;;; Admin Dashboard functionality including track management, queue controls, and player
 

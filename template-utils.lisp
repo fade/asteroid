@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; template-utils.lisp - CLIP Template Processing Utilities
 ;;;; Proper CLIP-based template rendering using keyword arguments
 

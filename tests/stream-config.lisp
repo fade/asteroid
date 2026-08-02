@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; tests/stream-config.lisp
 ;;;;
 ;;;; Behavioral tests for the env-var-driven stream-URL configuration logic.

@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; user-management.lisp - User Management System for Asteroid Radio
 ;;;; Core user management functionality and database operations
 
