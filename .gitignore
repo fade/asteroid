@@ -1,6 +1,10 @@
 *.FASL
 *.fasl
+*.ufasl
+*.cfasl
+*.x86f
 *.lisp-temp
+.asdf-cache/
 *.dfsl
 *.pfsl
 *.d64fsl
@@ -17,6 +21,8 @@
 *.wx32fsl
 /slime.lisp
 asteroid
+bin/
+*.pid
 *.wma
 
 # Docker music directory - keep folder but ignore music files
@@ -65,4 +71,3 @@ playlists/stream-queue.m3u
 /radiance-bootstrap.lisp
 /test-postgres-db.lisp
 /userdump.csv
-.envrc
