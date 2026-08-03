@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; tests/scheduler.lisp
 ;;;;
 ;;;; Unit tests for playlist-scheduler.lisp's cron-job management — the

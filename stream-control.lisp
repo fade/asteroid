@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; stream-control.lisp - Stream Queue and Playlist Control for Asteroid Radio
 ;;;; Manages the main broadcast stream queue and generates M3U playlists for Liquidsoap
 

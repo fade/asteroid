@@ -1,10 +1,11 @@
 ;; -*-lisp-*-
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; asteroid.asd
 
 (asdf:defsystem #:asteroid
   :description "A radio station to stream Asteroid Music"
   :author "Brian O'Reilly <fade@deepsky.com>"
-  :license "GNU AFFERO GENERAL PUBLIC LICENSE V.3"
+  :license "AGPL-3.0-or-later"
   :serial t
   :version "1.0.0"
   :defsystem-depends-on (:radiance)

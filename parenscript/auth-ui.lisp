@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; auth-ui.lisp - ParenScript version of auth-ui.js
 ;;;; Handle authentication UI state across all pages
 

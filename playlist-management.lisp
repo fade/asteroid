@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; playlist-management.lisp - Playlist Management for Asteroid Radio
 ;;;; Database operations and functions for user playlists
 

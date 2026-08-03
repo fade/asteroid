@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; auth-routes.lisp - Authentication Routes for Asteroid Radio
 ;;;; Web routes for user authentication, registration, and management
 

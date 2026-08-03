@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; tests/url-helpers.lisp
 ;;;;
 ;;;; Unit tests for the pure URL-string helpers in asteroid.lisp.

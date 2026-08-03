@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; stream-player.lisp - ParenScript for persistent stream player
 ;;;; Handles audio-player-frame and popout-player stream reconnect logic
 

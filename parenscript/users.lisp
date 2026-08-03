@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; users.lisp - ParenScript version of users.js
 ;;;; User management page for admins
 

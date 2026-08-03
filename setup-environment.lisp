@@ -1,3 +1,4 @@
+;;;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;;;; Setup script for Asteroid Radio Radiance environment
 ;;;; This creates the necessary symbolic links for the custom environment
 
