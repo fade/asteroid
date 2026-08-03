@@ -3,6 +3,8 @@
 *.ufasl
 *.cfasl
 *.x86f
+*.fas
+*.fasb
 *.lisp-temp
 .asdf-cache/
 *.dfsl
