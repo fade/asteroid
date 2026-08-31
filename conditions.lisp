@@ -97,7 +97,9 @@
 
 (define-condition stream-connectivity-error (asteroid-error)
   ()
-  (:documentation "Signaled when stream connectivity fails but plain text response is needed")
+  (:documentation "Signaled when a stream service could not be reached, so the
+   requested operation did not happen. The station itself is healthy; the
+   process it was trying to control is not answering.")
   (:report (lambda (condition stream)
              (format stream "Stream connectivity failed: ~a"
                      (error-message condition)))))
@@ -146,16 +148,22 @@
                      ("message" . "Stream operation failed"))
                    :message "Stream operation failed"
                    :status 500))
+     ;; Must precede the asteroid-error clause it inherits from: handler-case
+     ;; takes the first applicable clause, so a broader parent listed earlier
+     ;; would swallow this one. The station is up and the service it controls
+     ;; is not, which is what 503 says.
+     (stream-connectivity-error (e)
+       (format t "Stream connectivity error: ~a~%" e)
+       (api-output `(("status" . "error")
+                     ("message" . ,(error-message e)))
+                   :message (error-message e)
+                   :status 503))
      (asteroid-error (e)
        (format t "Asteroid error: ~a~%" e)
        (api-output `(("status" . "error")
                      ("message" . ,(error-message e)))
                    :message (error-message e)
                    :status 500))
-     (stream-connectivity-error (e)
-       ;; For endpoints that need plain text responses (like now-playing-inline)
-       (setf (header "Content-Type") "text/plain")
-       "Stream Offline")
      (error (e)
        (format t "Unexpected error: ~a~%" e)
        (api-output `(("status" . "error")

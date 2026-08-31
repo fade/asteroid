@@ -547,21 +547,38 @@
 ;;; Control Liquidsoap via telnet interface on port 1234
 
 (defun liquidsoap-command (command)
-  "Send a command to Liquidsoap via telnet and return the response"
-  (handler-case
-      (let ((result (uiop:run-program 
-                     (format nil "echo '~a' | nc -q1 127.0.0.1 1234" command)
-                     :output :string
-                     :error-output :string
-                     :ignore-error-status t)))
-        ;; Remove the trailing "END" line
-        (let ((lines (cl-ppcre:split "\\n" result)))
-          (string-trim '(#\Space #\Newline #\Return)
-                       (format nil "~{~a~^~%~}" 
-                               (remove-if (lambda (l) (string= (string-trim '(#\Space #\Return) l) "END")) 
-                                          lines)))))
-    (error (e)
-      (format nil "Error: ~a" e))))
+  "Send COMMAND to Liquidsoap over its telnet interface and return the response.
+   Signals STREAM-CONNECTIVITY-ERROR when the command could not be delivered:
+   the conversation failed, nc could not connect, or nothing came back. A
+   caller that gets a string back can trust the command was carried out."
+  (multiple-value-bind (output exit-code)
+      (handler-case
+          (multiple-value-bind (out err code)
+              (uiop:run-program
+               (format nil "echo '~a' | nc -q1 127.0.0.1 1234" command)
+               :output :string
+               :error-output :string
+               :ignore-error-status t)
+            (declare (ignore err))
+            (values out code))
+        (error (e)
+          (error 'stream-connectivity-error
+                 :message (format nil "Could not reach Liquidsoap to send ~a: ~a"
+                                  command e))))
+    (unless (eql exit-code 0)
+      (error 'stream-connectivity-error
+             :message (format nil "Could not reach Liquidsoap to send ~a: nc exited ~a"
+                              command exit-code)))
+    ;; Remove the trailing "END" line
+    (let* ((lines (cl-ppcre:split "\\n" output))
+           (response (string-trim '(#\Space #\Newline #\Return)
+                                  (format nil "~{~a~^~%~}"
+                                          (remove-if (lambda (l) (string= (string-trim '(#\Space #\Return) l) "END"))
+                                                     lines)))))
+      (when (zerop (length response))
+        (error 'stream-connectivity-error
+               :message (format nil "Liquidsoap gave no answer to ~a" command)))
+      response)))
 
 (defun parse-liquidsoap-metadata (raw-metadata)
   "Parse Liquidsoap metadata string and extract current track info"
