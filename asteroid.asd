@@ -29,6 +29,7 @@
                :cl-fad
                :bordeaux-threads
                :drakma
+               :usocket
                :cl-cron
                ;; radiance interfaces
                :i-log4cl

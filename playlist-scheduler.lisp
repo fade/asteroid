@@ -40,39 +40,38 @@
   (let ((current-hour (local-time:timestamp-hour (local-time:now) :timezone local-time:+utc-zone+)))
     (get-scheduled-playlist-for-hour current-hour)))
 
-(defun liquidsoap-command-succeeded-p (result)
-  "Check if a liquidsoap-command result indicates success.
-   Returns NIL if the result is empty, an error string, or otherwise invalid."
-  (and result
-       (stringp result)
-       (> (length (string-trim '(#\Space #\Newline #\Return) result)) 0)
-       (not (search "Error:" result :test #'char-equal))))
-
 (defun liquidsoap-reload-and-skip (&key (max-retries 3) (retry-delay 2))
   "Reload the playlist and skip the current track in Liquidsoap with retries.
    First reloads the playlist file, then skips to trigger crossfade.
-   Retries up to MAX-RETRIES times with RETRY-DELAY seconds between attempts."
-  (let ((reload-ok nil)
-        (skip-ok nil))
-    ;; Step 1: Reload the playlist file in Liquidsoap
-    (dotimes (attempt max-retries)
-      (let ((result (liquidsoap-command "stream-queue_m3u.reload")))
-        (when (liquidsoap-command-succeeded-p result)
+   Retries up to MAX-RETRIES times with RETRY-DELAY seconds between attempts.
+   A Liquidsoap that cannot be reached costs an attempt and nothing more: this
+   runs on the scheduler's cron thread, where an escaping condition would take
+   the thread down and stop every later schedule change."
+  (flet ((command-succeeded-p (command)
+           (handler-case
+               (progn (liquidsoap-command command) t)
+             (stream-connectivity-error (e)
+               (log:warn "Scheduler could not send ~a: ~a" command e)
+               nil))))
+    (let ((reload-ok nil)
+          (skip-ok nil))
+      ;; Step 1: Reload the playlist file in Liquidsoap
+      (dotimes (attempt max-retries)
+        (when (command-succeeded-p "stream-queue_m3u.reload")
           (setf reload-ok t)
-          (return)))
-      (when (< attempt (1- max-retries))
-        (sleep retry-delay)))
-    ;; Step 2: Skip current track to trigger crossfade to new playlist
-    (when reload-ok
-      (sleep 1)) ; Brief pause after reload before skipping
-    (dotimes (attempt max-retries)
-      (let ((result (liquidsoap-command "stream-queue_m3u.skip")))
-        (when (liquidsoap-command-succeeded-p result)
+          (return))
+        (when (< attempt (1- max-retries))
+          (sleep retry-delay)))
+      ;; Step 2: Skip current track to trigger crossfade to new playlist
+      (when reload-ok
+        (sleep 1)) ; Brief pause after reload before skipping
+      (dotimes (attempt max-retries)
+        (when (command-succeeded-p "stream-queue_m3u.skip")
           (setf skip-ok t)
-          (return)))
-      (when (< attempt (1- max-retries))
-        (sleep retry-delay)))
-    (values skip-ok reload-ok)))
+          (return))
+        (when (< attempt (1- max-retries))
+          (sleep retry-delay)))
+      (values skip-ok reload-ok))))
 
 (defun load-scheduled-playlist (playlist-name)
   "Load a playlist by name, copying it to stream-queue.m3u and triggering playback."

@@ -68,7 +68,7 @@
 (defun convert-to-docker-path (host-path)
   "Convert host file path to Docker container path"
   ;; Replace the music library path with /app/music/
-  (let ((library-prefix (namestring *music-library-path*)))
+  (let ((library-prefix (namestring (music-library-path))))
     (if (and (stringp host-path) 
              (>= (length host-path) (length library-prefix))
              (string= host-path library-prefix :end1 (length library-prefix)))
@@ -174,7 +174,7 @@
            (>= (length docker-path) 11)
            (string= docker-path "/app/music/" :end1 11))
       (format nil "~a~a" 
-              (namestring *music-library-path*)
+              (namestring (music-library-path))
               (subseq docker-path 11))
       docker-path))
 

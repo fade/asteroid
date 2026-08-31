@@ -36,63 +36,89 @@
         (declare (ignore e))
         nil))))
 
+(defun icecast-stats-xml (icecast-base-url)
+  "Fetch the Icecast admin statistics document and return it as a string.
+
+   Returns NIL when the conversation with Icecast fails at the network level: a
+   host that refuses the connection or cannot be reached, a name that will not
+   resolve, a connection accepted and then never answered, a connection dropped
+   part way through the body.  An Icecast that is down is an expected operating
+   condition, and a caller should degrade rather than fail.
+
+   The connection timeout is deliberate, and is what covers the accepted but
+   never answered case.  Waiting on a silent Icecast would hang the caller, and a
+   front page has no error handling in front of it: hanging there is worse than
+   either failing or degrading.
+
+   The handler covers the request and the decoding of its response, and no more.
+   A programming error in a caller is not a connectivity failure and must not be
+   silenced here."
+  (handler-case
+      (let ((response (drakma:http-request (format nil "~a/admin/stats.xml" icecast-base-url)
+                                           :want-stream nil
+                                           :connection-timeout 5
+                                           :basic-authorization '("admin" "asteroid_admin_2024"))))
+        (when response
+          (if (stringp response)
+              response
+              (babel:octets-to-string response :encoding :utf-8))))
+    ((or usocket:socket-error usocket:ns-error drakma:drakma-error stream-error) (e)
+      (log:debug "Icecast at ~a is unreachable: ~a" icecast-base-url e)
+      nil)))
+
 (defun icecast-now-playing (icecast-base-url &optional (mount "asteroid.mp3"))
   "Fetch now-playing information from Icecast server.
-  
+
   ICECAST-BASE-URL - Base URL of the Icecast server (e.g. http://localhost:8000)
   MOUNT - Mount point to fetch metadata from (default: asteroid.mp3)
-  
-  Returns a plist with :listenurl, :title, and :listeners, or NIL on error."
-    (let* ((icecast-url (format nil "~a/admin/stats.xml" icecast-base-url))
-           (response (drakma:http-request icecast-url
-                                         :want-stream nil
-                                         :basic-authorization '("admin" "asteroid_admin_2024"))))
-      (when response
-        (let ((xml-string (if (stringp response)
-                              response
-                              (babel:octets-to-string response :encoding :utf-8))))
-          ;; Extract total listener count from root <listeners> tag (sums all mount points)
-          ;; Extract title from specified mount point
-          (let* ((total-listeners (multiple-value-bind (match groups)
-                                      (cl-ppcre:scan-to-strings "<listeners>(\\d+)</listeners>" xml-string)
-                                    (if (and match groups)
-                                        (parse-integer (aref groups 0) :junk-allowed t)
-                                        0)))
-                 ;; Escape dots in mount name for regex
-                 (mount-pattern (format nil "<source mount=\"/~a\">" 
-                                       (cl-ppcre:regex-replace-all "\\." mount "\\\\.")))
-                 (mount-start (cl-ppcre:scan mount-pattern xml-string))
-                 (title (if mount-start
-                           (let* ((source-section (subseq xml-string mount-start
-                                                         (or (cl-ppcre:scan "</source>" xml-string :start mount-start)
-                                                             (length xml-string)))))
-                             (multiple-value-bind (match groups)
-                                 (cl-ppcre:scan-to-strings "<title>(.*?)</title>" source-section)
-                               (if (and match groups)
-                                   (plump:decode-entities (aref groups 0))
-                                   "Unknown")))
-                           "Unknown")))
-            
-            ;; Track recently played if title changed
-            ;; Use appropriate last-known-track and list based on stream type
-            (let* ((is-shuffle (string= mount "asteroid-shuffle.mp3"))
-                   (last-known (if is-shuffle *last-known-track-shuffle* *last-known-track-curated*))
-                   (stream-type (if is-shuffle :shuffle :curated)))
-              (when (and title 
-                        (not (string= title "Unknown"))
-                        (not (equal title last-known)))
-                (if is-shuffle
-                    (setf *last-known-track-shuffle* title)
-                    (setf *last-known-track-curated* title))
-                (add-recently-played (list :title title
-                                          :timestamp (get-universal-time))
-                                    stream-type)))
-            
-            `((:listenurl . ,(format nil "~a/~a" *stream-base-url* mount))
-              (:title . ,title)
-              (:listeners . ,total-listeners)
-              (:track-id . ,(find-track-by-title title))
-              (:favorite-count . ,(or (get-track-favorite-count title) 1))))))))
+
+  Returns a plist with :listenurl, :title, and :listeners, or NIL when Icecast
+  cannot be reached.  Callers treat that NIL as the stream being offline; a
+  front page reaching an Icecast that is down degrades instead of erroring."
+  (let ((xml-string (icecast-stats-xml icecast-base-url)))
+    (when xml-string
+      ;; Extract total listener count from root <listeners> tag (sums all mount points)
+      ;; Extract title from specified mount point
+      (let* ((total-listeners (multiple-value-bind (match groups)
+                                  (cl-ppcre:scan-to-strings "<listeners>(\\d+)</listeners>" xml-string)
+                                (if (and match groups)
+                                    (parse-integer (aref groups 0) :junk-allowed t)
+                                    0)))
+             ;; Escape dots in mount name for regex
+             (mount-pattern (format nil "<source mount=\"/~a\">"
+                                    (cl-ppcre:regex-replace-all "\\." mount "\\\\.")))
+             (mount-start (cl-ppcre:scan mount-pattern xml-string))
+             (title (if mount-start
+                        (let* ((source-section (subseq xml-string mount-start
+                                                       (or (cl-ppcre:scan "</source>" xml-string :start mount-start)
+                                                           (length xml-string)))))
+                          (multiple-value-bind (match groups)
+                              (cl-ppcre:scan-to-strings "<title>(.*?)</title>" source-section)
+                            (if (and match groups)
+                                (plump:decode-entities (aref groups 0))
+                                "Unknown")))
+                        "Unknown")))
+
+        ;; Track recently played if title changed
+        ;; Use appropriate last-known-track and list based on stream type
+        (let* ((is-shuffle (string= mount "asteroid-shuffle.mp3"))
+               (last-known (if is-shuffle *last-known-track-shuffle* *last-known-track-curated*))
+               (stream-type (if is-shuffle :shuffle :curated)))
+          (when (and title
+                     (not (string= title "Unknown"))
+                     (not (equal title last-known)))
+            (if is-shuffle
+                (setf *last-known-track-shuffle* title)
+                (setf *last-known-track-curated* title))
+            (add-recently-played (list :title title
+                                       :timestamp (get-universal-time))
+                                 stream-type)))
+
+        `((:listenurl . ,(format nil "~a/~a" *stream-base-url* mount))
+          (:title . ,title)
+          (:listeners . ,total-listeners)
+          (:track-id . ,(find-track-by-title title))
+          (:favorite-count . ,(or (get-track-favorite-count title) 1)))))))
 
 (define-api-with-limit asteroid/partial/now-playing (&optional mount) (:limit 120 :timeout 60)
   "Get Partial HTML with live status from Icecast server.

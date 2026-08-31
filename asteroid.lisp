@@ -16,12 +16,34 @@
 ;; Configuration -- this will be refactored to a dedicated
 ;; configuration logic. Probably using 'ubiquity
 (defparameter *server-port* 8080)
-(defparameter *music-library-path* 
+
+(defun default-music-library-path ()
+  "Where to look for the music library when the configuration does not say.
+
+   MUSIC_LIBRARY_PATH from the environment wins, so a container can name the
+   directory its library is mounted at; failing that, music/library/ under the
+   station root when that directory is really there; failing that, the path the
+   production image uses."
   (or (uiop:getenv "MUSIC_LIBRARY_PATH")
-      ;; Default to /app/music/ for production Docker, but check if music/library/ exists for local dev
-      (if (probe-file (merge-pathnames "music/library/" (asteroid-root)))
-          (merge-pathnames "music/library/" (asteroid-root))
-          "/app/music/")))
+      (let ((under-root (merge-pathnames "music/library/" (asteroid-root))))
+        (when (probe-file under-root)
+          under-root))
+      "/app/music/"))
+
+(defun music-library-path ()
+  "The directory the station reads its music from.
+
+   Read through the configuration, which is seeded from
+   DEFAULT-MUSIC-LIBRARY-PATH the first time anything asks, so an operator can
+   point the station at another library by setting the value and without
+   rebuilding it.
+
+   Resolved on each call rather than at load time.  Configuration needs the
+   Radiance environment, which is not up when this file loads, and a value
+   computed at load time is dumped into a binary as whatever directory the build
+   machine happened to have."
+  (defaulted-config (default-music-library-path) :music :library-path))
+
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 (defparameter *stream-base-url* "http://localhost:8000")
 
@@ -525,21 +547,38 @@
 ;;; Control Liquidsoap via telnet interface on port 1234
 
 (defun liquidsoap-command (command)
-  "Send a command to Liquidsoap via telnet and return the response"
-  (handler-case
-      (let ((result (uiop:run-program 
-                     (format nil "echo '~a' | nc -q1 127.0.0.1 1234" command)
-                     :output :string
-                     :error-output :string
-                     :ignore-error-status t)))
-        ;; Remove the trailing "END" line
-        (let ((lines (cl-ppcre:split "\\n" result)))
-          (string-trim '(#\Space #\Newline #\Return)
-                       (format nil "~{~a~^~%~}" 
-                               (remove-if (lambda (l) (string= (string-trim '(#\Space #\Return) l) "END")) 
-                                          lines)))))
-    (error (e)
-      (format nil "Error: ~a" e))))
+  "Send COMMAND to Liquidsoap over its telnet interface and return the response.
+   Signals STREAM-CONNECTIVITY-ERROR when the command could not be delivered:
+   the conversation failed, nc could not connect, or nothing came back. A
+   caller that gets a string back can trust the command was carried out."
+  (multiple-value-bind (output exit-code)
+      (handler-case
+          (multiple-value-bind (out err code)
+              (uiop:run-program
+               (format nil "echo '~a' | nc -q1 127.0.0.1 1234" command)
+               :output :string
+               :error-output :string
+               :ignore-error-status t)
+            (declare (ignore err))
+            (values out code))
+        (error (e)
+          (error 'stream-connectivity-error
+                 :message (format nil "Could not reach Liquidsoap to send ~a: ~a"
+                                  command e))))
+    (unless (eql exit-code 0)
+      (error 'stream-connectivity-error
+             :message (format nil "Could not reach Liquidsoap to send ~a: nc exited ~a"
+                              command exit-code)))
+    ;; Remove the trailing "END" line
+    (let* ((lines (cl-ppcre:split "\\n" output))
+           (response (string-trim '(#\Space #\Newline #\Return)
+                                  (format nil "~{~a~^~%~}"
+                                          (remove-if (lambda (l) (string= (string-trim '(#\Space #\Return) l) "END"))
+                                                     lines)))))
+      (when (zerop (length response))
+        (error 'stream-connectivity-error
+               :message (format nil "Liquidsoap gave no answer to ~a" command)))
+      response)))
 
 (defun parse-liquidsoap-metadata (raw-metadata)
   "Parse Liquidsoap metadata string and extract current track info"

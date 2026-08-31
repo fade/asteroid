@@ -197,7 +197,7 @@ The playlist scheduler automatically switches playlists based on a time-of-day s
 The scheduler uses =liquidsoap-reload-and-skip= which:
 - Sends =stream-queue_m3u.reload= up to 3 times with 2-second delays
 - Then sends =stream-queue_m3u.skip= up to 3 times to trigger crossfade
-- Validates each response with =liquidsoap-command-succeeded-p=
+- Counts an unreachable Liquidsoap as a failed attempt and retries
 - Logs each attempt for diagnostics
 
 ** Troubleshooting

@@ -316,7 +316,13 @@
       (log:error "Failed to aggregate daily stats: ~a" e))))
 
 (defun aggregate-hourly-stats (date hour)
-  "Compute hourly aggregates"
+  "Compute hourly aggregates: unique listeners and peak concurrent listeners
+   per mount, for the given DATE and HOUR.
+
+   Both joined tables carry a mount column, so every column here names the side
+   it comes from.  The mount is the session's: it is the left side of the join
+   and so is present on every row, where the snapshot's is null for a mount that
+   was never sampled in that hour."
   (handler-case
       (with-db
         (postmodern:execute
@@ -324,15 +330,15 @@
           SELECT
             $1::date,
             $2::int,
-            mount,
-            COUNT(DISTINCT ip_hash),
-            COALESCE(MAX(listener_count), 0)
+            ls.mount,
+            COUNT(DISTINCT ls.ip_hash),
+            COALESCE(MAX(lsn.listener_count), 0)
           FROM listener_sessions ls
           LEFT JOIN listener_snapshots lsn ON lsn.mount = ls.mount
             AND DATE_TRUNC('hour', lsn.timestamp) = DATE_TRUNC('hour', ls.session_start)
-          WHERE session_start::date = $1::date
-            AND EXTRACT(HOUR FROM session_start) = $2::int
-          GROUP BY mount
+          WHERE ls.session_start::date = $1::date
+            AND EXTRACT(HOUR FROM ls.session_start) = $2::int
+          GROUP BY ls.mount
           ON CONFLICT (date, hour, mount) DO UPDATE SET
             unique_listeners = EXCLUDED.unique_listeners,
             peak_concurrent = EXCLUDED.peak_concurrent"

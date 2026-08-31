@@ -99,7 +99,7 @@
           (dm:insert track)
           t))))
 
-(defun scan-music-library (&optional (directory *music-library-path*))
+(defun scan-music-library (&optional (directory (music-library-path)))
   "Scan music library directory and add tracks to database"
   (format t "~%=== SCAN DEBUG ===~%")
   (format t "Input directory: ~a~%" directory)
@@ -126,7 +126,7 @@
     added-count))
 
 ;; Initialize music directory structure
-(defun initialize-music-directories (&optional (base-dir *music-library-path*))
+(defun initialize-music-directories (&optional (base-dir (music-library-path)))
   "Create necessary music directories if they don't exist"
   (progn
     (ensure-directories-exist (merge-pathnames "library/" base-dir))
