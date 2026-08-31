@@ -6,12 +6,6 @@
 ;;; Allows users to request tracks with social attribution
 ;;; ==========================================================================
 
-(defun sql-escape (str)
-  "Escape a string for SQL by doubling single quotes"
-  (if str
-      (cl-ppcre:regex-replace-all "'" str "''")
-      ""))
-
 ;;; ==========================================================================
 ;;; Database Functions
 ;;; ==========================================================================
@@ -20,99 +14,106 @@
   "Create a new track request"
   (with-db
     (postmodern:query
-     (:raw (format nil "INSERT INTO track_requests (\"user-id\", track_title, track_path, message, status) VALUES (~a, '~a', ~a, ~a, 'pending') RETURNING _id"
-                   user-id
-                   (sql-escape track-title)
-                   (if track-path (format nil "'~a'" (sql-escape track-path)) "NULL")
-                   (if message (format nil "'~a'" (sql-escape message)) "NULL")))
+     (:raw "INSERT INTO track_requests (\"user-id\", track_title, track_path, message, status) VALUES ($1, $2, $3, $4, 'pending') RETURNING _id")
+     user-id
+     ;; track_title is NOT NULL, and cl-postgres renders a bare NIL as false,
+     ;; so a missing title has to become an empty string rather than "false".
+     (or track-title "")
+     (or track-path :null)
+     (or message :null)
      :single)))
 
 (defun get-pending-requests (&key (limit 50))
   "Get all pending track requests for admin review"
   (with-db
     (postmodern:query
-     (:raw (format nil "SELECT r._id, r.track_title, r.track_path, r.message, r.status, r.\"created-at\", u.username 
-                        FROM track_requests r 
-                        JOIN \"USERS\" u ON r.\"user-id\" = u._id 
-                        WHERE r.status = 'pending' 
-                        ORDER BY r.\"created-at\" ASC 
-                        LIMIT ~a" limit))
+     (:raw "SELECT r._id, r.track_title, r.track_path, r.message, r.status, r.\"created-at\", u.username 
+            FROM track_requests r 
+            JOIN \"USERS\" u ON r.\"user-id\" = u._id 
+            WHERE r.status = 'pending' 
+            ORDER BY r.\"created-at\" ASC 
+            LIMIT $1")
+     limit
      :alists)))
 
 (defun get-user-requests (user-id &key (limit 20))
   "Get a user's track requests"
   (with-db
     (postmodern:query
-     (:raw (format nil "SELECT _id, track_title, message, status, \"created-at\", \"played-at\" 
-                        FROM track_requests 
-                        WHERE \"user-id\" = ~a 
-                        ORDER BY \"created-at\" DESC 
-                        LIMIT ~a" user-id limit))
+     (:raw "SELECT _id, track_title, message, status, \"created-at\", \"played-at\" 
+            FROM track_requests 
+            WHERE \"user-id\" = $1 
+            ORDER BY \"created-at\" DESC 
+            LIMIT $2")
+     user-id limit
      :alists)))
 
 (defun get-requests-by-status (status &key (limit 50))
   "Get requests by status with user info"
   (with-db
     (postmodern:query
-     (:raw (format nil "SELECT r._id, r.track_title, r.track_path, r.message, r.status, r.\"created-at\", u.username
-                        FROM track_requests r 
-                        JOIN \"USERS\" u ON r.\"user-id\" = u._id 
-                        WHERE r.status = '~a' 
-                        ORDER BY r.\"created-at\" DESC 
-                        LIMIT ~a" status limit))
+     (:raw "SELECT r._id, r.track_title, r.track_path, r.message, r.status, r.\"created-at\", u.username
+            FROM track_requests r 
+            JOIN \"USERS\" u ON r.\"user-id\" = u._id 
+            WHERE r.status = $1 
+            ORDER BY r.\"created-at\" DESC 
+            LIMIT $2")
+     status limit
      :alists)))
 
 (defun get-recent-played-requests (&key (limit 10))
   "Get recently played requests with user attribution"
   (with-db
     (postmodern:query
-     (:raw (format nil "SELECT r._id, r.track_title, r.\"played-at\", u.username, u.avatar_path
-                        FROM track_requests r 
-                        JOIN \"USERS\" u ON r.\"user-id\" = u._id 
-                        WHERE r.status = 'played' 
-                        ORDER BY r.\"played-at\" DESC 
-                        LIMIT ~a" limit))
+     (:raw "SELECT r._id, r.track_title, r.\"played-at\", u.username, u.avatar_path
+            FROM track_requests r 
+            JOIN \"USERS\" u ON r.\"user-id\" = u._id 
+            WHERE r.status = 'played' 
+            ORDER BY r.\"played-at\" DESC 
+            LIMIT $1")
+     limit
      :alists)))
 
 (defun approve-request (request-id admin-id)
   "Approve a track request"
   (with-db
     (postmodern:query
-     (:raw (format nil "UPDATE track_requests SET status = 'approved', \"reviewed-at\" = NOW(), \"reviewed-by\" = ~a WHERE _id = ~a"
-                   admin-id request-id)))))
+     (:raw "UPDATE track_requests SET status = 'approved', \"reviewed-at\" = NOW(), \"reviewed-by\" = $1 WHERE _id = $2")
+     admin-id request-id)))
 
 (defun reject-request (request-id admin-id)
   "Reject a track request"
   (with-db
     (postmodern:query
-     (:raw (format nil "UPDATE track_requests SET status = 'rejected', \"reviewed-at\" = NOW(), \"reviewed-by\" = ~a WHERE _id = ~a"
-                   admin-id request-id)))))
+     (:raw "UPDATE track_requests SET status = 'rejected', \"reviewed-at\" = NOW(), \"reviewed-by\" = $1 WHERE _id = $2")
+     admin-id request-id)))
 
 (defun mark-request-played (request-id)
   "Mark a request as played"
   (with-db
     (postmodern:query
-     (:raw (format nil "UPDATE track_requests SET status = 'played', \"played-at\" = NOW() WHERE _id = ~a"
-                   request-id)))))
+     (:raw "UPDATE track_requests SET status = 'played', \"played-at\" = NOW() WHERE _id = $1")
+     request-id)))
 
 (defun get-request-by-id (request-id)
   "Get a single request by ID"
   (with-db
     (postmodern:query
-     (:raw (format nil "SELECT r.*, u.username FROM track_requests r JOIN \"USERS\" u ON r.\"user-id\" = u._id WHERE r._id = ~a"
-                   request-id))
+     (:raw "SELECT r.*, u.username FROM track_requests r JOIN \"USERS\" u ON r.\"user-id\" = u._id WHERE r._id = $1")
+     request-id
      :alist)))
 
 (defun get-approved-requests (&key (limit 20))
   "Get approved requests ready to be queued"
   (with-db
     (postmodern:query
-     (:raw (format nil "SELECT r._id, r.track_title, r.track_path, u.username 
-                        FROM track_requests r 
-                        JOIN \"USERS\" u ON r.\"user-id\" = u._id 
-                        WHERE r.status = 'approved' 
-                        ORDER BY r.\"reviewed-at\" ASC 
-                        LIMIT ~a" limit))
+     (:raw "SELECT r._id, r.track_title, r.track_path, u.username 
+            FROM track_requests r 
+            JOIN \"USERS\" u ON r.\"user-id\" = u._id 
+            WHERE r.status = 'approved' 
+            ORDER BY r.\"reviewed-at\" ASC 
+            LIMIT $1")
+     limit
      :alists)))
 
 ;;; ==========================================================================

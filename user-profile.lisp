@@ -366,8 +366,8 @@
     ;; Update database - use raw SQL for single field update to avoid timestamp issues
     (with-db
       (postmodern:query
-       (:raw (format nil "UPDATE \"USERS\" SET avatar_path = '~a' WHERE _id = ~a"
-                     relative-path user-id))))
+       (:raw "UPDATE \"USERS\" SET avatar_path = $1 WHERE _id = $2")
+       relative-path user-id))
     relative-path))
 
 (defun get-user-avatar (user-id)
