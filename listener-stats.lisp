@@ -273,14 +273,13 @@
   (when country-code
     (handler-case
         (with-db
-          (let ((city-sql (if city (format nil "'~a'" city) "NULL")))
-            (postmodern:execute
-             (format nil "INSERT INTO listener_geo_stats (date, country_code, city, listener_count, listen_minutes)
-                        VALUES (CURRENT_DATE, '~a', ~a, ~a, ~a)
-                        ON CONFLICT (date, country_code, city) 
-                        DO UPDATE SET listener_count = GREATEST(listener_geo_stats.listener_count, ~a),
-                                      listen_minutes = listener_geo_stats.listen_minutes + ~a"
-                     country-code city-sql listener-count listener-count listener-count listener-count))))
+          (postmodern:execute
+           "INSERT INTO listener_geo_stats (date, country_code, city, listener_count, listen_minutes)
+            VALUES (CURRENT_DATE, $1, $2, $3, $3)
+            ON CONFLICT (date, country_code, city)
+            DO UPDATE SET listener_count = GREATEST(listener_geo_stats.listener_count, $3),
+                          listen_minutes = listener_geo_stats.listen_minutes + $3"
+           country-code (or city :null) listener-count))
       (error (e)
         (log:error "Failed to update geo stats: ~a" e)))))
 
