@@ -5,9 +5,12 @@
 (in-package :asteroid)
 
 ;; Template directory configuration
-(defparameter *template-directory*
-  (merge-pathnames "template/" (asdf:system-source-directory :asteroid))
-  "Base directory for all CLIP templates")
+
+(defun template-directory ()
+  "Base directory for all CLIP templates.
+   Resolved on each call, so a shipped binary reads templates from the root it
+   is actually running in rather than the one its build machine had."
+  (merge-pathnames "template/" (asteroid-root)))
 
 ;; Template cache for parsed templates
 (defvar *template-cache* (make-hash-table :test 'equal)
@@ -18,7 +21,7 @@
    NAME can be either:
    - Simple name: 'front-page' -> 'template/front-page.ctml'
    - Path with subdirs: 'partial/now-playing' -> 'template/partial/now-playing.ctml'"
-  (merge-pathnames (format nil "~a.ctml" name) *template-directory*))
+  (merge-pathnames (format nil "~a.ctml" name) (template-directory)))
 
 (defun load-template (name)
   "Load and parse a template by name without caching.

@@ -248,11 +248,12 @@
   "Mark a listener session as ended and calculate duration"
   (handler-case
       (with-db
-        (postmodern:execute 
-         (format nil "UPDATE listener_sessions 
-                      SET session_end = NOW(),
-                          duration_seconds = EXTRACT(EPOCH FROM (NOW() - session_start))::INTEGER
-                      WHERE session_id = '~a' AND session_end IS NULL" session-id)))
+        (postmodern:execute
+         "UPDATE listener_sessions
+          SET session_end = NOW(),
+              duration_seconds = EXTRACT(EPOCH FROM (NOW() - session_start))::INTEGER
+          WHERE session_id = $1 AND session_end IS NULL"
+         session-id))
     (error (e)
       (log:error "Failed to end session: ~a" e))))
 
@@ -260,8 +261,9 @@
   "Remove session data older than retention period (GDPR compliance)"
   (handler-case
       (with-db
-        (let ((result (postmodern:query 
-                       (format nil "SELECT cleanup_old_listener_data(~a)" *session-retention-days*))))
+        (let ((result (postmodern:query
+                       "SELECT cleanup_old_listener_data($1)"
+                       *session-retention-days*)))
           (log:info "Session cleanup completed: ~a records removed" (caar result))))
     (error (e)
       (log:error "Session cleanup failed: ~a" e))))
@@ -290,25 +292,26 @@
   "Compute daily aggregates from session data"
   (handler-case
       (with-db
-        (postmodern:execute 
-         (format nil "INSERT INTO listener_daily_stats 
+        (postmodern:execute
+         "INSERT INTO listener_daily_stats
           (date, mount, unique_listeners, peak_concurrent, total_listen_minutes, avg_session_minutes)
-          SELECT 
-            '~a'::date,
+          SELECT
+            $1::date,
             mount,
             COUNT(DISTINCT ip_hash),
-            (SELECT COALESCE(MAX(listener_count), 0) FROM listener_snapshots 
-             WHERE timestamp::date = '~a'::date AND listener_snapshots.mount = listener_sessions.mount),
+            (SELECT COALESCE(MAX(listener_count), 0) FROM listener_snapshots
+             WHERE timestamp::date = $1::date AND listener_snapshots.mount = listener_sessions.mount),
             COALESCE(SUM(duration_seconds) / 60, 0),
             COALESCE(AVG(duration_seconds) / 60.0, 0)
           FROM listener_sessions
-          WHERE session_start::date = '~a'::date
+          WHERE session_start::date = $1::date
           GROUP BY mount
           ON CONFLICT (date, mount) DO UPDATE SET
             unique_listeners = EXCLUDED.unique_listeners,
             peak_concurrent = EXCLUDED.peak_concurrent,
             total_listen_minutes = EXCLUDED.total_listen_minutes,
-            avg_session_minutes = EXCLUDED.avg_session_minutes" date date date)))
+            avg_session_minutes = EXCLUDED.avg_session_minutes"
+         date))
     (error (e)
       (log:error "Failed to aggregate daily stats: ~a" e))))
 
@@ -317,22 +320,23 @@
   (handler-case
       (with-db
         (postmodern:execute
-         (format nil "INSERT INTO listener_hourly_stats (date, hour, mount, unique_listeners, peak_concurrent)
-          SELECT 
-            '~a'::date,
-            ~a,
+         "INSERT INTO listener_hourly_stats (date, hour, mount, unique_listeners, peak_concurrent)
+          SELECT
+            $1::date,
+            $2::int,
             mount,
             COUNT(DISTINCT ip_hash),
             COALESCE(MAX(listener_count), 0)
           FROM listener_sessions ls
-          LEFT JOIN listener_snapshots lsn ON lsn.mount = ls.mount 
+          LEFT JOIN listener_snapshots lsn ON lsn.mount = ls.mount
             AND DATE_TRUNC('hour', lsn.timestamp) = DATE_TRUNC('hour', ls.session_start)
-          WHERE session_start::date = '~a'::date 
-            AND EXTRACT(HOUR FROM session_start) = ~a
+          WHERE session_start::date = $1::date
+            AND EXTRACT(HOUR FROM session_start) = $2::int
           GROUP BY mount
           ON CONFLICT (date, hour, mount) DO UPDATE SET
             unique_listeners = EXCLUDED.unique_listeners,
-            peak_concurrent = EXCLUDED.peak_concurrent" date hour date hour)))
+            peak_concurrent = EXCLUDED.peak_concurrent"
+         date hour))
     (error (e)
       (log:error "Failed to aggregate hourly stats: ~a" e))))
 
@@ -357,49 +361,60 @@
       nil)))
 
 (defun get-daily-stats (&optional (days 30))
-  "Get daily statistics for the last N days"
+  "Get daily statistics for the last N days.
+   A caller that parsed DAYS out of a request may pass NIL; fall back to the
+   documented window rather than letting NIL reach the database as false."
   (handler-case
       (with-db
-        (postmodern:query 
-         (format nil "SELECT date, mount, unique_listeners, peak_concurrent, total_listen_minutes, avg_session_minutes
-          FROM listener_daily_stats 
-          WHERE date > NOW() - INTERVAL '~a days'
-          ORDER BY date DESC" days)))
+        (postmodern:query
+         "SELECT date, mount, unique_listeners, peak_concurrent, total_listen_minutes, avg_session_minutes
+          FROM listener_daily_stats
+          WHERE date > NOW() - make_interval(days => $1)
+          ORDER BY date DESC"
+         (or days 30)))
     (error (e)
       (log:error "Failed to get daily stats: ~a" e)
       nil)))
 
 (defun get-geo-stats (&optional (days 7) (order-by "minutes"))
   "Get geographic distribution for the last N days.
-   ORDER-BY can be 'minutes' (default) or 'listeners'."
+   ORDER-BY can be 'minutes' (default) or 'listeners'.
+   A caller that parsed DAYS out of a request may pass NIL; fall back to the
+   documented window rather than letting NIL reach the database as false."
   (handler-case
       (with-db
+        ;; The ORDER BY column is an identifier, which Postgres cannot take as a
+        ;; parameter, so it comes from this two-way choice and never from ORDER-BY itself.
         (let ((order-column (if (string= order-by "listeners")
                                 "total_listeners"
                                 "total_minutes")))
           (postmodern:query
            (format nil "SELECT country_code, SUM(listener_count) as total_listeners, SUM(listen_minutes) as total_minutes
           FROM listener_geo_stats
-          WHERE date > NOW() - INTERVAL '~a days'
+          WHERE date > NOW() - make_interval(days => $1)
           GROUP BY country_code
           ORDER BY ~a DESC
-          LIMIT 20" days order-column))))
+          LIMIT 20" order-column)
+           (or days 7))))
     (error (e)
       (log:error "Failed to get geo stats: ~a" e)
       nil)))
 
 (defun get-geo-stats-by-city (country-code &optional (days 7))
-  "Get city breakdown for a specific country for the last N days"
+  "Get city breakdown for a specific country for the last N days.
+   A caller that parsed DAYS out of a request may pass NIL; fall back to the
+   documented window rather than letting NIL reach the database as false."
   (handler-case
       (with-db
         (postmodern:query
-         (format nil "SELECT city, SUM(listener_count) as total_listeners, SUM(listen_minutes) as total_minutes
+         "SELECT city, SUM(listener_count) as total_listeners, SUM(listen_minutes) as total_minutes
           FROM listener_geo_stats
-          WHERE date > NOW() - INTERVAL '~a days'
-            AND country_code = '~a'
+          WHERE date > NOW() - make_interval(days => $1)
+            AND country_code = $2
           GROUP BY city
           ORDER BY total_listeners DESC
-          LIMIT 10" days country-code)))
+          LIMIT 10"
+         (or days 7) country-code))
     (error (e)
       (log:error "Failed to get city stats for ~a: ~a" country-code e)
       nil)))
@@ -408,13 +423,16 @@
   "Get listening statistics for a specific user"
   (handler-case
       (with-db
-        (let ((total-time (caar (postmodern:query 
-                                 (format nil "SELECT COALESCE(SUM(duration_seconds), 0) 
-                                  FROM listener_sessions WHERE user_id = ~a" user-id))))
+        (let ((total-time (caar (postmodern:query
+                                 "SELECT COALESCE(SUM(duration_seconds), 0)
+                                  FROM listener_sessions WHERE user_id = $1"
+                                 user-id)))
               (session-count (caar (postmodern:query
-                                    (format nil "SELECT COUNT(*) FROM listener_sessions WHERE user_id = ~a" user-id))))
+                                    "SELECT COUNT(*) FROM listener_sessions WHERE user_id = $1"
+                                    user-id)))
               (track-count (caar (postmodern:query
-                                  (format nil "SELECT COUNT(*) FROM user_listening_history WHERE user_id = ~a" user-id)))))
+                                  "SELECT COUNT(*) FROM user_listening_history WHERE user_id = $1"
+                                  user-id))))
           (list :total-listen-time (or total-time 0)
                 :session-count (or session-count 0)
                 :tracks-played (or track-count 0))))

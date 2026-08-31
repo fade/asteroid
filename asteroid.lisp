@@ -19,8 +19,8 @@
 (defparameter *music-library-path* 
   (or (uiop:getenv "MUSIC_LIBRARY_PATH")
       ;; Default to /app/music/ for production Docker, but check if music/library/ exists for local dev
-      (if (probe-file (merge-pathnames "music/library/" (asdf:system-source-directory :asteroid)))
-          (merge-pathnames "music/library/" (asdf:system-source-directory :asteroid))
+      (if (probe-file (merge-pathnames "music/library/" (asteroid-root)))
+          (merge-pathnames "music/library/" (asteroid-root))
           "/app/music/")))
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 (defparameter *stream-base-url* "http://localhost:8000")
@@ -94,7 +94,7 @@
   "Parse metadata from the stream-queue.m3u playlist file.
    Returns a plist with :playlist-name, :phase, :description, :curator, :duration"
   (let ((playlist-path (merge-pathnames "playlists/stream-queue.m3u" 
-                                        (asdf:system-source-directory :asteroid))))
+                                        (asteroid-root))))
     (if (probe-file playlist-path)
         (handler-case
             (with-open-file (stream playlist-path :direction :input)
@@ -384,11 +384,11 @@
 
 (defun get-playlists-directory ()
   "Get the path to the playlists directory (for saved playlists)"
-  (merge-pathnames "playlists/" (asdf:system-source-directory :asteroid)))
+  (merge-pathnames "playlists/" (asteroid-root)))
 
 (defun get-stream-queue-path ()
   "Get the path to stream-queue.m3u (in playlists/ directory for Docker mount)"
-  (merge-pathnames "playlists/stream-queue.m3u" (asdf:system-source-directory :asteroid)))
+  (merge-pathnames "playlists/stream-queue.m3u" (asteroid-root)))
 
 (defun list-playlist-files ()
   "List all .m3u files in the playlists directory, excluding stream-queue.m3u"
@@ -687,7 +687,7 @@
    (read-from-string 
     (alexandria:read-file-into-string 
      (merge-pathnames "static/asteroid.lass" 
-                      (asdf:system-source-directory :asteroid))))))
+                      (asteroid-root))))))
 
 ;; Generate CSS file using LASS
 (defun compile-styles ()
@@ -992,7 +992,7 @@
     ;; Serve regular static file
     (t
      (let ((file-path (merge-pathnames (format nil "static/~a" path)
-                                       (asdf:system-source-directory :asteroid))))
+                                       (asteroid-root))))
        (if (probe-file file-path)
            (serve-file file-path)
            (error 'radiance:request-not-found))))))
@@ -1127,7 +1127,7 @@
   (let* ((current-user (auth:current-user))
          (username (gethash "username" current-user))
          (template-path (merge-pathnames "template/profile.ctml"
-                                        (asdf:system-source-directory :asteroid))))
+                                        (asteroid-root))))
     (clip:process-to-string 
      (plump:parse (alexandria:read-file-into-string template-path))
      :title (format nil "🎧 ~a - Profile | Asteroid Radio" username)
@@ -1463,6 +1463,17 @@
      if-swank-connected   - invoke only when Swank/Slynk is connected
      t                    - always invoke debugger"
   (format t "Starting Asteroid Radio RADIANCE server on port ~a~%"  port)
+
+  ;; Resolve and check the station root before anything can serve a request.
+  ;; A deployment that cannot find its own files should die here rather than
+  ;; answer 500s.
+  (let ((root (asteroid-root)))
+    (unless (probe-file (merge-pathnames "template/" root))
+      (error "Asteroid root ~a has no template/ subdirectory. Set ASTEROID_ROOT ~
+              to the station directory, or run the binary from it."
+             root))
+    (l:info :asteroid "Asteroid root resolved to ~a" root))
+
   (compile-styles)  ; Generate CSS file using LASS
 
   ;; Set debugger policy from environment to prevent stray conditions from

@@ -350,7 +350,7 @@
 
 (defun get-avatars-directory ()
   "Get the path to the avatars directory"
-  (merge-pathnames "static/avatars/" (asdf:system-source-directory :asteroid)))
+  (merge-pathnames "static/avatars/" (asteroid-root)))
 
 (defun save-avatar (user-id temp-file-path original-filename)
   "Save an avatar file from temp path and return the relative path"
@@ -366,8 +366,8 @@
     ;; Update database - use raw SQL for single field update to avoid timestamp issues
     (with-db
       (postmodern:query
-       (:raw (format nil "UPDATE \"USERS\" SET avatar_path = '~a' WHERE _id = ~a"
-                     relative-path user-id))))
+       (:raw "UPDATE \"USERS\" SET avatar_path = $1 WHERE _id = $2")
+       relative-path user-id))
     relative-path))
 
 (defun get-user-avatar (user-id)

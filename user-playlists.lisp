@@ -150,7 +150,7 @@
          (safe-name (cl-ppcre:regex-replace-all "[^a-zA-Z0-9-_]" name "-"))
          (filename (format nil "~a-~a-~a.m3u" username safe-name playlist-id))
          (submissions-dir (merge-pathnames "playlists/user-submissions/" 
-                                           (asdf:system-source-directory :asteroid)))
+                                           (asteroid-root)))
          (filepath (merge-pathnames filename submissions-dir)))
     ;; Ensure directory exists
     (ensure-directories-exist submissions-dir)

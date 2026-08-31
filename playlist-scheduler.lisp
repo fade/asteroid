@@ -182,8 +182,8 @@
       (handler-case
           (with-db
             (postmodern:query
-             (format nil "INSERT INTO playlist_schedule (hour, playlist, updated_at) VALUES (~a, '~a', NOW()) ON CONFLICT (hour) DO UPDATE SET playlist = '~a', updated_at = NOW()"
-                     hour playlist-name playlist-name)))
+             "INSERT INTO playlist_schedule (hour, playlist, updated_at) VALUES ($1, $2, NOW()) ON CONFLICT (hour) DO UPDATE SET playlist = $2, updated_at = NOW()"
+             hour playlist-name))
         (error (e2)
           (log:warn "Scheduler could not save schedule entry: ~a" e2))))))
 
