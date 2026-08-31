@@ -16,12 +16,34 @@
 ;; Configuration -- this will be refactored to a dedicated
 ;; configuration logic. Probably using 'ubiquity
 (defparameter *server-port* 8080)
-(defparameter *music-library-path* 
+
+(defun default-music-library-path ()
+  "Where to look for the music library when the configuration does not say.
+
+   MUSIC_LIBRARY_PATH from the environment wins, so a container can name the
+   directory its library is mounted at; failing that, music/library/ under the
+   station root when that directory is really there; failing that, the path the
+   production image uses."
   (or (uiop:getenv "MUSIC_LIBRARY_PATH")
-      ;; Default to /app/music/ for production Docker, but check if music/library/ exists for local dev
-      (if (probe-file (merge-pathnames "music/library/" (asteroid-root)))
-          (merge-pathnames "music/library/" (asteroid-root))
-          "/app/music/")))
+      (let ((under-root (merge-pathnames "music/library/" (asteroid-root))))
+        (when (probe-file under-root)
+          under-root))
+      "/app/music/"))
+
+(defun music-library-path ()
+  "The directory the station reads its music from.
+
+   Read through the configuration, which is seeded from
+   DEFAULT-MUSIC-LIBRARY-PATH the first time anything asks, so an operator can
+   point the station at another library by setting the value and without
+   rebuilding it.
+
+   Resolved on each call rather than at load time.  Configuration needs the
+   Radiance environment, which is not up when this file loads, and a value
+   computed at load time is dumped into a binary as whatever directory the build
+   machine happened to have."
+  (defaulted-config (default-music-library-path) :music :library-path))
+
 (defparameter *supported-formats* '("mp3" "flac" "ogg" "wav"))
 (defparameter *stream-base-url* "http://localhost:8000")
 
