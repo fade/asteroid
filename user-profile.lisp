@@ -350,7 +350,7 @@
 
 (defun get-avatars-directory ()
   "Get the path to the avatars directory"
-  (merge-pathnames "static/avatars/" (asdf:system-source-directory :asteroid)))
+  (merge-pathnames "static/avatars/" (asteroid-root)))
 
 (defun save-avatar (user-id temp-file-path original-filename)
   "Save an avatar file from temp path and return the relative path"

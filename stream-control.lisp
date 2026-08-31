@@ -95,7 +95,7 @@
    NOTE: This writes to project root stream-queue.m3u, NOT playlists/stream-queue.m3u
    which is what Liquidsoap actually reads. This function may be deprecated."
   (let ((playlist-path (merge-pathnames "stream-queue.m3u" 
-                                       (asdf:system-source-directory :asteroid))))
+                                       (asteroid-root))))
     (if (null *stream-queue*)
         ;; DISABLED: Don't dump all tracks when queue is empty
         ;; This was overwriting files with all library tracks unexpectedly
@@ -181,7 +181,7 @@
 (defun load-queue-from-m3u-file ()
   "Load the stream queue from the stream-queue.m3u file"
   (let* ((m3u-path (merge-pathnames "stream-queue.m3u" 
-                                    (asdf:system-source-directory :asteroid)))
+                                    (asteroid-root)))
          (track-ids '())
          (all-tracks (dm:get "tracks" (db:query :all))))
     

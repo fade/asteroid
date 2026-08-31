@@ -139,9 +139,9 @@
   (require-role :admin)
   (handler-case
       (let ((incoming-dir (merge-pathnames "music/incoming/" 
-                                           (asdf:system-source-directory :asteroid)))
+                                           (asteroid-root)))
             (library-dir (merge-pathnames "music/library/" 
-                                          (asdf:system-source-directory :asteroid)))
+                                          (asteroid-root)))
             (files-copied 0))
         (ensure-directories-exist incoming-dir)
         (ensure-directories-exist library-dir)
