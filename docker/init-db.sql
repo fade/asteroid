@@ -171,6 +171,19 @@ CREATE TABLE IF NOT EXISTS playlist_schedule (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Table for scheduler enable/disable events
+CREATE TABLE IF NOT EXISTS scheduler_events (
+    _id SERIAL PRIMARY KEY,
+    event VARCHAR(16) NOT NULL CHECK (event IN ('enabled', 'disabled')),
+    actor VARCHAR(255),
+    playlist VARCHAR(255),
+    track TEXT,
+    loaded_playlist VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_scheduler_events_created_at ON scheduler_events(created_at);
+
 -- User favorites table - tracks that users have liked/rated
 CREATE TABLE IF NOT EXISTS user_favorites (
     _id SERIAL PRIMARY KEY,

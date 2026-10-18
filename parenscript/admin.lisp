@@ -1199,8 +1199,17 @@
                        (if (ps:@ data enabled)
                            (setf (ps:@ status-el inner-h-t-m-l) 
                                  "<span style=\"color: #00ff00;\">🟢 Enabled</span>")
-                           (setf (ps:@ status-el inner-h-t-m-l) 
-                                 "<span style=\"color: #ffaa00;\">🟡 Disabled</span>"))))
+                           (progn
+                             (setf (ps:@ status-el inner-h-t-m-l) 
+                                   "<span style=\"color: #ffaa00;\">🟡 Disabled</span>")
+                             (let ((ev (ps:@ data last_event)))
+                               (when (and ev (= (ps:@ ev event) "disabled"))
+                                 (ps:chain status-el
+                                           (append-child
+                                            (ps:chain document
+                                                      (create-text-node
+                                                       (+ " by " (or (ps:@ ev actor) "unknown")
+                                                          " at " (ps:@ ev created_at) " UTC")))))))))))
                    
                    ;; Update available playlists dropdown (preserve current selection)
                    (let ((playlist-select (ps:chain document (get-element-by-id "schedule-playlist")))

@@ -167,3 +167,166 @@
       (asteroid::setup-playlist-cron-jobs)
       (is = 0 (hash-table-count asteroid::*scheduler-cron-keys*))
       (is = 0 (hash-table-count cl-cron::*cron-jobs-hash*)))))
+
+;;; --- Stubbing and log capture helpers ---
+
+(defun call-with-stubbed-functions (stubs thunk)
+  "Install each (NAME . FUNCTION) in STUBS as NAME's global definition, call
+   THUNK, and restore the original definitions however THUNK exits."
+  (let ((originals (mapcar (lambda (stub) (cons (car stub) (fdefinition (car stub))))
+                           stubs)))
+    (unwind-protect
+         (progn
+           (dolist (stub stubs)
+             (setf (fdefinition (car stub)) (cdr stub)))
+           (funcall thunk))
+      (dolist (original originals)
+        (setf (fdefinition (car original)) (cdr original))))))
+
+(defmacro with-stubbed-functions (bindings &body body)
+  "Run BODY with each (NAME FUNCTION-FORM) in BINDINGS replacing NAME's global
+   definition; the originals are restored afterwards."
+  `(call-with-stubbed-functions
+    (list ,@(mapcar (lambda (b) `(cons ',(first b) ,(second b))) bindings))
+    (lambda () ,@body)))
+
+(defun call-capturing-log (thunk)
+  "Call THUNK with a string appender on the root log4cl logger. Return the
+   captured log text."
+  (let* ((stream (make-string-output-stream))
+         (appender (make-instance 'log4cl:fixed-stream-appender :stream stream)))
+    (log4cl:add-appender log4cl:*root-logger* appender)
+    (unwind-protect (funcall thunk)
+      (log4cl:remove-appender log4cl:*root-logger* appender))
+    (get-output-stream-string stream)))
+
+(defmacro capturing-log (&body body)
+  "Run BODY and return the log text it emitted."
+  `(call-capturing-log (lambda () ,@body)))
+
+(defmacro with-scheduler-flags ((&key (enabled t) (last-loaded nil)) &body body)
+  "Run BODY with *scheduler-enabled* and *last-loaded-playlist* rebound."
+  `(let ((asteroid::*scheduler-enabled* ,enabled)
+         (asteroid::*last-loaded-playlist* ,last-loaded))
+     ,@body))
+
+;;; --- scheduled-playlist-loader ---
+
+(define-test scheduled-playlist-loader/skipped-job-logs-and-does-not-load
+  "A job firing while the scheduler is disabled loads nothing and logs a
+   warning naming the playlist it skipped."
+  (let ((loads nil))
+    (with-stubbed-functions ((asteroid::load-scheduled-playlist
+                              (lambda (name) (push name loads) t)))
+      (with-scheduler-flags (:enabled nil)
+        (let ((log (capturing-log
+                     (funcall (asteroid::scheduled-playlist-loader 6 "morning-drift.m3u")))))
+          (false loads)
+          (true (search "WARN" log))
+          (true (search "skipped morning-drift.m3u" log))
+          (true (search "06:00 UTC" log)))))))
+
+(define-test scheduled-playlist-loader/enabled-job-loads
+  "A job firing while the scheduler is enabled loads its playlist."
+  (let ((loads nil))
+    (with-stubbed-functions ((asteroid::load-scheduled-playlist
+                              (lambda (name) (push name loads) t)))
+      (with-scheduler-flags (:enabled t)
+        (funcall (asteroid::scheduled-playlist-loader 6 "morning-drift.m3u"))
+        (is equal '("morning-drift.m3u") loads)))))
+
+;;; --- enable-scheduler / disable-scheduler ---
+
+(define-test enable-scheduler/records-event-and-loads-current-slot
+  "Enabling loads the playlist scheduled for the current hour.
+   The recorded event holds the playlist and track on air before the switch.
+   Its loaded_playlist is the playlist just loaded."
+  (with-clean-cron-state
+    (setf asteroid::*scheduler-running* t)
+    (let ((events nil)
+          (loads nil)
+          (starts 0))
+      (with-stubbed-functions
+          ((asteroid::start-playlist-scheduler (lambda () (incf starts) t))
+           (asteroid::get-current-scheduled-playlist (lambda () "afternoon-orbit.m3u"))
+           (asteroid::current-on-air-track (lambda () "Old Artist - Old Track"))
+           (asteroid::load-scheduled-playlist
+            (lambda (name)
+              (push name loads)
+              (setf asteroid::*last-loaded-playlist* name)
+              t))
+           (asteroid::insert-scheduler-event (lambda (&rest args) (push args events))))
+        (with-scheduler-flags (:enabled nil :last-loaded "manual.m3u")
+          (is equal "afternoon-orbit.m3u" (asteroid::enable-scheduler "admin"))
+          (true asteroid::*scheduler-enabled*)
+          (is = 0 starts)
+          (is equal '("afternoon-orbit.m3u") loads)
+          (is equal '(("enabled" "admin" "manual.m3u" "Old Artist - Old Track"
+                       "afternoon-orbit.m3u"))
+              events))))))
+
+(define-test enable-scheduler/starts-scheduler-when-not-running
+  "Enabling starts the cron jobs when none are registered."
+  (with-clean-cron-state
+    (let ((starts 0))
+      (with-stubbed-functions
+          ((asteroid::start-playlist-scheduler (lambda () (incf starts) t))
+           (asteroid::get-current-scheduled-playlist (lambda () "afternoon-orbit.m3u"))
+           (asteroid::current-on-air-track (lambda () nil))
+           (asteroid::load-scheduled-playlist (lambda (name) (declare (ignore name)) t))
+           (asteroid::insert-scheduler-event (lambda (&rest args) (declare (ignore args)))))
+        (with-scheduler-flags (:enabled nil)
+          (asteroid::enable-scheduler "admin")
+          (is = 1 starts))))))
+
+(define-test enable-scheduler/failed-load-records-nil
+  "A load that fails or signals leaves the scheduler enabled and records
+   loaded_playlist as NIL."
+  (with-clean-cron-state
+    (setf asteroid::*scheduler-running* t)
+    (let ((events nil))
+      (with-stubbed-functions
+          ((asteroid::get-current-scheduled-playlist (lambda () "missing.m3u"))
+           (asteroid::current-on-air-track (lambda () nil))
+           (asteroid::load-scheduled-playlist
+            (lambda (name) (error "cannot copy ~a" name)))
+           (asteroid::insert-scheduler-event (lambda (&rest args) (push args events))))
+        (with-scheduler-flags (:enabled nil)
+          (false (asteroid::enable-scheduler "admin"))
+          (true asteroid::*scheduler-enabled*)
+          (is equal '(("enabled" "admin" nil nil nil)) events))))))
+
+(define-test disable-scheduler/records-last-loaded-playlist
+  "Disabling clears the flag and records the actor, the last loaded playlist,
+   and the on-air track, with no loaded_playlist. The log line carries no
+   loaded clause."
+  (let ((events nil))
+    (with-stubbed-functions
+        ((asteroid::current-on-air-track (lambda () "Some Artist - Some Track"))
+         (asteroid::insert-scheduler-event (lambda (&rest args) (push args events))))
+      (with-scheduler-flags (:enabled t :last-loaded "evening-descent.m3u")
+        (let ((log (capturing-log
+                     (true (asteroid::disable-scheduler "admin")))))
+          (true (search "disabled by admin" log))
+          (false (search "loaded:" log)))
+        (false asteroid::*scheduler-enabled*)
+        (is equal '(("disabled" "admin" "evening-descent.m3u"
+                     "Some Artist - Some Track" nil))
+            events)))))
+
+(define-test record-scheduler-event/database-failure-does-not-propagate
+  "A signalling insert is logged as a warning; record-scheduler-event returns
+   NIL and disable-scheduler still completes."
+  (with-stubbed-functions
+      ((asteroid::current-on-air-track (lambda () nil))
+       (asteroid::insert-scheduler-event
+        (lambda (&rest args)
+          (declare (ignore args))
+          (error "database unavailable"))))
+    (with-scheduler-flags (:enabled t)
+      (let ((log (capturing-log
+                   (false (asteroid::record-scheduler-event "disabled" :actor "admin")))))
+        (true (search "could not record disabled event" log))
+        (true (search "database unavailable" log)))
+      (true (asteroid::disable-scheduler "admin"))
+      (false asteroid::*scheduler-enabled*))))
