@@ -462,6 +462,7 @@
           (progn
             ;; Copy playlist to stream-queue.m3u
             (copy-playlist-to-stream-queue playlist-path)
+            (setf *last-loaded-playlist* name)
             ;; Load into in-memory queue
             (let ((count (load-queue-from-m3u-file))
                   (channel-name (get-curated-channel-name)))

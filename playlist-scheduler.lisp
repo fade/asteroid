@@ -26,6 +26,11 @@
    so schedule edits don't require destroying and recreating the dispatcher thread
    (which previously accumulated orphan jobs and could wedge SBCL signal handling).")
 
+(defvar *last-loaded-playlist* nil
+  "Filename of the playlist most recently copied into the stream queue, by
+   load-scheduled-playlist or the admin asteroid/stream/playlists/load API,
+   or NIL before the first load.")
+
 ;;; Scheduler Functions
 
 (defun get-scheduled-playlist-for-hour (hour)
@@ -74,12 +79,16 @@
       (values skip-ok reload-ok))))
 
 (defun load-scheduled-playlist (playlist-name)
-  "Load a playlist by name, copying it to stream-queue.m3u and triggering playback."
+  "Load a playlist by name, copying it to stream-queue.m3u and triggering playback.
+   Return T and record PLAYLIST-NAME in *last-loaded-playlist* once the queue
+   file is written, whether or not Liquidsoap acknowledged the switch; return
+   NIL when the playlist file does not exist."
   (let ((playlist-path (merge-pathnames playlist-name (get-playlists-directory))))
     (if (probe-file playlist-path)
         (progn
           (copy-playlist-to-stream-queue playlist-path)
           (load-queue-from-m3u-file)
+          (setf *last-loaded-playlist* playlist-name)
           (multiple-value-bind (skip-ok reload-ok)
               (liquidsoap-reload-and-skip)
             (if (and reload-ok skip-ok)
@@ -92,10 +101,13 @@
           nil))))
 
 (defun scheduled-playlist-loader (hour playlist-name)
-  "Create a function that loads a specific playlist. Used by cl-cron jobs."
+  "Return the cl-cron job function for HOUR: load PLAYLIST-NAME while the
+   scheduler is enabled, otherwise log a warning naming the skipped playlist."
   (lambda ()
-    (when *scheduler-enabled*
-      (load-scheduled-playlist playlist-name))))
+    (if *scheduler-enabled*
+        (load-scheduled-playlist playlist-name)
+        (log:warn "Scheduler disabled: skipped ~a scheduled for ~2,'0d:00 UTC"
+                  playlist-name hour))))
 
 ;;; Cron Job Management
 
@@ -256,6 +268,125 @@
           :schedule (get-schedule)
           :server-time time-info)))
 
+(defun current-on-air-track ()
+  "Return the title Icecast reports for the curated mount.
+   Return NIL when Icecast cannot be reached or reports no title. A condition
+   signalled during the lookup is logged as a warning and also yields NIL."
+  (handler-case
+      (let* ((base-url (locally (declare (special *stream-base-url*))
+                         *stream-base-url*))
+             (title (cdr (assoc :title (icecast-now-playing base-url "asteroid.mp3")))))
+        (unless (or (null title) (equal title "Unknown"))
+          title))
+    (error (e)
+      (log:warn "Scheduler could not read the on-air track: ~a" e)
+      nil)))
+
+(defun current-admin-username ()
+  "Return the username of the session's logged-in user, or NIL when there is
+   no session user or the lookup signals."
+  (handler-case
+      (let ((user (get-current-user)))
+        (when user
+          (dm:field user "username")))
+    (error (e)
+      (log:warn "Scheduler could not resolve the acting user: ~a" e)
+      nil)))
+
+(defun insert-scheduler-event (event actor playlist track loaded-playlist)
+  "Insert one row into scheduler_events. NIL arguments are stored as NULL.
+   Signals on any database failure."
+  (flet ((sql-value (x) (or x :null)))
+    (with-db
+      (postmodern:query
+       "INSERT INTO scheduler_events (event, actor, playlist, track, loaded_playlist) VALUES ($1, $2, $3, $4, $5)"
+       event
+       (sql-value actor)
+       (sql-value playlist)
+       (sql-value track)
+       (sql-value loaded-playlist)))))
+
+(defun record-scheduler-event (event &key actor playlist track loaded-playlist)
+  "Log an info line for EVENT (\"enabled\" or \"disabled\") and insert it into
+   scheduler_events. The loaded playlist appears in the log line only for an
+   enabled event. Return T when the row was written, NIL otherwise. A database
+   failure is logged as a warning and never signals, so the failure cannot
+   block an enable or disable."
+  (log:info "Scheduler ~a by ~a (on air: playlist ~a, track ~a~@[; loaded: ~a~])"
+            event (or actor "unknown") (or playlist "none") (or track "none")
+            (when (equal event "enabled")
+              (or loaded-playlist "none")))
+  (handler-case
+      (progn
+        (insert-scheduler-event event actor playlist track loaded-playlist)
+        t)
+    (error (e)
+      (log:warn "Scheduler could not record ~a event: ~a" event e)
+      nil)))
+
+(defun enable-scheduler (actor)
+  "Resume scheduled playlist changes and load the playlist scheduled for the
+   current hour. Start the cron jobs first when none are registered.
+   Record an enabled event with:
+     ACTOR,
+     the playlist and track on air before the switch,
+     the playlist loaded.
+   Return the loaded playlist filename, or NIL when none is scheduled or the
+   load failed."
+  (let ((previous-playlist *last-loaded-playlist*)
+        (previous-track (current-on-air-track)))
+    (setf *scheduler-enabled* t)
+    (unless *scheduler-running*
+      (start-playlist-scheduler))
+    (let* ((slot (get-current-scheduled-playlist))
+           (loaded (when (and slot
+                              (handler-case (load-scheduled-playlist slot)
+                                (error (e)
+                                  (log:error "Scheduler could not load ~a on enable: ~a"
+                                             slot e)
+                                  nil)))
+                     slot)))
+      (record-scheduler-event "enabled"
+                              :actor actor
+                              :playlist previous-playlist
+                              :track previous-track
+                              :loaded-playlist loaded)
+      loaded)))
+
+(defun disable-scheduler (actor)
+  "Stop scheduled playlist changes and record a disabled event naming ACTOR,
+   the last loaded playlist, and the on-air track. Return T."
+  (setf *scheduler-enabled* nil)
+  (record-scheduler-event "disabled"
+                          :actor actor
+                          :playlist *last-loaded-playlist*
+                          :track (current-on-air-track))
+  t)
+
+(defun latest-scheduler-event ()
+  "Return the most recent scheduler_events row as a JSON-ready alist, NULL
+   columns as NIL. Keys:
+     event
+     actor
+     playlist
+     track
+     loaded_playlist
+     created_at
+   Return NIL when the table is empty or the query signals."
+  (handler-case
+      (let ((row (with-db
+                   (postmodern:query
+                    "SELECT event, actor, playlist, track, loaded_playlist, to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') FROM scheduler_events ORDER BY created_at DESC, _id DESC LIMIT 1"
+                    :row))))
+        (when row
+          (mapcar (lambda (key value)
+                    (cons key (if (eq value :null) nil value)))
+                  '("event" "actor" "playlist" "track" "loaded_playlist" "created_at")
+                  row)))
+    (error (e)
+      (log:warn "Scheduler could not read the latest event: ~a" e)
+      nil)))
+
 ;;; API Endpoints for Admin Interface
 
 (define-api asteroid/scheduler/status () ()
@@ -269,6 +400,7 @@
                     ("enabled" . ,(if (getf status :enabled) t :json-false))
                     ("running" . ,(if (getf status :running) t :json-false))
                     ("current_playlist" . ,(getf status :current-playlist))
+                    ("last_event" . ,(latest-scheduler-event))
                     ("server_time" . (("utc" . ,(getf time-info :utc-time))
                                       ("utc_hour" . ,(getf time-info :utc-hour))
                                       ("local" . ,(getf time-info :local-time))))
@@ -282,17 +414,18 @@
   "Enable the playlist scheduler"
   (require-role :admin)
   (with-error-handling
-    (setf *scheduler-enabled* t)
-    (unless *scheduler-running*
-      (start-playlist-scheduler))
-    (api-output `(("status" . "success")
-                  ("message" . "Scheduler enabled")))))
+    (let ((loaded (enable-scheduler (current-admin-username))))
+      (api-output `(("status" . "success")
+                    ("message" . ,(if loaded
+                                      (format nil "Scheduler enabled; loaded ~a" loaded)
+                                      "Scheduler enabled; no playlist loaded for this hour (none scheduled, or the load failed: see the log)"))
+                    ("loaded_playlist" . ,loaded))))))
 
 (define-api asteroid/scheduler/disable () ()
   "Disable the playlist scheduler (stops automatic playlist changes)"
   (require-role :admin)
   (with-error-handling
-    (setf *scheduler-enabled* nil)
+    (disable-scheduler (current-admin-username))
     (api-output `(("status" . "success")
                   ("message" . "Scheduler disabled - playlists will not auto-change")))))
 
